@@ -7,8 +7,10 @@ interface AuthProps {
   onLogin: (user: ApplicationUser, token: string) => void;
 }
 
+type AuthMode = "login" | "register" | "forgot";
+
 const Auth: React.FC<AuthProps> = ({ onLogin }) => {
-  const [isRegister, setIsRegister] = useState(false);
+  const [mode, setMode] = useState<AuthMode>("login");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -28,10 +30,17 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     setSuccess("");
 
     try {
+      if (mode === "forgot") {
+        await api.resetPasswordRequest(formData.email);
+        setSuccess("Instructions to reset your access key have been sent to your registry email.");
+        setLoading(false);
+        return;
+      }
+
       let res;
-      if (isRegister) {
+      if (mode === "register") {
         res = await api.register(formData);
-        setSuccess("Registration successful. Welcome to Moore Hotels.");
+        setSuccess("Identity established. Welcome to the Sanctuary.");
       } else {
         res = await api.login({
           email: formData.email,
@@ -39,14 +48,14 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         });
       }
 
-      const user = await api.getMe();
-
       if (res && res.token) {
+        api.setToken(res.token);
+        const user = await api.getMe();
         onLogin(user, res.token);
         navigate("/profile");
       }
     } catch (err: any) {
-      setError(err.message || "Invalid credentials. Please try again.");
+      setError(err.message || "Credential verification failed. Please check your entries.");
     } finally {
       setLoading(false);
     }
@@ -54,7 +63,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen flex relative overflow-hidden bg-background-dark">
-      {/* Desktop Image Panel */}
+      {/* Cinematic Image Panel */}
       <div className="hidden lg:block w-1/2 relative">
         <div className="absolute inset-0 bg-black/60 z-10"></div>
         <img
@@ -62,8 +71,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           className="w-full h-full object-cover grayscale brightness-50"
           alt="Luxury Interior"
         />
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-20 text-center space-y-8">
-          <div className="w-24 h-24 bg-primary rounded-sm flex items-center justify-center text-black font-black text-5xl shadow-2xl">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-20 text-center space-y-8 animate-reveal">
+          <div className="w-24 h-24 bg-primary rounded-sm flex items-center justify-center text-black font-black text-5xl shadow-2xl animate-luxury-logo">
             M
           </div>
           <div className="space-y-4">
@@ -75,46 +84,48 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         </div>
       </div>
 
-      {/* Auth Form */}
+      {/* Auth Form Container */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12 lg:p-24 relative z-30">
-        <div className="w-full max-w-md space-y-12">
-          {/* Mobile Logo */}
+        <div className="w-full max-w-md space-y-12 animate-reveal">
+          {/* Mobile Identity Branding */}
           <div className="lg:hidden flex flex-col items-center space-y-6 mb-12">
-            <div className="w-16 h-16 bg-primary rounded-sm flex items-center justify-center text-black font-black text-3xl shadow-2xl">
+            <div className="w-16 h-16 bg-primary rounded-sm flex items-center justify-center text-black font-black text-3xl shadow-2xl animate-luxury-logo">
               M
             </div>
             <h1 className="serif-font text-4xl text-white italic">
-              {isRegister ? "Join" : "Welcome"}
+              {mode === 'register' ? "Join Circle" : mode === 'forgot' ? "Reset Access" : "Welcome Back"}
             </h1>
           </div>
 
           <div className="space-y-4">
             <h2 className="serif-font text-4xl text-white italic hidden lg:block">
-              {isRegister ? "Begin Your Story" : "Verify Identity"}
+              {mode === 'register' ? "Begin Your Story" : mode === 'forgot' ? "Recover Identity" : "Verify Identity"}
             </h2>
             <p className="text-gray-500 text-[9px] uppercase tracking-[0.5em] font-black italic">
-              {isRegister
-                ? "Identify yourself for a tailored residency"
-                : "Provide your credentials to access the vault"}
+              {mode === 'register' 
+                ? "Identify yourself for a tailored residency" 
+                : mode === 'forgot' 
+                  ? "Provide your registry email to initiate recovery"
+                  : "Provide your credentials to access the vault"}
             </p>
           </div>
 
           {error && (
-            <div className="bg-red-500/5 border border-red-500/10 text-red-500 p-5 rounded-sm text-[11px] flex items-start gap-4">
+            <div className="bg-red-500/5 border border-red-500/10 text-red-500 p-5 rounded-sm text-[11px] flex items-start gap-4 animate-in fade-in slide-in-from-top-2">
               <span className="material-symbols-outlined text-sm pt-0.5">error</span>
               <p className="font-medium italic leading-relaxed">{error}</p>
             </div>
           )}
 
           {success && (
-            <div className="bg-green-500/5 border border-green-500/10 text-green-500 p-5 rounded-sm text-[11px] flex items-start gap-4">
+            <div className="bg-green-500/5 border border-green-500/10 text-green-500 p-5 rounded-sm text-[11px] flex items-start gap-4 animate-in fade-in slide-in-from-top-2">
               <span className="material-symbols-outlined text-sm pt-0.5">check_circle</span>
               <p className="font-medium italic leading-relaxed">{success}</p>
             </div>
           )}
 
           <form className="space-y-8" onSubmit={handleSubmit}>
-            {isRegister && (
+            {mode === "register" && (
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -127,9 +138,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                       placeholder="First"
                       type="text"
                       value={formData.firstName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, firstName: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                     />
                   </div>
 
@@ -143,9 +152,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                       placeholder="Last"
                       type="text"
                       value={formData.lastName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, lastName: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                     />
                   </div>
                 </div>
@@ -160,9 +167,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                     placeholder="+234 ..."
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
                 </div>
               </>
@@ -178,35 +183,44 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                 placeholder="concierge@moore.com"
                 type="email"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
-                Access Key
-              </label>
-              <input
-                required
-                className="w-full bg-white/[0.03] border border-white/10 rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800"
-                placeholder="••••••••"
-                type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-              />
-            </div>
+            {mode !== "forgot" && (
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                    Access Key
+                  </label>
+                  {mode === "login" && (
+                    <button 
+                      type="button"
+                      onClick={() => setMode("forgot")}
+                      className="text-[8px] text-primary uppercase font-black tracking-widest italic border-b border-primary/20 pb-0.5 hover:text-white transition-colors"
+                    >
+                      FORGOT KEY?
+                    </button>
+                  )}
+                </div>
+                <input
+                  required
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800"
+                  placeholder="••••••••"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                />
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary hover:bg-yellow-500 text-black font-black py-4.5 rounded-sm transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-4 group disabled:opacity-50 active:scale-95 h-14"
+              className="w-full bg-primary hover:bg-yellow-500 text-black font-black py-4.5 rounded-sm transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-4 group disabled:opacity-50 active:scale-95 h-14 mt-4"
             >
               <span className="text-[10px] uppercase tracking-[0.4em]">
-                {loading ? "AUTHENTICATING..." : isRegister ? "ESTABLISH IDENTITY" : "VERIFY ACCESS"}
+                {loading ? "AUTHORIZING..." : mode === 'register' ? "ESTABLISH IDENTITY" : mode === 'forgot' ? "INITIATE RECOVERY" : "VERIFY ACCESS"}
               </span>
               {!loading && (
                 <span className="material-symbols-outlined text-xl transition-transform group-hover:translate-x-2">
@@ -216,16 +230,28 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             </button>
           </form>
 
-          <div className="pt-6 text-center text-[9px] uppercase tracking-[0.2em] font-black border-t border-white/5">
-            <span className="text-gray-700">
-              {isRegister ? "EXISTING MEMBER?" : "NEW TO ANTHOLOGY?"}
-            </span>
-            <button
-              onClick={() => setIsRegister(!isRegister)}
-              className="text-primary hover:text-white ml-3 transition-colors border-b border-primary/20 pb-0.5 italic"
-            >
-              {isRegister ? "SIGN IN" : "JOIN CIRCLE"}
-            </button>
+          <div className="pt-6 text-center text-[9px] uppercase tracking-[0.2em] font-black border-t border-white/5 space-y-4">
+            <div>
+              <span className="text-gray-700">
+                {mode === 'register' ? "EXISTING MEMBER?" : "NEW TO ANTHOLOGY?"}
+              </span>
+              <button
+                onClick={() => setMode(mode === 'register' ? 'login' : 'register')}
+                className="text-primary hover:text-white ml-3 transition-colors border-b border-primary/20 pb-0.5 italic"
+              >
+                {mode === 'register' ? "SIGN IN" : "JOIN CIRCLE"}
+              </button>
+            </div>
+            {mode === 'forgot' && (
+              <div>
+                <button
+                  onClick={() => setMode('login')}
+                  className="text-gray-500 hover:text-white transition-colors border-b border-white/10 pb-0.5 italic"
+                >
+                  RETURN TO SIGN IN
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

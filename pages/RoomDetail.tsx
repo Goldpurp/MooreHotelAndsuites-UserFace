@@ -1,8 +1,42 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import { generateAppImage, APP_IMAGE_PROMPTS } from "../services/imageService";
 import { Room } from "../types";
+
+import {
+  IconWifi,
+  IconAirConditioningDisabled,
+  IconBath,
+  IconPhone,
+  IconGlassFullFilled,
+  IconIroning,
+  IconDesk,
+  IconFridge,
+  IconLockFilled,
+  IconHanger2Filled,
+  IconDeviceTv,
+  IconTeapot,
+  IconBedFilled,
+  IconRosetteDiscountCheckFilled,
+} from "@tabler/icons-react";
+import { JSX } from "react/jsx-runtime";
+
+/* ---------------- ICON MAP ---------------- */
+const AMENITY_ICON_MAP: Record<string, JSX.Element> = {
+  wifi: <IconWifi size={18} />,
+  ac: <IconAirConditioningDisabled size={18} />,
+  workspace: <IconDesk size={18} />,
+  telephone: <IconPhone size={18} />,
+  bathtub: <IconBath size={18} />,
+  mini_bar: <IconGlassFullFilled size={18} />,
+  iron: <IconIroning size={18} />,
+  tv: <IconDeviceTv size={18} />,
+  safe: <IconLockFilled size={18} />,
+  wardrobe: <IconHanger2Filled size={18} />,
+  kettle: <IconTeapot size={18} />,
+  fridge: <IconFridge size={18} />,
+  king_bed: <IconBedFilled size={18} />,
+};
 
 const RoomDetail: React.FC = () => {
   const { id } = useParams();
@@ -10,87 +44,97 @@ const RoomDetail: React.FC = () => {
   const navigate = useNavigate();
 
   const [room, setRoom] = useState<Room | null>(null);
-  const [dynamicImg, setDynamicImg] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
-  
-  // Availability State
+
+  // Availability state
   const [isAvailable, setIsAvailable] = useState(true);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
-  const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
+  const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(
+    null,
+  );
 
   const [selectedCheckIn, setSelectedCheckIn] = useState(
     searchParams.get("checkIn") ?? new Date().toISOString().split("T")[0],
   );
+
   const [selectedCheckOut, setSelectedCheckOut] = useState(
     searchParams.get("checkOut") ??
       new Date(Date.now() + 86400000).toISOString().split("T")[0],
   );
 
+  /* ---------------- FETCH ROOM ---------------- */
   useEffect(() => {
     const fetchRoom = async () => {
       try {
         const data = await api.getRoomById(id!);
         setRoom(data);
-
-        const key =
-          `${data.category.toLowerCase()}_room` as keyof typeof APP_IMAGE_PROMPTS;
-        const img = await generateAppImage(
-          APP_IMAGE_PROMPTS[key] || APP_IMAGE_PROMPTS.standard_room,
-        );
-        if (img) setDynamicImg(img);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Room fetch failed", err);
-        if (err.message?.includes('unreachable')) {
-          setAvailabilityMessage("Connection error: Unable to verify room details.");
-        } else {
-           navigate("/rooms");
-        }
+        navigate("/rooms");
       } finally {
         setLoading(false);
       }
     };
+
     fetchRoom();
   }, [id, navigate]);
 
-  // Real-world availability check effect
+  /* ---------------- AVAILABILITY CHECK ---------------- */
   useEffect(() => {
     const verifyDates = async () => {
       if (!id || !selectedCheckIn || !selectedCheckOut) return;
-      
+
       const checkInDate = new Date(selectedCheckIn);
       const checkOutDate = new Date(selectedCheckOut);
-      
+
       if (checkOutDate <= checkInDate) {
         setIsAvailable(false);
-        setAvailabilityMessage("Invalid Date Sequence: Check-out must follow check-in.");
+        setAvailabilityMessage("Check-out must be after check-in.");
         return;
       }
 
       setAvailabilityLoading(true);
+
       try {
-        const res = await api.checkAvailability(id, selectedCheckIn, selectedCheckOut);
+        const res = await api.checkAvailability(
+          id,
+          selectedCheckIn,
+          selectedCheckOut,
+        );
         setIsAvailable(res.available);
-        setAvailabilityMessage(res.available ? null : (res.message || "This room is already reserved for the selected period."));
-      } catch (err) {
-        setIsAvailable(true); // Default to true to allow user to try booking if check fails
+        setAvailabilityMessage(
+          res.available
+            ? null
+            : res.message || "Room is not available for these dates.",
+        );
+      } catch {
+        setIsAvailable(true);
+        setAvailabilityMessage(null);
       } finally {
         setAvailabilityLoading(false);
       }
     };
 
-    const timer = setTimeout(verifyDates, 500); 
+    const timer = setTimeout(verifyDates, 500);
     return () => clearTimeout(timer);
   }, [id, selectedCheckIn, selectedCheckOut]);
 
+  /* ---------------- STAY CALCULATION ---------------- */
   const stayCalculations = useMemo(() => {
     if (!room) return { nights: 0, total: 0 };
+
     const checkInDate = new Date(selectedCheckIn);
     const checkOutDate = new Date(selectedCheckOut);
-    const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
-    const nights = Math.max(1, Math.ceil(timeDiff / (1000 * 3600 * 24)));
-    const total = room.pricePerNight * nights;
-    return { nights, total };
+    const nights = Math.max(
+      1,
+      Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / 86400000),
+    );
+
+    return {
+      nights,
+      total: room.pricePerNight * nights,
+    };
   }, [room, selectedCheckIn, selectedCheckOut]);
 
   if (loading) {
@@ -103,13 +147,10 @@ const RoomDetail: React.FC = () => {
 
   if (!room) return null;
 
-  const images = room.images ?? [];
+  const images = room.images?.length ? room.images : [];
 
   const handleAuthoriseStay = () => {
-    if (!isAvailable) {
-      alert(availabilityMessage || "Selected dates are not available.");
-      return;
-    }
+    if (!isAvailable) return;
     navigate(
       `/checkout/${room.id}?checkIn=${selectedCheckIn}&checkOut=${selectedCheckOut}`,
     );
@@ -117,14 +158,14 @@ const RoomDetail: React.FC = () => {
 
   return (
     <div className="bg-background-dark min-h-screen pb-28">
-      {/* HERO SECTION */}
+      {/* HERO */}
       <section className="relative">
-        <div className="absolute top-24 left-4 sm:left-6 lg:left-16 z-50">
+        <div className="absolute top-24 left-6 z-50">
           <button
             onClick={() => navigate("/rooms")}
-            className="flex items-center gap-2 px-3 py-2 bg-black/50 backdrop-blur-xl border border-white/10 rounded-sm text-white hover:text-primary transition group"
+            className="flex items-center gap-2 px-3 py-2 bg-black/50 border border-white/10 rounded-sm text-white hover:text-primary transition"
           >
-            <span className="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">
+            <span className="material-symbols-outlined text-sm">
               arrow_left_alt
             </span>
             <span className="text-[9px] uppercase tracking-[0.35em] font-black">
@@ -133,42 +174,43 @@ const RoomDetail: React.FC = () => {
           </button>
         </div>
 
-        <div className="relative h-[65vh] md:h-[85vh] w-full bg-black overflow-hidden">
-          {/* MAIN IMAGE */}
-          <img
-            src={images[activeImage]}
-            alt={room.name}
-            loading="eager"
-            className="absolute inset-0 w-full h-full object-cover object-center select-none will-change-transform"
-          />
+        <div className="relative h-[70vh] bg-black overflow-hidden">
+          {images[activeImage] && (
+            <img
+              src={images[activeImage]}
+              alt={room.name}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
 
-          {/* OVERLAY */}
           <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-black/30" />
 
-          {/* TEXT */}
-          <div className="absolute bottom-10 left-4 sm:left-6 lg:left-16 z-30 max-w-[90vw] space-y-4">
+          <div className="absolute bottom-10 left-6 space-y-4 z-20">
             <p className="text-primary text-[9px] uppercase tracking-[0.6em] font-black">
               Room {room.roomNumber}
             </p>
-            <h1 className="serif-font text-4xl md:text-6xl lg:text-9xl italic text-white leading-none tracking-tight">
+            <h1 className="serif-font text-4xl md:text-7xl italic text-white">
               {room.name}
             </h1>
           </div>
 
-          {/* THUMBNAIL CAROUSEL */}
           {images.length > 1 && (
-            <div className="absolute bottom-16 right-4 sm:right-6 lg:right-16 z-40 flex gap-3">
+            <div className="absolute bottom-16 right-6 flex gap-3 z-30">
               {images.map((img, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveImage(index)}
-                  className={`relative w-16 h-12 md:w-20 md:h-14 overflow-hidden border transition ${
+                  className={`w-20 h-14 overflow-hidden border ${
                     activeImage === index
                       ? "border-primary scale-105"
-                      : "border-white/20 opacity-70 hover:opacity-100"
+                      : "border-white/20 opacity-70"
                   }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={img}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -176,64 +218,41 @@ const RoomDetail: React.FC = () => {
         </div>
       </section>
 
-      {/* CONTENT GRID */}
-      <div className="max-w-[1600px] mx-auto px-4 md:px-10 pt-16 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+      {/* CONTENT */}
+      <div className="max-w-[1600px] mx-auto px-6 pt-16 grid grid-cols-1 lg:grid-cols-12 gap-20">
         <div className="lg:col-span-8 space-y-16">
-          <section className="space-y-6">
-            <h2 className="serif-font text-2xl md:text-5xl italic text-white">
-              {room.description || "A refined escape defined by stillness and precision."}
+          <section>
+            <h2 className="serif-font text-3xl md:text-5xl italic text-white">
+              {room.description || "A refined sanctuary crafted for stillness."}
             </h2>
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-10 border-y border-white/5 mt-10">
-              <div>
-                <p className="text-[8px] uppercase tracking-[0.4em] text-gray-600 font-black">
-                  Unit
-                </p>
-                <p className="text-white text-xl font-bold italic">
-                  {room.category}
-                </p>
-              </div>
-              <div>
-                <p className="text-[8px] uppercase tracking-[0.4em] text-gray-600 font-black">
-                  Status
-                </p>
-                <p className="text-primary text-xl font-black uppercase">
-                  {room.status}
-                </p>
-              </div>
-              <div>
-                <p className="text-[8px] uppercase tracking-[0.4em] text-gray-600 font-black">
-                  Capacity
-                </p>
-                <p className="text-white text-xl font-bold italic">
-                  {room.capacity || 2} Guests
-                </p>
-              </div>
-              <div>
-                <p className="text-[8px] uppercase tracking-[0.4em] text-gray-600 font-black">
-                  Room size
-                </p>
-                <p className="text-white text-xl font-bold italic">
-                  {room.size || "65sqm"}
-                </p>
-              </div>
+              <Detail label="Category" value={room.category} />
+              <Detail label="Status" value={room.status} highlight />
+              <Detail label="Guests" value={`${room.capacity ?? 2} Guests`} />
+              <Detail label="Size" value={room.size ?? "65sqm"} />
             </div>
           </section>
 
-          <section className="space-y-8">
-            <h3 className="text-primary text-[10px] uppercase tracking-[0.5em] font-black">
-              Bespoke Amenities
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {room.amenities.map((amenity) => (
+          <section>
+            <p className="text-primary text-[10px] uppercase tracking-[0.5em] font-black mb-6">
+              Amenities
+            </p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {room.amenities.map((a) => (
                 <div
-                  key={amenity}
-                  className="p-6 bg-white/[0.03] border border-white/5 rounded-sm flex items-center gap-4 hover:border-primary/40 transition group"
+                  key={a}
+                  className="p-6 bg-white/[0.03] border border-white/5 flex items-center gap-4"
                 >
-                  <span className="material-symbols-outlined text-primary/30 group-hover:text-primary transition text-2xl">
-                    verified
+                  {/* Icon */}
+                  <span className="text-primary">
+                    {AMENITY_ICON_MAP[a.toLowerCase().replace(/\s+/g, "_")] || (
+                      <IconRosetteDiscountCheckFilled size={18} />
+                    )}
                   </span>
+
                   <span className="text-[11px] uppercase tracking-[0.2em] text-white font-black">
-                    {amenity}
+                    {a}
                   </span>
                 </div>
               ))}
@@ -241,98 +260,52 @@ const RoomDetail: React.FC = () => {
           </section>
         </div>
 
-        <aside className="lg:col-span-4">
-          <div className="bg-surface-dark border border-white/10 p-10 rounded-sm space-y-10 sticky top-32 shadow-2xl">
-            <div className="text-center space-y-2">
+        {/* BOOKING CARD */}
+        <aside className="lg:col-span-4 sticky top-32">
+          <div className="bg-surface-dark border border-white/10 p-10 space-y-10">
+            <div className="text-center">
               <p className="text-primary text-[9px] uppercase tracking-[0.5em] font-black">
                 Nightly Rate
               </p>
-              <h3 className="serif-font text-5xl md:text-6xl text-white font-bold tracking-tighter">
+              <h3 className="serif-font text-6xl text-white font-bold">
                 ₦{room.pricePerNight.toLocaleString()}
               </h3>
             </div>
 
-            <div className="space-y-6 pt-6 border-t border-white/5 relative">
-              {/* AVAILABILITY WARNING MESSAGE - RIGHT ON TOP OF CALENDAR */}
-              {availabilityMessage && (
-                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-sm animate-in slide-in-from-top-2 duration-300">
-                  <div className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-primary text-lg shrink-0">warning</span>
-                    <p className="text-[10px] uppercase tracking-wider text-primary font-black italic leading-relaxed">
-                      {availabilityMessage}
-                    </p>
-                  </div>
-                </div>
-              )}
+            {availabilityMessage && (
+              <p className="text-primary text-[10px] uppercase font-black">
+                {availabilityMessage}
+              </p>
+            )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[8px] uppercase tracking-widest text-primary font-black ml-1">
-                    Check-in
-                  </label>
-                  <input
-                    type="date"
-                    value={selectedCheckIn}
-                    min={new Date().toISOString().split("T")[0]}
-                    onChange={(e) => setSelectedCheckIn(e.target.value)}
-                    className={`w-full bg-white/[0.07] border rounded-sm p-4 text-xs text-white focus:border-primary outline-none transition-all cursor-pointer hover:bg-white/[0.1] ${!isAvailable ? 'border-red-500/40' : 'border-primary/40'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[8px] uppercase tracking-widest text-primary font-black ml-1">
-                    Check-out
-                  </label>
-                  <input
-                    type="date"
-                    value={selectedCheckOut}
-                    min={selectedCheckIn}
-                    onChange={(e) => setSelectedCheckOut(e.target.value)}
-                    className={`w-full bg-white/[0.07] border rounded-sm p-4 text-xs text-white focus:border-primary outline-none transition-all cursor-pointer hover:bg-white/[0.1] ${!isAvailable ? 'border-red-500/40' : 'border-primary/40'}`}
-                  />
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                type="date"
+                value={selectedCheckIn}
+                onChange={(e) => setSelectedCheckIn(e.target.value)}
+                className="bg-white/[0.07] p-4 text-xs text-white"
+              />
+              <input
+                type="date"
+                value={selectedCheckOut}
+                onChange={(e) => setSelectedCheckOut(e.target.value)}
+                className="bg-white/[0.07] p-4 text-xs text-white"
+              />
             </div>
 
-            <div className="space-y-4 pt-6 pb-2 border-t border-white/5">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-gray-500 uppercase tracking-widest font-black text-[9px]">
-                  Duration
-                </span>
-                <span className="text-white italic">
-                  {stayCalculations.nights} Nights
-                </span>
-              </div>
-              <div className="flex justify-between items-end pt-4">
-                <span className="text-primary uppercase tracking-[0.2em] font-black text-[10px]">
-                  Total Stay
-                </span>
-                <span className="serif-font text-3xl text-white font-bold italic tracking-tighter">
-                  ₦{stayCalculations.total.toLocaleString()}
-                </span>
-              </div>
+            <div className="flex justify-between text-xs pt-4">
+              <span>{stayCalculations.nights} Nights</span>
+              <span className="serif-font text-2xl">
+                ₦{stayCalculations.total.toLocaleString()}
+              </span>
             </div>
 
             <button
               onClick={handleAuthoriseStay}
               disabled={!isAvailable || availabilityLoading}
-              className={`w-full h-16 uppercase text-[10px] font-black tracking-[0.4em] transition shadow-2xl active:scale-95 flex items-center justify-center gap-4 group ${
-                !isAvailable 
-                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed border border-white/5' 
-                  : 'bg-primary hover:bg-yellow-500 text-black'
-              }`}
+              className="w-full h-16 bg-primary text-black uppercase text-[10px] font-black tracking-[0.4em]"
             >
-              {availabilityLoading ? (
-                <span className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-              ) : isAvailable ? (
-                <>
-                  Confirm Stay{" "}
-                  <span className="material-symbols-outlined group-hover:translate-x-1 transition">
-                    arrow_right_alt
-                  </span>
-                </>
-              ) : (
-                "Room Unavailable"
-              )}
+              Confirm Stay
             </button>
           </div>
         </aside>
@@ -340,5 +313,27 @@ const RoomDetail: React.FC = () => {
     </div>
   );
 };
+
+/* -------- SMALL HELPER COMPONENT -------- */
+const Detail = ({
+  label,
+  value,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}) => (
+  <div>
+    <p className="text-[8px] uppercase tracking-[0.4em] text-gray-600 font-black">
+      {label}
+    </p>
+    <p
+      className={`text-xl font-bold italic ${highlight ? "text-primary" : "text-white"}`}
+    >
+      {value}
+    </p>
+  </div>
+);
 
 export default RoomDetail;

@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import { generateAppImage, APP_IMAGE_PROMPTS } from "../services/imageService";
 import { Room, RoomCategory } from "../types";
 import FAQ from "../components/FAQ";
 
 const Home: React.FC = () => {
   const [featuredRooms, setFeaturedRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
-  const [heroImg, setHeroImg] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const [diningImg, setDiningImg] = useState<string>("");
-  const [spaImg, setSpaImg] = useState<string>("");
-  const [heritageImg, setHeritageImg] = useState<string>("");
 
   const navigate = useNavigate();
 
@@ -26,19 +21,9 @@ const Home: React.FC = () => {
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const [rooms, hImg, dImg, sImg, herImg] = await Promise.all([
-          api.getRooms(""),
-          generateAppImage(APP_IMAGE_PROMPTS.hero),
-          generateAppImage(APP_IMAGE_PROMPTS.dining_general),
-          generateAppImage(APP_IMAGE_PROMPTS.wellness_general),
-          generateAppImage(APP_IMAGE_PROMPTS.about_heritage),
-        ]);
+        const [rooms] = await Promise.all([api.getRooms("")]);
 
         setFeaturedRooms(rooms.filter((r) => r.isOnline).slice(0, 3));
-        if (hImg) setHeroImg(hImg);
-        if (dImg) setDiningImg(dImg);
-        if (sImg) setSpaImg(sImg);
-        if (herImg) setHeritageImg(herImg);
       } catch (err) {
         console.error("Content load failed");
       } finally {
@@ -108,7 +93,6 @@ const Home: React.FC = () => {
               alt="Moore Lobby"
               className="w-full h-full object-cover opacity-70 scale-105 animate-[pulse_25s_ease-in-out_infinite]"
               src={
-                heroImg ||
                 "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1920"
               }
             />
@@ -256,7 +240,6 @@ const Home: React.FC = () => {
             <div className="absolute -inset-4 border border-primary/20 rotate-3 z-0"></div>
             <img
               src={
-                heritageImg ||
                 "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200"
               }
               className="relative z-10 rounded-sm grayscale hover:grayscale-0 transition-all duration-[2000ms] shadow-2xl"
@@ -326,52 +309,57 @@ const Home: React.FC = () => {
       </section>
 
       {/* 4. Video Experience Section */}
-      <section className="py-24 md:py-40 bg-black">
+      <section className="py-24 md:py-40 bg-black relative overflow-hidden">
         <div className="max-w-[1800px] mx-auto px-6">
           <div className="grid lg:grid-cols-12 gap-16 items-center">
+            {/* Text */}
             <div className="lg:col-span-5 space-y-10">
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <p className="text-primary text-[10px] font-black uppercase tracking-[0.5em]">
                   Moving Narrative
                 </p>
-                <h2 className="serif-font text-5xl md:text-7xl text-white italic leading-tight">
-                  The Moore <br />
+
+                <h2 className="serif-font text-5xl md:text-7xl text-white italic leading-[1.1]">
+                  The Moore
+                  <br />
                   Motion
                 </h2>
               </div>
-              <p className="text-gray-400 text-lg md:text-xl font-light leading-relaxed">
-                Witness the transformation. Our cinematic experience captures
-                the transition from the vibrant energy of Lagos to the deep
-                stillness of our private vaults.
+
+              <p className="text-gray-400 text-lg md:text-xl font-light leading-relaxed max-w-xl">
+                Witness the transformation. A cinematic journey that captures
+                the shift from the vibrant rhythm of Lagos to the calm, private
+                stillness of Moore Hotels and Suites.
               </p>
+
               <button className="flex items-center gap-6 group">
-                <div className="w-16 h-16 rounded-full border border-primary/30 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all shadow-2xl shadow-primary/10">
+                <div className="w-16 h-16 rounded-full border border-primary/30 flex items-center justify-center text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-black shadow-2xl shadow-primary/10">
                   <span className="material-symbols-outlined text-3xl">
                     play_arrow
                   </span>
                 </div>
+
                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">
                   Watch Anthem
                 </span>
               </button>
             </div>
+
+            {/* Video */}
             <div className="lg:col-span-7 relative">
-              <div className="aspect-video bg-surface-dark border border-white/10 rounded-sm overflow-hidden group shadow-[0_40px_80px_rgba(0,0,0,0.8)]">
-                <img
-                  src={
-                    heroImg ||
-                    "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1920"
-                  }
-                  className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-[2000ms] group-hover:scale-110"
-                  alt="Video Placeholder"
+              <div className="relative aspect-video rounded-sm overflow-hidden group border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)]">
+                <video
+                  src="https://media.istockphoto.com/id/2164324479/video/calm-summer-evening-in-luxury-hotel-woman-lying-on-lounger-put-hands-back-silhouette-of-lady.mp4?s=mp4-640x640-is&k=20&c=mmsIo19OMUfPZ-wUsNdTNZXzVOCY524vS-3Ek9zLPGI="
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-cover grayscale-[0.35] transition-all duration-[1800ms] group-hover:grayscale-0 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-20 h-20 rounded-full bg-black/50 backdrop-blur-xl flex items-center justify-center text-primary border border-primary/20 scale-100 group-hover:scale-110 transition-transform shadow-2xl">
-                    <span className="material-symbols-outlined text-4xl">
-                      play_circle
-                    </span>
-                  </div>
-                </div>
+
+                {/* Cinematic overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
               </div>
             </div>
           </div>
@@ -387,7 +375,6 @@ const Home: React.FC = () => {
               <div className="aspect-video overflow-hidden rounded-sm relative group shadow-2xl">
                 <img
                   src={
-                    // diningImg ||
                     "https://i.pinimg.com/1200x/53/c5/1d/53c51d69ed3a3c8d8a8b840d89a248c6.jpg"
                   }
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-[2000ms]"
@@ -440,7 +427,6 @@ const Home: React.FC = () => {
               <div className="aspect-video overflow-hidden rounded-sm relative group shadow-2xl">
                 <img
                   src={
-                    spaImg ||
                     "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=1200"
                   }
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-[2000ms]"

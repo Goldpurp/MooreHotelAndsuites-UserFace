@@ -1,6 +1,6 @@
 import { Room, Booking, ApplicationUser, PaymentMethod } from "../types";
 
-const BASE_URL = "https://localhost:7124/api";
+const BASE_URL = import.meta.env.VITE_API_URL; 
 
 const STORAGE_KEYS = {
   TOKEN: "mhs_auth_token",
@@ -43,9 +43,7 @@ class ApiService {
       const error = await response.json().catch(() => null);
 
       if (error && error.errors) {
-        const messages = Object.values(error.errors)
-          .flat()
-          .join(" | ");
+        const messages = Object.values(error.errors).flat().join(" | ");
         throw new Error(messages);
       }
 
@@ -66,29 +64,31 @@ class ApiService {
     password: string;
     phone: string;
   }) => {
-    const res = await this.request<{ token: string; user: ApplicationUser }>(
-      "/auth/register",
+    // Standardizing keys for ASP.NET backend
+    return this.request<{ token: string; user: ApplicationUser }>(
+      "/Auth/register",
       {
         method: "POST",
         body: JSON.stringify(data),
       },
     );
-
-    this.setToken(res.token);
-    return res;
   };
 
   login = async (credentials: { email: string; password: string }) => {
-    const res = await this.request<{ token: string; user: ApplicationUser }>(
-      "/auth/login",
+    return this.request<{ token: string; user: ApplicationUser }>(
+      "/Auth/login",
       {
         method: "POST",
         body: JSON.stringify(credentials),
       },
     );
+  };
 
-    this.setToken(res.token);
-    return res;
+  resetPasswordRequest = async (email: string) => {
+    return this.request<{ message: string }>("/Auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
   };
 
   // =========================
@@ -127,12 +127,12 @@ class ApiService {
   async checkAvailability(
     roomId: string,
     checkIn: string,
-    checkOut: string
+    checkOut: string,
   ): Promise<{ available: boolean; message?: string }> {
     const res = await this.request<{ available: boolean; message?: string }>(
       `/rooms/${roomId}/availability?checkIn=${encodeURIComponent(
-        new Date(checkIn).toISOString()
-      )}&checkOut=${encodeURIComponent(new Date(checkOut).toISOString())}`
+        new Date(checkIn).toISOString(),
+      )}&checkOut=${encodeURIComponent(new Date(checkOut).toISOString())}`,
     );
 
     return res;
@@ -180,6 +180,17 @@ class ApiService {
   async getBookingByCode(code: string): Promise<Booking> {
     return this.request<Booking>(`/bookings/code/${code}`);
   }
+
+  rotateSecurity = async (data: {
+    oldPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
+  }) => {
+    return this.request<{ message: string }>("/Profile/rotate-security", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  };
 
   async updateMe(data: {
     name?: string;

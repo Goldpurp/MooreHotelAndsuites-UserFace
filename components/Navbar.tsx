@@ -157,7 +157,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
                   onClick={onLogout}
                   className="text-left text-red-500/60 text-lg uppercase tracking-widest font-black pt-2"
                 >
-                  Secure Exit
+                  Logout
                 </button>
               )}
             </div>

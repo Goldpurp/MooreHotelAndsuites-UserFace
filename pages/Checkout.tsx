@@ -59,7 +59,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     bankName: "Zenith Bank",
     accountName: "Moore Hotels Ltd",
     accountNumber: "1234567890",
-    note: "Use your booking code as narration",
+    note: "Booking will be confirmed immediately after payment is confirmed",
   };
 
   // Verify availability before booking

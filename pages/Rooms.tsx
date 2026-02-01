@@ -13,11 +13,11 @@ const Rooms: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [budget, setBudget] = useState(3000000);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const activeCategory = searchParams.get("category") || "All";
   const checkIn = searchParams.get("checkIn") || "";
   const checkOut = searchParams.get("checkOut") || "";
-  const guests = searchParams.get("guests") || "2";
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -27,7 +27,6 @@ const Rooms: React.FC = () => {
       try {
         let data: Room[];
 
-        // Only call search if there are real values
         const shouldSearch =
           (checkIn && checkOut) || activeCategory !== "All";
 
@@ -42,11 +41,11 @@ const Rooms: React.FC = () => {
         }
 
         const availableRooms = data.filter(
-          (r) => r.isOnline && r.status !== RoomStatus.Maintenance
+          (r) => r.isOnline && r.status !== RoomStatus.Maintenance,
         );
 
         setRooms(availableRooms);
-      } catch (err: any) {
+      } catch {
         setError("Failed to load rooms. Please try again.");
       } finally {
         setLoading(false);
@@ -76,43 +75,69 @@ const Rooms: React.FC = () => {
     const newParams = new URLSearchParams(searchParams);
     if (cat === "All") newParams.delete("category");
     else newParams.set("category", cat);
-
     setSearchParams(newParams);
   };
 
   return (
     <div className="pt-28 min-h-screen bg-background-dark pb-24">
       <div className="max-w-[1800px] mx-auto px-6 md:px-10">
-        {/* Header & Filters */}
-        <header className="mb-10 space-y-16">
-          <div className="flex overflow-x-auto scrollbar-hide gap-8 md:gap-12 pb-4 border-b border-white/5">
+
+        {/* Category Tabs */}
+        <header className="mb-10 space-y-12">
+          <div className="flex overflow-x-auto scrollbar-hide gap-8 pb-4 border-b border-white/5">
             <button
               onClick={() => handleCategoryChange("All")}
               className={`text-[10px] font-black uppercase tracking-[0.4em] whitespace-nowrap transition-all pb-4 relative ${
-                activeCategory === "All" ? "text-primary" : "text-gray-600 hover:text-gray-300"
+                activeCategory === "All"
+                  ? "text-primary"
+                  : "text-gray-600 hover:text-gray-300"
               }`}
             >
               All Suites
               {activeCategory === "All" && (
-                <span className="absolute bottom-0 left-0 w-full h-[1px] bg-primary"></span>
+                <span className="absolute bottom-0 left-0 w-full h-px bg-primary" />
               )}
             </button>
+
             {Object.values(RoomCategory).map((cat) => (
               <button
                 key={cat}
                 onClick={() => handleCategoryChange(cat)}
                 className={`text-[10px] font-black uppercase tracking-[0.4em] whitespace-nowrap transition-all pb-4 relative ${
-                  activeCategory === cat ? "text-primary" : "text-gray-600 hover:text-gray-300"
+                  activeCategory === cat
+                    ? "text-primary"
+                    : "text-gray-600 hover:text-gray-300"
                 }`}
               >
                 {cat} Tier
                 {activeCategory === cat && (
-                  <span className="absolute bottom-0 left-0 w-full h-[1px] bg-primary"></span>
+                  <span className="absolute bottom-0 left-0 w-full h-px bg-primary" />
                 )}
               </button>
             ))}
           </div>
         </header>
+
+        {/* Mobile Filter Bar */}
+        <div className="md:hidden sticky top-24 z-40 bg-background-dark border-b border-white/5 mb-10">
+          <div className="flex items-center justify-between px-4 py-4">
+            <button
+              onClick={() => setFiltersOpen(true)}
+              className="flex items-center gap-3 text-white"
+            >
+              <span className="material-symbols-outlined text-xl">
+                tune
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em]">
+                Filter Rooms
+              </span>
+            </button>
+
+            <p className="text-[10px] uppercase tracking-[0.3em] text-gray-500">
+              {filteredRooms.length} Results
+            </p>
+          </div>
+        </div>
 
         {/* Room Grid */}
         {loading ? (
@@ -142,23 +167,113 @@ const Rooms: React.FC = () => {
 
                   <div className="absolute bottom-10 left-10 right-10 space-y-3 translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
                     <p className="text-primary text-[9px] uppercase tracking-[0.4em] font-black">
-                      {room.category} Unit
+                      {room.category} Tier
                     </p>
                     <h3 className="serif-font text-4xl text-white italic leading-tight group-hover:text-primary transition-colors">
                       {room.name}
                     </h3>
                   </div>
                 </div>
+
+                <div className="flex justify-between items-end border-t border-white/5 px-1">
+                  <div className="space-y-1">
+                    <p className="text-[9px] text-gray-700 font-black uppercase tracking-[0.4em]">
+                      NIGHTLY RATE
+                    </p>
+                    <p className="text-3xl text-white font-bold tracking-tighter italic">
+                      ₦{room.pricePerNight.toLocaleString()}
+                    </p>
+                  </div>
+
+                  <span className="material-symbols-outlined text-3xl text-primary">
+                    arrow_right_alt
+                  </span>
+                </div>
               </Link>
             ))}
           </div>
         ) : (
-          <div className="py-52 text-center space-y-10">
+          <div className="py-52 text-center">
             <p className="serif-font text-3xl text-gray-600 italic">
               No rooms match your lookup.
             </p>
           </div>
         )}
+
+        {/* Mobile Filter Drawer */}
+        {filtersOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setFiltersOpen(false)}
+            />
+
+            <div className="absolute bottom-0 left-0 right-0 bg-background-dark rounded-t-2xl border-t border-white/10 max-h-[85vh] overflow-y-auto">
+              <div className="p-6 space-y-10">
+
+                <div className="flex justify-between items-center">
+                  <p className="text-[10px] uppercase tracking-[0.4em] font-black">
+                    Filters
+                  </p>
+                  <button onClick={() => setFiltersOpen(false)}>
+                    Close
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-gray-500 font-black">
+                    Search
+                  </p>
+                  <input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-black border border-white/10 px-4 py-3 text-white"
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-gray-500 font-black">
+                    Max Budget
+                  </p>
+                  <input
+                    type="range"
+                    min={50000}
+                    max={3000000}
+                    step={50000}
+                    value={budget}
+                    onChange={(e) => setBudget(Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <p className="text-white text-xl italic">
+                    ₦{budget.toLocaleString()}
+                  </p>
+                </div>
+
+                <div className="flex gap-4 pt-6 border-t border-white/10">
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setBudget(3000000);
+                      setSelectedAmenities([]);
+                    }}
+                    className="flex-1 border border-white/10 py-4 text-[10px] uppercase tracking-[0.4em] text-gray-400"
+                  >
+                    Reset
+                  </button>
+
+                  <button
+                    onClick={() => setFiltersOpen(false)}
+                    className="flex-1 bg-primary text-black py-4 text-[10px] uppercase tracking-[0.4em] font-black"
+                  >
+                    Apply
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
