@@ -11,13 +11,8 @@ const STORAGE_KEYS = {
 class ApiService {
   private token: string | null = localStorage.getItem(STORAGE_KEYS.TOKEN);
 
-  // =========================
-  // Token handling
-  // =========================
-
   setToken(token: string | null) {
     this.token = token;
-
     if (token) {
       localStorage.setItem(STORAGE_KEYS.TOKEN, token);
     } else {
@@ -25,20 +20,14 @@ class ApiService {
     }
   }
 
-  // =========================
-  // Core request handler
-  // =========================
-
   private async request<T>(
     path: string,
     options: RequestInit = {},
-    requiresAuth = false,
   ): Promise<T> {
     const headers = new Headers(options.headers);
-
     headers.set("Content-Type", "application/json");
 
-    if (requiresAuth && this.token) {
+    if (this.token) {
       headers.set("Authorization", `Bearer ${this.token}`);
     }
 
@@ -53,55 +42,49 @@ class ApiService {
     }
 
     if (!response.ok) {
-      let errorMessage = `Error ${response.status}`;
+      const error = await response.json().catch(() => null);
 
-      try {
-        const error = await response.json();
-
-        if (error?.errors) {
-          errorMessage = Object.values(error.errors).flat().join(" | ");
-        } else if (error?.message) {
-          errorMessage = error.message;
-        }
-      } catch {
-        // no-op
+      if (error && error.errors) {
+        const messages = Object.values(error.errors).flat().join(" | ");
+        throw new Error(messages);
       }
 
-      throw new Error(errorMessage);
+      throw new Error(error?.message || `Error ${response.status}`);
     }
 
     return response.json();
   }
 
   // =========================
-  // Authentication (PUBLIC)
+  // Authentication
   // =========================
 
-  register(data: {
+  register = async (data: {
     firstName: string;
     lastName: string;
     email: string;
     password: string;
     phone: string;
-  }) {
+  }) => {
+    // Standardizing keys for ASP.NET backend
     return this.request<{ token: string; user: ApplicationUser }>(
-      "/auth/register",
+      "/Auth/register",
       {
         method: "POST",
         body: JSON.stringify(data),
       },
     );
-  }
+  };
 
-  login(credentials: { email: string; password: string }) {
+  login = async (credentials: { email: string; password: string }) => {
     return this.request<{ token: string; user: ApplicationUser }>(
-      "/auth/login",
+      "/Auth/login",
       {
         method: "POST",
         body: JSON.stringify(credentials),
       },
     );
-  }
+  };
 
   resetPasswordRequest = async (email: string) => {
     return this.request<{ message: string }>("/Auth/forgot-password", {
@@ -111,14 +94,14 @@ class ApiService {
   };
 
   // =========================
-  // Rooms (PUBLIC)
+  // Rooms (Guest Portal)
   // =========================
 
-  getRooms(): Promise<Room[]> {
+  async getRooms(p0: string): Promise<Room[]> {
     return this.request<Room[]>("/rooms");
   }
 
-  searchRooms(params: {
+  async searchRooms(params: {
     checkIn: string;
     checkOut: string;
     category?: string;
@@ -127,45 +110,41 @@ class ApiService {
   }): Promise<Room[]> {
     const queryParams = new URLSearchParams();
 
-    queryParams.append("checkIn", new Date(params.checkIn).toISOString());
-    queryParams.append("checkOut", new Date(params.checkOut).toISOString());
-
-    if (params.category && params.category !== "All") {
+    if (params.checkIn)
+      queryParams.append("checkIn", new Date(params.checkIn).toISOString());
+    if (params.checkOut)
+      queryParams.append("checkOut", new Date(params.checkOut).toISOString());
+    if (params.category && params.category !== "All")
       queryParams.append("category", params.category);
-    }
-
-    if (params.roomNumber) {
-      queryParams.append("roomNumber", params.roomNumber);
-    }
-
-    if (params.amenity) {
-      queryParams.append("amenity", params.amenity);
-    }
+    if (params.roomNumber) queryParams.append("roomNumber", params.roomNumber);
+    if (params.amenity) queryParams.append("amenity", params.amenity);
 
     return this.request<Room[]>(`/rooms/search?${queryParams.toString()}`);
   }
 
-  getRoomById(id: string): Promise<Room> {
+  async getRoomById(id: string): Promise<Room> {
     return this.request<Room>(`/rooms/${id}`);
   }
 
-  checkAvailability(
+  async checkAvailability(
     roomId: string,
     checkIn: string,
     checkOut: string,
   ): Promise<{ available: boolean; message?: string }> {
-    return this.request<{ available: boolean; message?: string }>(
+    const res = await this.request<{ available: boolean; message?: string }>(
       `/rooms/${roomId}/availability?checkIn=${encodeURIComponent(
         new Date(checkIn).toISOString(),
       )}&checkOut=${encodeURIComponent(new Date(checkOut).toISOString())}`,
     );
+
+    return res;
   }
 
   // =========================
-  // Bookings (PUBLIC per API guide)
+  // Bookings (Guest Portal)
   // =========================
 
-  createBooking(data: {
+  async createBooking(data: {
     roomId: string;
     guestFirstName: string;
     guestLastName: string;
@@ -188,23 +167,41 @@ class ApiService {
     });
   }
 
-  verifyBookingPayment(code: string): Promise<{ message: string }> {
-    return this.request<{ message: string }>(
-      `/bookings/${code}/verify-paystack`,
-      { method: "POST" },
-    );
-  }
-
   // =========================
-  // Profile / User (PROTECTED)
+  // Profile (Guest)
   // =========================
 
-  getMe(): Promise<ApplicationUser> {
-    return this.request<ApplicationUser>("/profile/me", {}, true);
+  getMe = async (): Promise<ApplicationUser> => {
+    return this.request<ApplicationUser>("/profile/me");
+  };
+
+  async getMyBookings(): Promise<Booking[]> {
+    return this.request<Booking[]>("/profile/bookings");
   }
 
-  getMyBookings(): Promise<Booking[]> {
-    return this.request<Booking[]>("/profile/bookings", {}, true);
+  async getBookingByCode(code: string): Promise<Booking> {
+    return this.request<Booking>(`/bookings/code/${code}`);
+  }
+
+  rotateSecurity = async (data: {
+    oldPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
+  }) => {
+    return this.request<{ message: string }>("/Profile/rotate-security", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  };
+
+  async updateMe(data: {
+    name?: string;
+    password?: string;
+  }): Promise<ApplicationUser> {
+    return this.request<ApplicationUser>("/profile/me", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
   }
 }
 
