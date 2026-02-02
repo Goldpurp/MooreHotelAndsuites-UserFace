@@ -2,7 +2,7 @@ import { Room, Booking, ApplicationUser, PaymentMethod } from "../types";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL?.trim() ||
-  "https://api.moorehotelandsuites.com";
+  "https://api.moorehotelandsuites.com/api";
 
 const STORAGE_KEYS = {
   TOKEN: "mhs_auth_token",
@@ -59,14 +59,12 @@ class ApiService {
         const error = await response.json();
 
         if (error?.errors) {
-          errorMessage = Object.values(error.errors)
-            .flat()
-            .join(" | ");
+          errorMessage = Object.values(error.errors).flat().join(" | ");
         } else if (error?.message) {
           errorMessage = error.message;
         }
       } catch {
-        // ignore json parsing errors
+        // no-op
       }
 
       throw new Error(errorMessage);
@@ -76,7 +74,7 @@ class ApiService {
   }
 
   // =========================
-  // Authentication
+  // Authentication (PUBLIC)
   // =========================
 
   register(data: {
@@ -87,7 +85,7 @@ class ApiService {
     phone: string;
   }) {
     return this.request<{ token: string; user: ApplicationUser }>(
-      "/Auth/register",
+      "/auth/register",
       {
         method: "POST",
         body: JSON.stringify(data),
@@ -97,7 +95,7 @@ class ApiService {
 
   login(credentials: { email: string; password: string }) {
     return this.request<{ token: string; user: ApplicationUser }>(
-      "/Auth/login",
+      "/auth/login",
       {
         method: "POST",
         body: JSON.stringify(credentials),
@@ -105,20 +103,12 @@ class ApiService {
     );
   }
 
-  resetPasswordRequest(email: string) {
-    return this.request<{ message: string }>("/Auth/forgot-password", {
-      method: "POST",
-      body: JSON.stringify({ email }),
-    });
-  }
-
   // =========================
-  // Rooms (PUBLIC endpoints)
+  // Rooms (PUBLIC)
   // =========================
-  // IMPORTANT: Routes are case-sensitive in production
 
   getRooms(): Promise<Room[]> {
-    return this.request<Room[]>("/Rooms");
+    return this.request<Room[]>("/rooms");
   }
 
   searchRooms(params: {
@@ -152,12 +142,12 @@ class ApiService {
     }
 
     return this.request<Room[]>(
-      `/Rooms/search?${queryParams.toString()}`,
+      `/rooms/search?${queryParams.toString()}`,
     );
   }
 
   getRoomById(id: string): Promise<Room> {
-    return this.request<Room>(`/Rooms/${id}`);
+    return this.request<Room>(`/rooms/${id}`);
   }
 
   checkAvailability(
@@ -166,7 +156,7 @@ class ApiService {
     checkOut: string,
   ): Promise<{ available: boolean; message?: string }> {
     return this.request<{ available: boolean; message?: string }>(
-      `/Rooms/${roomId}/availability?checkIn=${encodeURIComponent(
+      `/rooms/${roomId}/availability?checkIn=${encodeURIComponent(
         new Date(checkIn).toISOString(),
       )}&checkOut=${encodeURIComponent(
         new Date(checkOut).toISOString(),
@@ -175,7 +165,7 @@ class ApiService {
   }
 
   // =========================
-  // Bookings (PROTECTED)
+  // Bookings (PUBLIC per API guide)
   // =========================
 
   createBooking(data: {
@@ -195,59 +185,29 @@ class ApiService {
       checkOut: new Date(data.checkOut).toISOString(),
     };
 
-    return this.request<Booking>(
-      "/Bookings",
-      {
-        method: "POST",
-        body: JSON.stringify(payload),
-      },
-      true,
+    return this.request<Booking>("/bookings", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  verifyBookingPayment(code: string): Promise<{ message: string }> {
+    return this.request<{ message: string }>(
+      `/bookings/${code}/verify-paystack`,
+      { method: "POST" },
     );
   }
 
-  getBookingByCode(code: string): Promise<Booking> {
-    return this.request<Booking>(`/Bookings/code/${code}`);
-  }
-
   // =========================
-  // Profile (PROTECTED)
+  // Profile / User (PROTECTED)
   // =========================
 
   getMe(): Promise<ApplicationUser> {
-    return this.request<ApplicationUser>("/Profile/me", {}, true);
+    return this.request<ApplicationUser>("/profile/me", {}, true);
   }
 
   getMyBookings(): Promise<Booking[]> {
-    return this.request<Booking[]>("/Profile/bookings", {}, true);
-  }
-
-  rotateSecurity(data: {
-    oldPassword: string;
-    newPassword: string;
-    confirmNewPassword: string;
-  }) {
-    return this.request<{ message: string }>(
-      "/Profile/rotate-security",
-      {
-        method: "POST",
-        body: JSON.stringify(data),
-      },
-      true,
-    );
-  }
-
-  updateMe(data: {
-    name?: string;
-    password?: string;
-  }): Promise<ApplicationUser> {
-    return this.request<ApplicationUser>(
-      "/Profile/me",
-      {
-        method: "PATCH",
-        body: JSON.stringify(data),
-      },
-      true,
-    );
+    return this.request<Booking[]>("/profile/bookings", {}, true);
   }
 }
 
