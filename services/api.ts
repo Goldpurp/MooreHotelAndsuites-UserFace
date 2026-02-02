@@ -1,8 +1,8 @@
 import { Room, Booking, ApplicationUser, PaymentMethod } from "../types";
 
 const API_BASE_URL =
-  import.meta.env?.VITE_API_BASE_URL ||
-  'https://api.moorehotelandsuites.com';
+  import.meta.env.VITE_API_BASE_URL?.trim() ||
+  "https://api.moorehotelandsuites.com";
 
 const STORAGE_KEYS = {
   TOKEN: "mhs_auth_token",
@@ -11,8 +11,13 @@ const STORAGE_KEYS = {
 class ApiService {
   private token: string | null = localStorage.getItem(STORAGE_KEYS.TOKEN);
 
+  // =========================
+  // Token handling
+  // =========================
+
   setToken(token: string | null) {
     this.token = token;
+
     if (token) {
       localStorage.setItem(STORAGE_KEYS.TOKEN, token);
     } else {
@@ -20,14 +25,20 @@ class ApiService {
     }
   }
 
+  // =========================
+  // Core request handler
+  // =========================
+
   private async request<T>(
     path: string,
     options: RequestInit = {},
+    requiresAuth = false,
   ): Promise<T> {
     const headers = new Headers(options.headers);
+
     headers.set("Content-Type", "application/json");
 
-    if (this.token) {
+    if (requiresAuth && this.token) {
       headers.set("Authorization", `Bearer ${this.token}`);
     }
 
@@ -42,14 +53,23 @@ class ApiService {
     }
 
     if (!response.ok) {
-      const error = await response.json().catch(() => null);
+      let errorMessage = `Error ${response.status}`;
 
-      if (error && error.errors) {
-        const messages = Object.values(error.errors).flat().join(" | ");
-        throw new Error(messages);
+      try {
+        const error = await response.json();
+
+        if (error?.errors) {
+          errorMessage = Object.values(error.errors)
+            .flat()
+            .join(" | ");
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
+      } catch {
+        // ignore json parsing errors
       }
 
-      throw new Error(error?.message || `Error ${response.status}`);
+      throw new Error(errorMessage);
     }
 
     return response.json();
@@ -59,14 +79,13 @@ class ApiService {
   // Authentication
   // =========================
 
-  register = async (data: {
+  register(data: {
     firstName: string;
     lastName: string;
     email: string;
     password: string;
     phone: string;
-  }) => {
-    // Standardizing keys for ASP.NET backend
+  }) {
     return this.request<{ token: string; user: ApplicationUser }>(
       "/Auth/register",
       {
@@ -74,9 +93,9 @@ class ApiService {
         body: JSON.stringify(data),
       },
     );
-  };
+  }
 
-  login = async (credentials: { email: string; password: string }) => {
+  login(credentials: { email: string; password: string }) {
     return this.request<{ token: string; user: ApplicationUser }>(
       "/Auth/login",
       {
@@ -84,24 +103,25 @@ class ApiService {
         body: JSON.stringify(credentials),
       },
     );
-  };
+  }
 
-  resetPasswordRequest = async (email: string) => {
+  resetPasswordRequest(email: string) {
     return this.request<{ message: string }>("/Auth/forgot-password", {
       method: "POST",
       body: JSON.stringify({ email }),
     });
-  };
-
-  // =========================
-  // Rooms (Guest Portal)
-  // =========================
-
-  async getRooms(p0: string): Promise<Room[]> {
-    return this.request<Room[]>("/rooms");
   }
 
-  async searchRooms(params: {
+  // =========================
+  // Rooms (PUBLIC endpoints)
+  // =========================
+  // IMPORTANT: Routes are case-sensitive in production
+
+  getRooms(): Promise<Room[]> {
+    return this.request<Room[]>("/Rooms");
+  }
+
+  searchRooms(params: {
     checkIn: string;
     checkOut: string;
     category?: string;
@@ -110,41 +130,55 @@ class ApiService {
   }): Promise<Room[]> {
     const queryParams = new URLSearchParams();
 
-    if (params.checkIn)
-      queryParams.append("checkIn", new Date(params.checkIn).toISOString());
-    if (params.checkOut)
-      queryParams.append("checkOut", new Date(params.checkOut).toISOString());
-    if (params.category && params.category !== "All")
+    queryParams.append(
+      "checkIn",
+      new Date(params.checkIn).toISOString(),
+    );
+    queryParams.append(
+      "checkOut",
+      new Date(params.checkOut).toISOString(),
+    );
+
+    if (params.category && params.category !== "All") {
       queryParams.append("category", params.category);
-    if (params.roomNumber) queryParams.append("roomNumber", params.roomNumber);
-    if (params.amenity) queryParams.append("amenity", params.amenity);
+    }
 
-    return this.request<Room[]>(`/rooms/search?${queryParams.toString()}`);
+    if (params.roomNumber) {
+      queryParams.append("roomNumber", params.roomNumber);
+    }
+
+    if (params.amenity) {
+      queryParams.append("amenity", params.amenity);
+    }
+
+    return this.request<Room[]>(
+      `/Rooms/search?${queryParams.toString()}`,
+    );
   }
 
-  async getRoomById(id: string): Promise<Room> {
-    return this.request<Room>(`/rooms/${id}`);
+  getRoomById(id: string): Promise<Room> {
+    return this.request<Room>(`/Rooms/${id}`);
   }
 
-  async checkAvailability(
+  checkAvailability(
     roomId: string,
     checkIn: string,
     checkOut: string,
   ): Promise<{ available: boolean; message?: string }> {
-    const res = await this.request<{ available: boolean; message?: string }>(
-      `/rooms/${roomId}/availability?checkIn=${encodeURIComponent(
+    return this.request<{ available: boolean; message?: string }>(
+      `/Rooms/${roomId}/availability?checkIn=${encodeURIComponent(
         new Date(checkIn).toISOString(),
-      )}&checkOut=${encodeURIComponent(new Date(checkOut).toISOString())}`,
+      )}&checkOut=${encodeURIComponent(
+        new Date(checkOut).toISOString(),
+      )}`,
     );
-
-    return res;
   }
 
   // =========================
-  // Bookings (Guest Portal)
+  // Bookings (PROTECTED)
   // =========================
 
-  async createBooking(data: {
+  createBooking(data: {
     roomId: string;
     guestFirstName: string;
     guestLastName: string;
@@ -161,47 +195,59 @@ class ApiService {
       checkOut: new Date(data.checkOut).toISOString(),
     };
 
-    return this.request<Booking>("/bookings", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
+    return this.request<Booking>(
+      "/Bookings",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+      true,
+    );
+  }
+
+  getBookingByCode(code: string): Promise<Booking> {
+    return this.request<Booking>(`/Bookings/code/${code}`);
   }
 
   // =========================
-  // Profile (Guest)
+  // Profile (PROTECTED)
   // =========================
 
-  getMe = async (): Promise<ApplicationUser> => {
-    return this.request<ApplicationUser>("/profile/me");
-  };
-
-  async getMyBookings(): Promise<Booking[]> {
-    return this.request<Booking[]>("/profile/bookings");
+  getMe(): Promise<ApplicationUser> {
+    return this.request<ApplicationUser>("/Profile/me", {}, true);
   }
 
-  async getBookingByCode(code: string): Promise<Booking> {
-    return this.request<Booking>(`/bookings/code/${code}`);
+  getMyBookings(): Promise<Booking[]> {
+    return this.request<Booking[]>("/Profile/bookings", {}, true);
   }
 
-  rotateSecurity = async (data: {
+  rotateSecurity(data: {
     oldPassword: string;
     newPassword: string;
     confirmNewPassword: string;
-  }) => {
-    return this.request<{ message: string }>("/Profile/rotate-security", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  };
+  }) {
+    return this.request<{ message: string }>(
+      "/Profile/rotate-security",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      true,
+    );
+  }
 
-  async updateMe(data: {
+  updateMe(data: {
     name?: string;
     password?: string;
   }): Promise<ApplicationUser> {
-    return this.request<ApplicationUser>("/profile/me", {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    });
+    return this.request<ApplicationUser>(
+      "/Profile/me",
+      {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      },
+      true,
+    );
   }
 }
 
