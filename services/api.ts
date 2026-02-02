@@ -103,6 +103,13 @@ class ApiService {
     );
   }
 
+  resetPasswordRequest = async (email: string) => {
+    return this.request<{ message: string }>("/Auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  };
+
   // =========================
   // Rooms (PUBLIC)
   // =========================
@@ -120,14 +127,8 @@ class ApiService {
   }): Promise<Room[]> {
     const queryParams = new URLSearchParams();
 
-    queryParams.append(
-      "checkIn",
-      new Date(params.checkIn).toISOString(),
-    );
-    queryParams.append(
-      "checkOut",
-      new Date(params.checkOut).toISOString(),
-    );
+    queryParams.append("checkIn", new Date(params.checkIn).toISOString());
+    queryParams.append("checkOut", new Date(params.checkOut).toISOString());
 
     if (params.category && params.category !== "All") {
       queryParams.append("category", params.category);
@@ -141,9 +142,7 @@ class ApiService {
       queryParams.append("amenity", params.amenity);
     }
 
-    return this.request<Room[]>(
-      `/rooms/search?${queryParams.toString()}`,
-    );
+    return this.request<Room[]>(`/rooms/search?${queryParams.toString()}`);
   }
 
   getRoomById(id: string): Promise<Room> {
@@ -158,9 +157,7 @@ class ApiService {
     return this.request<{ available: boolean; message?: string }>(
       `/rooms/${roomId}/availability?checkIn=${encodeURIComponent(
         new Date(checkIn).toISOString(),
-      )}&checkOut=${encodeURIComponent(
-        new Date(checkOut).toISOString(),
-      )}`,
+      )}&checkOut=${encodeURIComponent(new Date(checkOut).toISOString())}`,
     );
   }
 
