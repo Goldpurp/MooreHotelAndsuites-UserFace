@@ -1,6 +1,8 @@
 import { Room, Booking, ApplicationUser, PaymentMethod } from "../types";
 
-const BASE_URL = import.meta.env.VITE_API_URL; 
+const API_BASE_URL =
+  import.meta.env?.VITE_API_BASE_URL ||
+  'https://api.moorehotelandsuites.com';
 
 const STORAGE_KEYS = {
   TOKEN: "mhs_auth_token",
@@ -29,7 +31,7 @@ class ApiService {
       headers.set("Authorization", `Bearer ${this.token}`);
     }
 
-    const response = await fetch(`${BASE_URL}${path}`, {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
       headers,
     });
