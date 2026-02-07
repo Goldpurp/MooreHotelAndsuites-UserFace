@@ -87,7 +87,7 @@ const App: React.FC = () => {
           <Route path="/rooms" element={<Rooms />} />
           <Route path="/rooms/:id" element={<RoomDetail />} />
           <Route path="/dining" element={<Dining />} />
-          <Route path="/amenities" element={<Services />} />
+          <Route path="/services" element={<Services />} />
           <Route path="/about" element={<About />} />
           <Route path="/auth" element={<Auth onLogin={handleLogin} />} />
           <Route

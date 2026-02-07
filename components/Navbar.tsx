@@ -33,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
   const navLinks = [
     { name: "ROOMS", path: "/rooms" },
     { name: "DINING", path: "/dining" },
-    { name: "SERVICES", path: "/amenities" },
+    { name: "SERVICES", path: "/services" },
     { name: "HISTORY", path: "/about" },
   ];
 
