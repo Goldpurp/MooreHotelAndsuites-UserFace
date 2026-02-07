@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { APP_IMAGE_PROMPTS } from "../services/imageService";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 
 const Dining: React.FC = () => {
-  const [venueImages, setVenueImages] = useState<Record<string, string>>({});
-  const [galleryImages, setGalleryImages] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [reservingVenue, setReservingVenue] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedVenue, setSelectedVenue] = useState<string>("");
 
   const venues = [
     {
       name: "L'Horizon",
       tag: "SIGNATURE FINE DINING",
-      desc: "An ethereal culinary journey curated by Michelin-starred masters. Experience a marriage of local organic treasures and avant-garde molecular techniques, served with a panoramic view of the coastline.",
+      desc: "An ethereal culinary journey on Sagamu-Ikenne Road, blending local Nigerian ingredients with avant-garde techniques and panoramic coastal views.",
       img: "/Images/L'Horizon.png",
       hours: "18:00 — 23:00",
       menu: "Tasting Menu & A La Carte",
@@ -20,7 +17,7 @@ const Dining: React.FC = () => {
     {
       name: "The Charcoal Room",
       tag: "PREMIUM GRILL & BAR",
-      desc: "Bold flavors forged in open flames. Specializing in dry-aged prime cuts and sustainably sourced seafood, The Charcoal Room offers an intimate, leather-scented atmosphere for the true epicurean.",
+      desc: "Bold flavors forged in open flames. Specializing in dry-aged prime cuts and sustainably sourced seafood in an intimate, leather-scented Nigerian setting.",
       img: "/Images/TheCharcoalRoom.png",
       hours: "12:00 — 00:00",
       menu: "Steakhouse & Artisanal Cocktails",
@@ -28,7 +25,7 @@ const Dining: React.FC = () => {
     {
       name: "Sanctuary Lounge",
       tag: "HIGH TEA & SPIRITS",
-      desc: "A daylight haven for artisanal teas and delicate pastries, transitioning into a sophisticated cocktail sanctuary by dusk. Perfect for quiet conversation and sunset views.",
+      desc: "Daylight haven for artisanal teas and delicate pastries, transitioning into a cocktail sanctuary by dusk with Nigerian hospitality at its heart.",
       img: "/Images/SanctuaryLounge.png",
       hours: "08:00 — 22:00",
       menu: "Botanical Infusions & Small Plates",
@@ -36,15 +33,48 @@ const Dining: React.FC = () => {
   ];
 
   const handleVenueReservation = (venueName: string) => {
-    alert(
-      `Thank you for your interest in ${venueName}. Our culinary concierge will contact you shortly to confirm your table.`,
-    );
+    setReservingVenue(venueName);
+    setSelectedVenue(venueName);
+    
+    // Simulate concierge handshake
+    setTimeout(() => {
+      setReservingVenue(null);
+      setShowModal(true);
+    }, 1500);
   };
 
   return (
-    <div className="bg-background-dark pt-24 min-h-screen">
+    <div className="bg-background-dark pt-24 min-h-screen relative">
+      {/* Cinematic Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 animate-in fade-in duration-500">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowModal(false)}></div>
+          <div className="relative bg-surface-dark border border-primary/20 p-8 md:p-12 max-w-lg w-full rounded-sm shadow-[0_30px_100px_rgba(0,0,0,0.9)] text-center space-y-8 animate-in slide-in-from-bottom-8 duration-500">
+            <div className="w-16 h-16 bg-primary/10 border border-primary/30 rounded-full flex items-center justify-center text-primary mx-auto animate-luxury-logo">
+              <span className="material-symbols-outlined text-4xl">restaurant</span>
+            </div>
+            <div className="space-y-4">
+              <h3 className="serif-font text-3xl text-white italic">In-Person Excellence</h3>
+              <p className="text-gray-400 text-sm font-light leading-relaxed">
+                Our dining service isn't available online yet, but we will serve you better on site. 
+                <br /><br />
+                <span className="text-primary/60 text-[10px] uppercase tracking-widest font-black italic">
+                  Visit us at MOORE HOTELS for the full experience.
+                </span>
+              </p>
+            </div>
+            <button 
+              onClick={() => setShowModal(false)}
+              className="w-full bg-primary text-black py-4 uppercase text-[10px] font-black tracking-[0.4em] hover:bg-yellow-500 transition-all shadow-xl shadow-primary/20"
+            >
+              I Understand
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
-      <section className="relative h-[60vh] md:h-[65vh] flex items-center justify-center overflow-hidden">
+     <section className="relative h-[60vh] md:h-[65vh] flex items-center justify-center overflow-hidden px-6">
         <img
           src={"https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=1920"}
           className="absolute inset-0 w-full h-full object-cover opacity-40 scale-110"
@@ -75,12 +105,14 @@ const Dining: React.FC = () => {
             >
               <div className="flex-1 relative group w-full">
                 <div className="absolute -inset-4 border border-primary/10 scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-700 hidden md:block"></div>
-                 <img
+                <div className="relative w-full overflow-hidden rounded-xl shadow-2xl bg-surface-dark border border-white/5">
+                  <img
                     src={venue.img}
-                    className="w-full aspect-[4/5] lg:aspect-[3/4] object-cover rounded-sm grayscale-[0.2] group-hover:grayscale-0 transition-all duration-1000"
+                    className="w-full h-auto max-h-[600px] object-contain transition-all duration-700 group-hover:scale-105"
                     alt={venue.name}
                   />
-                <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 bg-black/80 backdrop-blur-md p-6 md:p-8 border border-white/10">
+                </div>
+                <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 bg-black/80 backdrop-blur-md p-4 md:p-6 border border-white/10 rounded-lg">
                   <p className="text-primary text-[8px] md:text-[10px] font-black uppercase tracking-widest mb-1 md:mb-2">
                     Operating Hours
                   </p>
@@ -95,7 +127,7 @@ const Dining: React.FC = () => {
                   <p className="text-primary text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em]">
                     {venue.tag}
                   </p>
-                  <h2 className="serif-font text-5xl md:text-7xl lg:text-[8rem] text-white italic leading-tight">
+                  <h2 className="serif-font text-5xl md:text-7xl lg:text-[8rem] text-white leading-tight italic">
                     {venue.name}
                   </h2>
                 </div>
@@ -121,12 +153,12 @@ const Dining: React.FC = () => {
                   </div>
                   <button
                     onClick={() => handleVenueReservation(venue.name)}
-                    className="bg-primary text-black w-full md:w-auto px-10 py-4 text-[11px] font-black uppercase tracking-widest hover:bg-yellow-500 transition-all rounded-sm flex items-center justify-center gap-4 shadow-xl shadow-primary/10 active:scale-95"
+                    disabled={reservingVenue === venue.name}
+                    className="bg-primary text-black w-full md:w-auto px-10 py-4 text-[11px] font-black uppercase tracking-widest hover:bg-yellow-500 transition-all rounded-full flex items-center justify-center gap-4 shadow-xl shadow-primary/10 active:scale-95 disabled:opacity-70 h-14"
                   >
-                    Reserve Table{" "}
-                    <span className="material-symbols-outlined text-base">
-                      event_seat
-                    </span>
+                    {reservingVenue === venue.name && <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>}
+                    {reservingVenue === venue.name ? "CONTACTING..." : "Reserve Table"} 
+                    {!reservingVenue && <span className="material-symbols-outlined text-base">event_seat</span>}
                   </button>
                 </div>
               </div>
@@ -148,57 +180,22 @@ const Dining: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-16">
-            {(galleryImages.length > 0 ? galleryImages : [1, 2, 3]).map(
-              (img, idx) => (
-                <div
-                  key={idx}
-                  className="group relative aspect-square overflow-hidden rounded-sm border border-white/5 bg-white/5"
-                >
-                  {typeof img === "string" ? (
-                    <img
-                      src={img}
-                      className="w-full h-full object-cover transition-transform duration-[4000ms] group-hover:scale-125 grayscale-[0.3] group-hover:grayscale-0"
-                      alt={`Gourmet Dish ${idx + 1}`}
-                    />
-                  ) : (
-                    <div className="w-full h-full animate-pulse bg-white/5" />
-                  )}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-2 md:gap-4">
-                      <span className="material-symbols-outlined text-primary text-3xl md:text-5xl transform scale-50 group-hover:scale-100 transition-all duration-500">
-                        restaurant
-                      </span>
-                      <p className="text-primary text-[8px] md:text-[10px] font-black tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity delay-300">
-                        Culinary Art
-                      </p>
-                    </div>
+            {[1, 2, 3].map((idx) => (
+              <div key={idx} className="group relative aspect-square overflow-hidden rounded-xl border border-white/5 bg-white/5">
+                <div className="w-full h-full animate-pulse bg-white/5" />
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-2 md:gap-4">
+                    <span className="material-symbols-outlined text-primary text-3xl md:text-5xl transform scale-50 group-hover:scale-100 transition-all duration-500">
+                      restaurant
+                    </span>
+                    <p className="text-primary text-[8px] md:text-[10px] font-black tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity delay-300">
+                      Culinary Art
+                    </p>
                   </div>
                 </div>
-              ),
-            )}
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
-
-      {/* Bespoke Experiences */}
-      <section className="py-24 md:py-40 px-6">
-        <div className="max-w-[1800px] mx-auto bg-surface-dark border border-white/10 p-10 md:p-32 relative overflow-hidden text-center shadow-2xl">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 md:w-64 h-1 bg-primary"></div>
-          <h3 className="serif-font text-4xl md:text-6xl lg:text-[7rem] text-white italic mb-8 md:mb-10 leading-tight">
-            Private Dining & <br className="hidden md:block" />
-            Bespoke Celebrations
-          </h3>
-          <p className="max-w-3xl mx-auto text-gray-400 text-lg md:text-xl leading-relaxed mb-12 md:mb-16 opacity-80">
-            For occasions that demand absolute discretion and personalized
-            luxury. Our dedicated culinary concierge will design a menu unique
-            to your palette.
-          </p>
-          <button
-            onClick={() => handleVenueReservation("Bespoke Private Dining")}
-            className="border border-white/10 hover:border-primary hover:text-primary text-white px-10 py-4 text-[11px] font-black uppercase tracking-[0.3em] transition-all rounded-sm hover:bg-white/5"
-          >
-            Inquire Privately
-          </button>
         </div>
       </section>
     </div>

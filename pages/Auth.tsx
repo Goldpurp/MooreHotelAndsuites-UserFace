@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { ApplicationUser } from "../types";
+import NotificationModal from "../components/NotificationModal";
 
 interface AuthProps {
   onLogin: (user: ApplicationUser, token: string) => void;
@@ -18,21 +19,54 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     lastName: "",
     phone: "",
   });
+  
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [modal, setModal] = useState<{ show: boolean; title: string; message: string; type: 'success' | 'error' | 'info' }>({
+    show: false,
+    title: '',
+    message: '',
+    type: 'info'
+  });
+
   const navigate = useNavigate();
+
+  const validate = () => {
+    const errors: Record<string, string> = {};
+    if (!formData.email) errors.email = "Email is required for identity verification.";
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = "Please provide a valid business email.";
+
+    if (mode !== "forgot") {
+      if (!formData.password) errors.password = "Access key is required.";
+      else if (formData.password.length < 6) errors.password = "Key must be at least 6 characters.";
+    }
+
+    if (mode === "register") {
+      if (!formData.firstName) errors.firstName = "First name is mandatory.";
+      if (!formData.lastName) errors.lastName = "Last name is mandatory.";
+      if (!formData.phone) errors.phone = "Phone number is required for concierge contact.";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+    if (!validate()) return;
+
     setLoading(true);
-    setError("");
-    setSuccess("");
 
     try {
       if (mode === "forgot") {
         await api.resetPasswordRequest(formData.email);
-        setSuccess("Instructions to reset your access key have been sent to your registry email.");
+        setModal({
+          show: true,
+          title: 'Recovery Initiated',
+          message: 'Instructions to reset your access key have been sent to your registry email.',
+          type: 'success'
+        });
         setLoading(false);
         return;
       }
@@ -40,7 +74,6 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       let res;
       if (mode === "register") {
         res = await api.register(formData);
-        setSuccess("Identity established. Welcome to the Sanctuary.");
       } else {
         res = await api.login({
           email: formData.email,
@@ -55,14 +88,38 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         navigate("/profile");
       }
     } catch (err: any) {
-      setError(err.message || "Credential verification failed. Please check your entries.");
+      setModal({
+        show: true,
+        title: 'Verification Failed',
+        message: err.message || "Credential verification failed. Please check your entries.",
+        type: 'error'
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  const getButtonText = () => {
+    if (loading) {
+      if (mode === 'register') return "ESTABLISHING IDENTITY...";
+      if (mode === 'forgot') return "INITIATING RECOVERY...";
+      return "VERIFYING ACCESS...";
+    }
+    if (mode === 'register') return "ESTABLISH IDENTITY";
+    if (mode === 'forgot') return "INITIATE RECOVERY";
+    return "VERIFY ACCESS";
+  };
+
   return (
     <div className="min-h-screen flex relative overflow-hidden bg-background-dark">
+      <NotificationModal 
+        isOpen={modal.show}
+        onClose={() => setModal({ ...modal, show: false })}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+      />
+
       {/* Cinematic Image Panel */}
       <div className="hidden lg:block w-1/2 relative">
         <div className="absolute inset-0 bg-black/60 z-10"></div>
@@ -110,20 +167,6 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             </p>
           </div>
 
-          {error && (
-            <div className="bg-red-500/5 border border-red-500/10 text-red-500 p-5 rounded-sm text-[11px] flex items-start gap-4 animate-in fade-in slide-in-from-top-2">
-              <span className="material-symbols-outlined text-sm pt-0.5">error</span>
-              <p className="font-medium italic leading-relaxed">{error}</p>
-            </div>
-          )}
-
-          {success && (
-            <div className="bg-green-500/5 border border-green-500/10 text-green-500 p-5 rounded-sm text-[11px] flex items-start gap-4 animate-in fade-in slide-in-from-top-2">
-              <span className="material-symbols-outlined text-sm pt-0.5">check_circle</span>
-              <p className="font-medium italic leading-relaxed">{success}</p>
-            </div>
-          )}
-
           <form className="space-y-8" onSubmit={handleSubmit}>
             {mode === "register" && (
               <>
@@ -134,12 +177,14 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                     </label>
                     <input
                       required
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic"
+                      disabled={loading}
+                      className={`w-full bg-white/[0.03] border ${fieldErrors.firstName ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
                       placeholder="First"
                       type="text"
                       value={formData.firstName}
                       onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                     />
+                    {fieldErrors.firstName && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.firstName}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -148,12 +193,14 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                     </label>
                     <input
                       required
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic"
+                      disabled={loading}
+                      className={`w-full bg-white/[0.03] border ${fieldErrors.lastName ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
                       placeholder="Last"
                       type="text"
                       value={formData.lastName}
                       onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                     />
+                    {fieldErrors.lastName && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.lastName}</p>}
                   </div>
                 </div>
 
@@ -163,12 +210,14 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                   </label>
                   <input
                     required
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic"
+                    disabled={loading}
+                    className={`w-full bg-white/[0.03] border ${fieldErrors.phone ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
                     placeholder="+234 ..."
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
+                  {fieldErrors.phone && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.phone}</p>}
                 </div>
               </>
             )}
@@ -179,12 +228,14 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
               </label>
               <input
                 required
-                className="w-full bg-white/[0.03] border border-white/10 rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic"
+                disabled={loading}
+                className={`w-full bg-white/[0.03] border ${fieldErrors.email ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
                 placeholder="concierge@moore.com"
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
+              {fieldErrors.email && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.email}</p>}
             </div>
 
             {mode !== "forgot" && (
@@ -196,8 +247,9 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                   {mode === "login" && (
                     <button 
                       type="button"
+                      disabled={loading}
                       onClick={() => setMode("forgot")}
-                      className="text-[8px] text-primary uppercase font-black tracking-widest italic border-b border-primary/20 pb-0.5 hover:text-white transition-colors"
+                      className="text-[8px] text-primary uppercase font-black tracking-widest italic border-b border-primary/20 pb-0.5 hover:text-white transition-colors disabled:opacity-50"
                     >
                       FORGOT KEY?
                     </button>
@@ -205,22 +257,27 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                 </div>
                 <input
                   required
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800"
+                  disabled={loading}
+                  className={`w-full bg-white/[0.03] border ${fieldErrors.password ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 disabled:opacity-50`}
                   placeholder="••••••••"
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
+                {fieldErrors.password && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.password}</p>}
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary hover:bg-yellow-500 text-black font-black py-4.5 rounded-sm transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-4 group disabled:opacity-50 active:scale-95 h-14 mt-4"
+              className="w-full bg-primary hover:bg-yellow-500 text-black font-black py-4.5 rounded-sm transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-4 group disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 h-14 mt-4"
             >
+              {loading && (
+                <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+              )}
               <span className="text-[10px] uppercase tracking-[0.4em]">
-                {loading ? "AUTHORIZING..." : mode === 'register' ? "ESTABLISH IDENTITY" : mode === 'forgot' ? "INITIATE RECOVERY" : "VERIFY ACCESS"}
+                {getButtonText()}
               </span>
               {!loading && (
                 <span className="material-symbols-outlined text-xl transition-transform group-hover:translate-x-2">
@@ -236,8 +293,9 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                 {mode === 'register' ? "EXISTING MEMBER?" : "NEW TO ANTHOLOGY?"}
               </span>
               <button
+                disabled={loading}
                 onClick={() => setMode(mode === 'register' ? 'login' : 'register')}
-                className="text-primary hover:text-white ml-3 transition-colors border-b border-primary/20 pb-0.5 italic"
+                className="text-primary hover:text-white ml-3 transition-colors border-b border-primary/20 pb-0.5 italic disabled:opacity-50"
               >
                 {mode === 'register' ? "SIGN IN" : "JOIN CIRCLE"}
               </button>
@@ -245,8 +303,9 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             {mode === 'forgot' && (
               <div>
                 <button
+                  disabled={loading}
                   onClick={() => setMode('login')}
-                  className="text-gray-500 hover:text-white transition-colors border-b border-white/10 pb-0.5 italic"
+                  className="text-gray-500 hover:text-white transition-colors border-b border-white/10 pb-0.5 italic disabled:opacity-50"
                 >
                   RETURN TO SIGN IN
                 </button>

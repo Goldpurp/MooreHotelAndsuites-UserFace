@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { Room } from "../types";
+import AestheticLoader from "../components/AestheticLoader";
 
 import {
   IconWifi,
@@ -138,11 +139,7 @@ const RoomDetail: React.FC = () => {
   }, [room, selectedCheckIn, selectedCheckOut]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background-dark flex items-center justify-center">
-        <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <AestheticLoader message="Sanctuary Registry" subtext="Decrypting Room Specifications..." />;
   }
 
   if (!room) return null;
@@ -151,6 +148,7 @@ const RoomDetail: React.FC = () => {
 
   const handleAuthoriseStay = () => {
     if (!isAvailable) return;
+    // Navigate immediately to allow the checkout page to show its own loading state
     navigate(
       `/checkout/${room.id}?checkIn=${selectedCheckIn}&checkOut=${selectedCheckOut}`,
     );
@@ -219,14 +217,14 @@ const RoomDetail: React.FC = () => {
       </section>
 
       {/* CONTENT */}
-      <div className="max-w-[1600px] mx-auto px-6 pt-16 grid grid-cols-1 lg:grid-cols-12 gap-20">
-        <div className="lg:col-span-8 space-y-16">
+      <div className="max-w-[1600px] mx-auto px-6 pt-16 grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-20">
+        <div className="lg:col-span-8 space-y-12 md:space-y-16">
           <section>
-            <h2 className="serif-font text-3xl md:text-5xl italic text-white">
+            <h2 className="serif-font text-3xl md:text-5xl italic text-white leading-tight">
               {room.description || "A refined sanctuary crafted for stillness."}
             </h2>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-10 border-y border-white/5 mt-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 py-10 border-y border-white/5 mt-10">
               <Detail label="Category" value={room.category} />
               <Detail label="Status" value={room.status} highlight />
               <Detail label="Guests" value={`${room.capacity ?? 2} Guests`} />
@@ -242,7 +240,7 @@ const RoomDetail: React.FC = () => {
               {room.amenities.map((a) => (
                 <div
                   key={a}
-                  className="p-6 bg-white/[0.03] border border-white/5 flex items-center gap-4"
+                  className="p-6 bg-white/[0.03] border border-white/5 flex items-center gap-4 hover:border-primary/20 transition-all"
                 >
                   {/* Icon */}
                   <span className="text-primary">
@@ -261,52 +259,67 @@ const RoomDetail: React.FC = () => {
         </div>
 
         {/* BOOKING CARD */}
-        <aside className="lg:col-span-4 sticky top-32">
-          <div className="bg-surface-dark border border-white/10 p-10 space-y-10">
+        <aside className="lg:col-span-4 lg:sticky lg:top-32 h-fit">
+          <div className="bg-surface-dark border border-white/10 p-8 md:p-10 space-y-10 shadow-2xl rounded-sm">
             <div className="text-center">
               <p className="text-primary text-[9px] uppercase tracking-[0.5em] font-black">
                 Nightly Rate
               </p>
-              <h3 className="serif-font text-6xl text-white font-bold">
+              <h3 className="serif-font text-5xl md:text-6xl text-white font-bold tracking-tight">
                 ₦{room.pricePerNight.toLocaleString()}
               </h3>
             </div>
 
             {availabilityMessage && (
-              <p className="text-primary text-[10px] uppercase font-black">
+              <p className="text-red-500 text-[10px] uppercase font-black text-center tracking-widest bg-red-500/5 py-3 border border-red-500/10 rounded-sm">
                 {availabilityMessage}
               </p>
             )}
 
             <div className="grid grid-cols-2 gap-4">
-              <input
-                type="date"
-                value={selectedCheckIn}
-                onChange={(e) => setSelectedCheckIn(e.target.value)}
-                className="bg-white/[0.07] p-4 text-xs text-white"
-              />
-              <input
-                type="date"
-                value={selectedCheckOut}
-                onChange={(e) => setSelectedCheckOut(e.target.value)}
-                className="bg-white/[0.07] p-4 text-xs text-white"
-              />
+              <div className="space-y-2">
+                <label className="text-[8px] uppercase tracking-[0.2em] text-gray-600 font-black ml-1">Arrival</label>
+                <input
+                  type="date"
+                  value={selectedCheckIn}
+                  onChange={(e) => setSelectedCheckIn(e.target.value)}
+                  className="w-full bg-white/[0.07] p-4 text-xs text-white outline-none border border-white/5 focus:border-primary/40 transition-all appearance-none"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[8px] uppercase tracking-[0.2em] text-gray-600 font-black ml-1">Departure</label>
+                <input
+                  type="date"
+                  value={selectedCheckOut}
+                  onChange={(e) => setSelectedCheckOut(e.target.value)}
+                  className="w-full bg-white/[0.07] p-4 text-xs text-white outline-none border border-white/5 focus:border-primary/40 transition-all appearance-none"
+                />
+              </div>
             </div>
 
-            <div className="flex justify-between text-xs pt-4">
-              <span>{stayCalculations.nights} Nights</span>
-              <span className="serif-font text-2xl">
-                ₦{stayCalculations.total.toLocaleString()}
-              </span>
+            <div className="flex justify-between items-end text-xs pt-6 border-t border-white/5">
+              <div className="space-y-1">
+                <p className="text-[9px] text-gray-600 uppercase tracking-widest font-black">Stay Record</p>
+                <p className="text-white text-lg italic font-medium">{stayCalculations.nights} Nights</p>
+              </div>
+              <div className="text-right space-y-1">
+                <p className="text-[9px] text-gray-600 uppercase tracking-widest font-black">Total Investment</p>
+                <p className="serif-font text-3xl text-primary italic font-bold">₦{stayCalculations.total.toLocaleString()}</p>
+              </div>
             </div>
 
             <button
               onClick={handleAuthoriseStay}
               disabled={!isAvailable || availabilityLoading}
-              className="w-full h-16 bg-primary text-black uppercase text-[10px] font-black tracking-[0.4em]"
+              className="w-full h-16 bg-primary text-black uppercase text-[10px] font-black tracking-[0.4em] hover:bg-yellow-500 transition-all active:scale-95 disabled:opacity-30 shadow-xl shadow-primary/20 flex items-center justify-center gap-3"
             >
-              Confirm Stay
+              {availabilityLoading ? (
+                 <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+              ) : (
+                "Confirm Booking"
+              )}
             </button>
+            <p className="text-[8px] text-center text-gray-600 uppercase tracking-[0.3em] font-black italic">Secure Handshake Protocol Active</p>
           </div>
         </aside>
       </div>
@@ -325,11 +338,11 @@ const Detail = ({
   highlight?: boolean;
 }) => (
   <div>
-    <p className="text-[8px] uppercase tracking-[0.4em] text-gray-600 font-black">
+    <p className="text-[8px] uppercase tracking-[0.4em] text-gray-600 font-black mb-1">
       {label}
     </p>
     <p
-      className={`text-xl font-bold italic ${highlight ? "text-primary" : "text-white"}`}
+      className={`text-lg md:text-xl font-bold italic ${highlight ? "text-primary" : "text-white"}`}
     >
       {value}
     </p>
