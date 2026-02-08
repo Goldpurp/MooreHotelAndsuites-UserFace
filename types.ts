@@ -61,7 +61,7 @@ export interface ApplicationUser {
   lastName: string;
   phone?: string;
   status: ProfileStatus;
-  name?: string;
+  name: string;
   avatarUrl?: string | null;
   emailVerified?: boolean;
   createdAt?: string;

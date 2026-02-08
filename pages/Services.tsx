@@ -115,6 +115,7 @@ const Services: React.FC = () => {
             src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=1920"
             className="w-full h-full object-cover opacity-30 scale-105"
             alt="Moore Hotel Services"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-background-dark"></div>
         </div>
@@ -143,6 +144,7 @@ const Services: React.FC = () => {
                     src={section.img}
                     className="w-full h-auto max-h-[500px] object-cover transition-all duration-700 group-hover:scale-105"
                     alt={section.title}
+                    loading="lazy"
                   />
                 </div>
               </div>

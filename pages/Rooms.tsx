@@ -1,15 +1,13 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
 import { Room, RoomCategory, RoomStatus } from "../types";
 
+const CLIENT_LIMIT = 10;
+
 const Rooms: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [suggestions, setSuggestions] = useState<Room[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const activeCategory = searchParams.get("category") || "All";
   const checkIn = searchParams.get("checkIn") || "";
@@ -20,43 +18,47 @@ const Rooms: React.FC = () => {
   const [budget, setBudget] = useState(3000000);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchRooms = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const isDateFiltering = checkIn !== "" && checkOut !== "";
-        let data: Room[];
-        if (isDateFiltering || activeCategory !== "All") {
-          data = await api.searchRooms({
-            checkIn: isDateFiltering ? checkIn : undefined as any,
-            checkOut: isDateFiltering ? checkOut : undefined as any,
-            category: activeCategory === "All" ? undefined : activeCategory,
-          });
-        } else {
-          data = await api.getRooms("");
-        }
+  // Infinite scroll state
+  const [visibleCount, setVisibleCount] = useState(CLIENT_LIMIT);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-        const availableRooms = data.filter(
-          (r) => r.isOnline && r.status !== RoomStatus.Maintenance
-        );
-        setRooms(availableRooms);
-
-        if (availableRooms.length === 0 && isDateFiltering) {
-          const allRooms = await api.getRooms("");
-          setSuggestions(allRooms.filter(r => r.isOnline).slice(0, 3));
-        } else {
-          setSuggestions([]);
-        }
-      } catch {
-        setError("Unable to sync with the suite registry. Please verify connection.");
-      } finally {
-        setLoading(false);
+  // Fetch rooms using React Query
+  const {
+    data: rooms = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<Room[], Error>({
+    queryKey: ["rooms", activeCategory, checkIn, checkOut],
+    queryFn: async () => {
+      const isDateFiltering = checkIn !== "" && checkOut !== "";
+      let data: Room[];
+      if (isDateFiltering || activeCategory !== "All") {
+        data = await api.searchRooms({
+          checkIn: isDateFiltering ? checkIn : undefined as any,
+          checkOut: isDateFiltering ? checkOut : undefined as any,
+          category: activeCategory === "All" ? undefined : activeCategory,
+        });
+      } else {
+        data = await api.getRooms("");
       }
-    };
+      return data.filter((r) => r.isOnline && r.status !== RoomStatus.Maintenance);
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
 
-    fetchRooms();
-  }, [activeCategory, checkIn, checkOut]);
+  // Suggestions if no rooms available
+  const [suggestions, setSuggestions] = useState<Room[]>([]);
+  React.useEffect(() => {
+    if (!isLoading && rooms.length === 0 && (checkIn && checkOut)) {
+      api.getRooms("").then(allRooms => {
+        setSuggestions(allRooms.filter(r => r.isOnline).slice(0, 3));
+      });
+    } else {
+      setSuggestions([]);
+    }
+  }, [isLoading, rooms, checkIn, checkOut]);
 
   const filteredRooms = useMemo(() => {
     return rooms.filter((room) => {
@@ -67,12 +69,31 @@ const Rooms: React.FC = () => {
     });
   }, [rooms, searchQuery, budget]);
 
+  // Infinite scroll effect
+  useEffect(() => {
+    setVisibleCount(CLIENT_LIMIT); // Reset on filter change
+  }, [rooms, searchQuery, budget, activeCategory, checkIn, checkOut]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!scrollRef.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+      if (scrollTop + clientHeight >= scrollHeight - 200) {
+        setVisibleCount((prev) =>
+          prev + CLIENT_LIMIT > filteredRooms.length ? filteredRooms.length : prev + CLIENT_LIMIT
+        );
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [filteredRooms.length]);
+
   const handleReset = () => {
     setSearchParams({});
     setSearchQuery("");
     setBudget(3000000);
-    setLoading(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    refetch();
   };
 
   const updateParam = (key: string, value: string) => {
@@ -89,8 +110,32 @@ const Rooms: React.FC = () => {
     setSearchParams(newParams);
   };
 
+  if (error && rooms.length === 0) {
+    return (
+      <div className="min-h-screen bg-background-dark flex flex-col items-center justify-center p-6 text-center space-y-12">
+        <div className="w-24 h-24 bg-primary/10 border border-primary/30 rounded-full flex items-center justify-center text-primary animate-luxury-logo">
+          <span className="material-symbols-outlined text-5xl">cloud_off</span>
+        </div>
+        <div className="space-y-4">
+          <h1 className="serif-font text-5xl md:text-7xl text-white italic">
+            Connection <span className="text-primary">Offline</span>
+          </h1>
+          <p className="text-gray-500 text-[10px] uppercase tracking-[0.5em] font-black max-w-sm mx-auto">
+            Unable to establish connection to the hotel registry.
+          </p>
+        </div>
+        <button
+          onClick={() => refetch()}
+          className="bg-primary text-black px-12 py-5 text-[10px] font-black uppercase tracking-[0.4em] rounded-sm shadow-2xl active:scale-95 transition-all"
+        >
+          Reconnect
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="pt-28 min-h-screen bg-background-dark pb-24">
+    <div className="pt-28 min-h-screen bg-background-dark pb-24" ref={scrollRef}>
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 md:px-10">
 
         {/* Header Section */}
@@ -150,44 +195,52 @@ const Rooms: React.FC = () => {
         </header>
 
         {/* Room Grid */}
-        {loading ? (
+        {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
             {[1,2,3,4,5,6].map(i => (
               <div key={i} className="aspect-[4/5] bg-white/[0.02] animate-pulse rounded-sm border border-white/5" />
             ))}
           </div>
         ) : filteredRooms.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10 lg:gap-x-10 lg:gap-y-20">
-            {filteredRooms.map(room => (
-              <Link
-                key={room.id}
-                to={`/rooms/${room.id}?${searchParams.toString()}`}
-                className="group flex flex-col gap-6 sm:gap-8"
-              >
-                <div className="relative w-full aspect-[4/5] sm:aspect-[4/5] overflow-hidden rounded-sm bg-surface-dark border border-white/5 shadow-2xl transition-all duration-700 hover:shadow-primary/5">
-                  <img
-                    src={room.images?.[0]}
-                    alt={room.name}
-                    className="w-full h-full object-cover grayscale-[0.6] group-hover:grayscale-0 transition-all duration-[4000ms] group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90" />
-                  <div className="absolute bottom-4 sm:bottom-10 left-4 sm:left-10 right-4 sm:right-10 space-y-2 sm:space-y-3 translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
-                    <p className="text-primary text-[8px] sm:text-[9px] uppercase tracking-[0.35em] font-black">{room.category} Tier</p>
-                    <h3 className="serif-font text-2xl sm:text-3xl md:text-4xl text-white italic leading-tight group-hover:text-primary transition-colors">{room.name}</h3>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10 lg:gap-x-10 lg:gap-y-20">
+              {filteredRooms.slice(0, visibleCount).map(room => (
+                <Link
+                  key={room.id}
+                  to={`/rooms/${room.id}?${searchParams.toString()}`}
+                  className="group flex flex-col gap-6 sm:gap-8"
+                >
+                  <div className="relative w-full aspect-[4/5] sm:aspect-[4/5] overflow-hidden rounded-sm bg-surface-dark border border-white/5 shadow-2xl transition-all duration-700 hover:shadow-primary/5">
+                    <img
+                      src={room.images?.[0]}
+                      alt={room.name}
+                      className="w-full h-full object-cover grayscale-[0.6] group-hover:grayscale-0 transition-all duration-[4000ms] group-hover:scale-110"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90" />
+                    <div className="absolute bottom-4 sm:bottom-10 left-4 sm:left-10 right-4 sm:right-10 space-y-2 sm:space-y-3 translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
+                      <p className="text-primary text-[8px] sm:text-[9px] uppercase tracking-[0.35em] font-black">{room.category} Tier</p>
+                      <h3 className="serif-font text-2xl sm:text-3xl md:text-4xl text-white italic leading-tight group-hover:text-primary transition-colors">{room.name}</h3>
+                    </div>
                   </div>
-                </div>
-                <div className="flex justify-between items-end border-t border-white/5 px-1 pt-4 sm:pt-6">
-                  <div className="space-y-1">
-                    <p className="text-[8px] sm:text-[9px] text-gray-700 font-black uppercase tracking-[0.35em]">NIGHTLY RATE</p>
-                    <p className="text-2xl sm:text-3xl text-white font-bold tracking-tighter italic">₦{room.pricePerNight.toLocaleString()}</p>
+                  <div className="flex justify-between items-end border-t border-white/5 px-1 pt-4 sm:pt-6">
+                    <div className="space-y-1">
+                      <p className="text-[8px] sm:text-[9px] text-gray-700 font-black uppercase tracking-[0.35em]">NIGHTLY RATE</p>
+                      <p className="text-2xl sm:text-3xl text-white font-bold tracking-tighter italic">₦{room.pricePerNight.toLocaleString()}</p>
+                    </div>
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all duration-500">
+                      <span className="material-symbols-outlined text-xl sm:text-2xl">east</span>
+                    </div>
                   </div>
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all duration-500">
-                    <span className="material-symbols-outlined text-xl sm:text-2xl">east</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+            {visibleCount >= filteredRooms.length && (
+              <div className="text-center text-primary text-xs mt-10">
+                Showing all {filteredRooms.length} rooms. No more rooms to load.
+              </div>
+            )}
+          </>
         ) : (
           /* Suggestions */
           <div className="py-16 sm:py-24 md:py-32 text-center space-y-10 sm:space-y-12 md:space-y-16 max-w-6xl mx-auto animate-in fade-in duration-1000">
@@ -213,6 +266,7 @@ const Rooms: React.FC = () => {
                       src={room.images?.[0]}
                       alt={room.name}
                       className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-110"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
                   </div>

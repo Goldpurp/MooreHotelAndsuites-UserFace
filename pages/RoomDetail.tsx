@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
 import { Room } from "../types";
 import AestheticLoader from "../components/AestheticLoader";
@@ -44,42 +45,41 @@ const RoomDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const [room, setRoom] = useState<Room | null>(null);
-  const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
 
   // Availability state
   const [isAvailable, setIsAvailable] = useState(true);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
-  const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(
-    null,
-  );
+  const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
 
   const [selectedCheckIn, setSelectedCheckIn] = useState(
-    searchParams.get("checkIn") ?? new Date().toISOString().split("T")[0],
+    searchParams.get("checkIn") ?? new Date().toISOString().split("T")[0]
   );
-
   const [selectedCheckOut, setSelectedCheckOut] = useState(
-    searchParams.get("checkOut") ??
-      new Date(Date.now() + 86400000).toISOString().split("T")[0],
+    searchParams.get("checkOut") ?? new Date(Date.now() + 86400000).toISOString().split("T")[0]
   );
 
-  /* ---------------- FETCH ROOM ---------------- */
-  useEffect(() => {
-    const fetchRoom = async () => {
-      try {
-        const data = await api.getRoomById(id!);
-        setRoom(data);
-      } catch (err) {
-        console.error("Room fetch failed", err);
-        navigate("/rooms");
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Fetch room using React Query
+  const {
+    data: room,
+    isLoading,
+    error,
+  } = useQuery<Room, Error>({
+    queryKey: ["roomDetail", id],
+    queryFn: async () => {
+      const data = await api.getRoomById(id!);
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
 
-    fetchRoom();
-  }, [id, navigate]);
+  // Redirect if error
+  useEffect(() => {
+    if (error) {
+      navigate("/rooms");
+    }
+  }, [error, navigate]);
 
   /* ---------------- AVAILABILITY CHECK ---------------- */
   useEffect(() => {
@@ -138,7 +138,7 @@ const RoomDetail: React.FC = () => {
     };
   }, [room, selectedCheckIn, selectedCheckOut]);
 
-  if (loading) {
+  if (isLoading) {
     return <AestheticLoader message="Sanctuary Registry" subtext="Decrypting Room Specifications..." />;
   }
 
@@ -148,7 +148,6 @@ const RoomDetail: React.FC = () => {
 
   const handleAuthoriseStay = () => {
     if (!isAvailable) return;
-    // Navigate immediately to allow the checkout page to show its own loading state
     navigate(
       `/checkout/${room.id}?checkIn=${selectedCheckIn}&checkOut=${selectedCheckOut}`,
     );
@@ -178,6 +177,7 @@ const RoomDetail: React.FC = () => {
               src={images[activeImage]}
               alt={room.name}
               className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
             />
           )}
 
@@ -208,6 +208,7 @@ const RoomDetail: React.FC = () => {
                     src={img}
                     alt=""
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </button>
               ))}
@@ -226,9 +227,9 @@ const RoomDetail: React.FC = () => {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 py-10 border-y border-white/5 mt-10">
               <Detail label="Category" value={room.category} />
-              <Detail label="Floor" value={room.floor} highlight />
+              <Detail label="Floor" value={room.floor ?? "N/A"} highlight />
               <Detail label="Guests" value={`${room.capacity} Guests`} />
-              <Detail label="Size" value={room.size} />
+              <Detail label="Size" value={room.size ?? "N/A"} />
             </div>
           </section>
 

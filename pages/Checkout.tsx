@@ -605,6 +605,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   src={room.images?.[0]}
                   className="w-full h-full object-cover grayscale-[0.5]"
                   alt=""
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black p-6 flex flex-col justify-end">
                   <p className="text-primary text-[8px] uppercase font-black tracking-widest">

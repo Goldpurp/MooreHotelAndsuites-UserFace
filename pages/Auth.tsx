@@ -127,6 +127,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=1920"
           className="w-full h-full object-cover grayscale brightness-50"
           alt="Luxury Interior"
+          loading="lazy"
         />
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-[clamp(2rem,5vw,6rem)] text-center space-y-[clamp(1.5rem,3vw,3rem)] animate-reveal">
           <div className="w-[clamp(4rem,8vw,6rem)] h-[clamp(4rem,8vw,6rem)] bg-primary rounded-sm flex items-center justify-center text-black font-black text-[clamp(2rem,5vw,5rem)] shadow-2xl animate-luxury-logo">

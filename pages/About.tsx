@@ -10,6 +10,7 @@ const About: React.FC = () => {
             src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=80"
             className="w-full h-full object-cover opacity-40 grayscale scale-105"
             alt="More Hotels"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-background-dark" />
         </div>
@@ -63,6 +64,7 @@ const About: React.FC = () => {
               src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=80"
               className="w-full aspect-[4/5] md:aspect-video lg:aspect-[4/5] object-cover rounded-sm shadow-2xl grayscale"
               alt="Innovation"
+              loading="lazy"
             />
           </div>
         </div>
@@ -98,6 +100,7 @@ const About: React.FC = () => {
               src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80"
               className="w-full aspect-[4/5] md:aspect-video lg:aspect-[4/5] object-cover rounded-sm shadow-2xl grayscale"
               alt="Luxury Suite"
+              loading="lazy"
             />
           </div>
 

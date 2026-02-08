@@ -81,6 +81,7 @@ const Dining: React.FC = () => {
           src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=1920"
           className="absolute inset-0 w-full h-full object-cover opacity-40 scale-110 transition-transform duration-700"
           alt="Fine Dining"
+          loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-background-dark"></div>
         <div className="relative z-10 text-center px-6">
@@ -112,6 +113,7 @@ const Dining: React.FC = () => {
                     src={venue.img}
                     className="w-full h-auto max-h-[600px] object-contain transition-all duration-700 group-hover:scale-105"
                     alt={venue.name}
+                    loading="lazy"
                   />
                 </div>
                 <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 bg-black/80 backdrop-blur-md p-4 md:p-6 border border-white/10 rounded-lg">

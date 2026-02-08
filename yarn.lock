@@ -550,6 +550,18 @@
   resolved "https://registry.yarnpkg.com/@tabler/icons/-/icons-3.36.1.tgz#a893104b3c56e02458b13342abb6e466d4a81a8d"
   integrity sha512-f4Jg3Fof/Vru5ioix/UO4GX+sdDsF9wQo47FbtvG+utIYYVQ/QVAC0QYgcBbAjQGfbdOh2CCf0BgiFOF9Ixtjw==
 
+"@tanstack/query-core@5.90.20":
+  version "5.90.20"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.90.20.tgz#e12128e39210715d4ce4fb299c33498ac297771e"
+  integrity sha512-OMD2HLpNouXEfZJWcKeVKUgQ5n+n3A2JFmBaScpNDUqSrQSjiveC7dKMe53uJUg1nDG16ttFPz2xfilz6i2uVg==
+
+"@tanstack/react-query@^5.90.20":
+  version "5.90.20"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.90.20.tgz#42bb7018bfedc72f216b6e9b4052c919063f350b"
+  integrity sha512-vXBxa+qeyveVO7OA0jX1z+DeyCA4JKnThKv411jd5SORpBKgkcVnYKCiBgECvADvniBX7tobwBmg01qq9JmMJw==
+  dependencies:
+    "@tanstack/query-core" "5.90.20"
+
 "@types/babel__core@^7.20.5":
   version "7.20.5"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.20.5.tgz#3df15f27ba85319caa07ba08d0721889bb39c017"

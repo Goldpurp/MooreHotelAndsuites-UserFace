@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
 import { Room, RoomCategory } from "../types";
 import FAQ from "../components/FAQ";
 import NotificationModal from "../components/NotificationModal";
 
 const Home: React.FC = () => {
-  const [featuredRooms, setFeaturedRooms] = useState<Room[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [modal, setModal] = useState<{
@@ -29,19 +27,21 @@ const Home: React.FC = () => {
     guests: "2",
   });
 
-  useEffect(() => {
-    const loadContent = async () => {
-      try {
-        const [rooms] = await Promise.all([api.getRooms("")]);
-        setFeaturedRooms(rooms.filter((r) => r.isOnline).slice(0, 4));
-      } catch {
-        console.error("Content load failed");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadContent();
-  }, []);
+  // Fetch featured rooms using React Query
+  const {
+    data: featuredRooms = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<Room[], Error>({
+    queryKey: ["featuredRooms"],
+    queryFn: async () => {
+      const rooms = await api.getRooms("");
+      return rooms.filter((r) => r.isOnline).slice(0, 4);
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 1,
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +101,7 @@ const Home: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => refetch()}
           className="bg-primary text-black px-12 py-5 text-[10px] font-black uppercase tracking-[0.4em] rounded-sm shadow-2xl active:scale-95 transition-all"
         >
           Reconnect
@@ -120,7 +120,7 @@ const Home: React.FC = () => {
         type={modal.type}
       />
 
-      {/* HERO SECTION - unchanged sizing */}
+      {/* HERO SECTION */}
       <header className="relative h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-black/50 z-10"></div>
@@ -129,6 +129,7 @@ const Home: React.FC = () => {
               alt="Moore Lobby"
               className="w-full h-full object-cover opacity-70 scale-105 animate-[pulse_25s_ease-in-out_infinite]"
               src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1920"
+              loading="lazy"
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-background-dark z-20"></div>
@@ -268,6 +269,7 @@ const Home: React.FC = () => {
               src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200"
               className="relative z-10 rounded-sm grayscale hover:grayscale-0 transition-all duration-[2000ms] shadow-2xl w-full h-auto object-cover"
               alt="Moore Hotel Lagos"
+              loading="lazy"
             />
           </div>
         </div>
@@ -294,7 +296,7 @@ const Home: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 md:gap-12">
-            {loading
+            {isLoading
               ? [1, 2, 3, 4].map((i) => (
                   <div key={i} className="aspect-[3/4] bg-white/[0.02] animate-pulse rounded-sm" />
                 ))
@@ -309,6 +311,7 @@ const Home: React.FC = () => {
                         src={room.images?.[0]}
                         alt={room.name}
                         className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-transform duration-[2500ms] group-hover:scale-105"
+                        loading="lazy"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90" />
                       <div className="absolute bottom-6 left-6 right-6 flex flex-col gap-1 sm:gap-2">
