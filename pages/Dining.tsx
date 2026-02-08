@@ -35,8 +35,7 @@ const Dining: React.FC = () => {
   const handleVenueReservation = (venueName: string) => {
     setReservingVenue(venueName);
     setSelectedVenue(venueName);
-    
-    // Simulate concierge handshake
+
     setTimeout(() => {
       setReservingVenue(null);
       setShowModal(true);
@@ -45,10 +44,13 @@ const Dining: React.FC = () => {
 
   return (
     <div className="bg-background-dark pt-24 min-h-screen relative">
-      {/* Cinematic Modal */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 animate-in fade-in duration-500">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowModal(false)}></div>
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            onClick={() => setShowModal(false)}
+          />
           <div className="relative bg-surface-dark border border-primary/20 p-8 md:p-12 max-w-lg w-full rounded-sm shadow-[0_30px_100px_rgba(0,0,0,0.9)] text-center space-y-8 animate-in slide-in-from-bottom-8 duration-500">
             <div className="w-16 h-16 bg-primary/10 border border-primary/30 rounded-full flex items-center justify-center text-primary mx-auto animate-luxury-logo">
               <span className="material-symbols-outlined text-4xl">restaurant</span>
@@ -56,14 +58,14 @@ const Dining: React.FC = () => {
             <div className="space-y-4">
               <h3 className="serif-font text-3xl text-white italic">In-Person Excellence</h3>
               <p className="text-gray-400 text-sm font-light leading-relaxed">
-                Our dining service isn't available online yet, but we will serve you better on site. 
+                Our dining service isn't available online yet, but we will serve you better on site.
                 <br /><br />
                 <span className="text-primary/60 text-[10px] uppercase tracking-widest font-black italic">
                   Visit us at MOORE HOTELS for the full experience.
                 </span>
               </p>
             </div>
-            <button 
+            <button
               onClick={() => setShowModal(false)}
               className="w-full bg-primary text-black py-4 uppercase text-[10px] font-black tracking-[0.4em] hover:bg-yellow-500 transition-all shadow-xl shadow-primary/20"
             >
@@ -74,10 +76,10 @@ const Dining: React.FC = () => {
       )}
 
       {/* Hero Section */}
-     <section className="relative h-[60vh] md:h-[65vh] flex items-center justify-center overflow-hidden px-6">
+      <section className="relative h-[60vh] md:h-[65vh] flex items-center justify-center overflow-hidden px-6">
         <img
-          src={"https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=1920"}
-          className="absolute inset-0 w-full h-full object-cover opacity-40 scale-110"
+          src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=1920"
+          className="absolute inset-0 w-full h-full object-cover opacity-40 scale-110 transition-transform duration-700"
           alt="Fine Dining"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-background-dark"></div>
@@ -167,7 +169,7 @@ const Dining: React.FC = () => {
         </div>
       </section>
 
-      {/* Food Gallery Section */}
+      {/* Food Gallery */}
       <section className="py-24 md:py-40 bg-black/50 border-t border-white/5 overflow-hidden px-6">
         <div className="max-w-[1800px] mx-auto">
           <div className="text-center mb-16 md:mb-32 space-y-4 md:space-y-6">

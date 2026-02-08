@@ -3,12 +3,37 @@
 @tailwind utilities;
 
 @layer base {
+
+  html {
+    /* Fluid root scaling for consistent typography behavior */
+    font-size: clamp(15px, 0.3vw + 14px, 18px);
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background-dark text-gray-100 antialiased overflow-x-hidden;
+    @apply bg-background-dark text-gray-100 antialiased overflow-x-hidden
+           text-[clamp(1rem,0.5vw+0.875rem,1.125rem)] leading-relaxed;
   }
 
   img {
     @apply block max-w-full object-cover object-center;
     height: auto;
   }
+
+  /* Fluid section spacing foundation */
+  section {
+    padding-top: clamp(2rem, 6vh, 8rem);
+    padding-bottom: clamp(2rem, 6vh, 8rem);
+  }
+
+  /* Consistent container behavior for ultra-wide displays */
+  .container-fluid {
+    width: 100%;
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: clamp(1rem, 4vw, 4rem);
+    padding-right: clamp(1rem, 4vw, 4rem);
+  }
+
 }

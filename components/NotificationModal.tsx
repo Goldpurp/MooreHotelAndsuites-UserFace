@@ -10,7 +10,13 @@ interface NotificationModalProps {
   type: NotificationType;
 }
 
-const NotificationModal: React.FC<NotificationModalProps> = ({ isOpen, onClose, title, message, type }) => {
+const NotificationModal: React.FC<NotificationModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  message,
+  type
+}) => {
   if (!isOpen) return null;
 
   const icons = {
@@ -27,20 +33,28 @@ const NotificationModal: React.FC<NotificationModalProps> = ({ isOpen, onClose, 
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={onClose}></div>
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 bg-black/95 backdrop-blur-xl"
+        onClick={onClose}
+      ></div>
+
+      {/* Modal Content */}
       <div className="relative bg-surface-dark border border-white/10 p-8 sm:p-12 w-full max-w-md rounded-sm shadow-[0_30px_100px_rgba(0,0,0,1)] text-center space-y-8 animate-in zoom-in-95 duration-300">
+        
+        {/* Icon */}
         <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto border ${colors[type]}`}>
           <span className="material-symbols-outlined text-4xl">{icons[type]}</span>
         </div>
-        
+
+        {/* Text */}
         <div className="space-y-4">
           <h3 className="serif-font text-3xl text-white italic">{title}</h3>
-          <p className="text-gray-400 text-sm font-light leading-relaxed">
-            {message}
-          </p>
+          <p className="text-gray-400 text-sm font-light leading-relaxed">{message}</p>
         </div>
 
-        <button 
+        {/* Acknowledge Button */}
+        <button
           onClick={onClose}
           className="w-full bg-primary text-black py-4 uppercase text-[10px] font-black tracking-[0.4em] hover:bg-yellow-500 transition-all shadow-xl shadow-primary/20 active:scale-95"
         >

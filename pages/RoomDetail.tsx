@@ -155,7 +155,7 @@ const RoomDetail: React.FC = () => {
   };
 
   return (
-    <div className="bg-background-dark min-h-screen pb-28">
+    <div className="bg-background-dark min-h-screen pb-12">
       {/* HERO */}
       <section className="relative">
         <div className="absolute top-24 left-6 z-50">
@@ -217,18 +217,18 @@ const RoomDetail: React.FC = () => {
       </section>
 
       {/* CONTENT */}
-      <div className="max-w-[1600px] mx-auto px-6 pt-16 grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-20">
+      <div className="max-w-[1600px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
         <div className="lg:col-span-8 space-y-12 md:space-y-16">
-          <section>
-            <h2 className="serif-font text-3xl md:text-5xl italic text-white leading-tight">
+          <section className="my-[-110px]">
+            <h2 className="serif-font text-2xl md:text-4xl text-white leading-tight">
               {room.description || "A refined sanctuary crafted for stillness."}
             </h2>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 py-10 border-y border-white/5 mt-10">
               <Detail label="Category" value={room.category} />
-              <Detail label="Status" value={room.status} highlight />
-              <Detail label="Guests" value={`${room.capacity ?? 2} Guests`} />
-              <Detail label="Size" value={room.size ?? "65sqm"} />
+              <Detail label="Floor" value={room.floor} highlight />
+              <Detail label="Guests" value={`${room.capacity} Guests`} />
+              <Detail label="Size" value={room.size} />
             </div>
           </section>
 

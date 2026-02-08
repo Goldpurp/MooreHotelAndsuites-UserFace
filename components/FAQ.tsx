@@ -1,22 +1,21 @@
-
 import React, { useState } from 'react';
 
 const FAQ_DATA = [
   {
-    question: "What is the standard check-in and check-out time?",
-    answer: "Standard arrival begins at 14:00. We request that guests depart their sanctuary by 12:00. Gold Circle members enjoy extended check-out privileges subject to availability."
+    question: "What are your standard check-in and check-out times?",
+    answer: "Check-in begins from 3:00 PM, while check-out is at 11:30 AM. Early check-in or late check-out may be arranged through the front desk, subject to room availability."
   },
   {
-    question: "Are airport transfers included in my stay?",
-    answer: "Complimentary luxury chauffeur service is provided for all Suite and Executive bookings. Business tier guests may arrange transfers via our concierge for a nominal fee."
+    question: "Do you provide airport pickup or drop-off services?",
+    answer: "Yes, airport transfer services can be arranged through our concierge team for an additional fee. Executive and selected suite bookings may qualify for complimentary scheduled transfers."
   },
   {
-    question: "What is the policy regarding children and extra residents?",
-    answer: "Our sanctuaries are designed for tranquility. Children are welcome, and we offer bespoke family arrangements in our connected suites. Please contact the concierge for specific requirements."
+    question: "Can additional guests or children stay in the room?",
+    answer: "Children and additional occupants are welcome. Extra beds or connecting rooms can be arranged on request, depending on the room category booked and availability at the time of arrival."
   },
   {
-    question: "How does the Moore Hotels security system function?",
-    answer: "We utilize state-of-the-art encrypted biometric access and 24/7 elite security personnel to ensure the absolute safety and privacy of all residents."
+    question: "What security measures are available at the hotel?",
+    answer: "Our property operates 24-hour monitored security, controlled access entry points, and dedicated guest safety personnel to ensure a secure and comfortable stay for all residents."
   }
 ];
 
@@ -24,11 +23,15 @@ const FAQ: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="py-24 md:py-48 px-6 bg-black/40">
-      <div className="max-w-4xl mx-auto space-y-16">
+    <section className="py-[clamp(3rem,8vh,8rem)] px-[clamp(1rem,4vw,3rem)] bg-black/40">
+      <div className="max-w-4xl mx-auto space-y-[clamp(2rem,5vw,4rem)]">
         <div className="text-center space-y-6">
-          <p className="text-primary text-[10px] font-black uppercase tracking-[0.6em]">Guidance & Clarity</p>
-          <h2 className="serif-font text-5xl md:text-8xl text-white italic">Common Inquiries</h2>
+          <p className="text-primary text-[clamp(0.65rem,0.6vw,0.75rem)] font-black uppercase tracking-[0.6em]">
+            Guest Information
+          </p>
+          <h2 className="serif-font text-[clamp(2rem,6vw,5rem)] text-white italic">
+            Frequently Asked Questions
+          </h2>
         </div>
 
         <div className="space-y-4">
@@ -39,19 +42,20 @@ const FAQ: React.FC = () => {
             >
               <button 
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full py-8 flex justify-between items-center text-left group"
+                className="w-full py-[clamp(1.5rem,3vw,2.5rem)] flex justify-between items-center text-left group"
               >
-                <span className={`serif-font text-xl md:text-2xl italic transition-colors ${openIndex === index ? 'text-primary' : 'text-white hover:text-primary/80'}`}>
+                <span className={`serif-font text-[clamp(1.1rem,2vw,1.5rem)] italic transition-colors ${openIndex === index ? 'text-primary' : 'text-white hover:text-primary/80'}`}>
                   {item.question}
                 </span>
                 <span className={`material-symbols-outlined text-primary transition-transform duration-500 ${openIndex === index ? 'rotate-180' : ''}`}>
                   expand_more
                 </span>
               </button>
+
               <div 
                 className={`transition-all duration-500 ease-in-out ${openIndex === index ? 'max-h-96 pb-8 opacity-100' : 'max-h-0 opacity-0'}`}
               >
-                <p className="text-gray-400 text-lg font-light leading-relaxed px-1">
+                <p className="text-gray-400 text-[clamp(0.95rem,1.1vw,1.125rem)] font-light leading-relaxed px-1">
                   {item.answer}
                 </p>
               </div>

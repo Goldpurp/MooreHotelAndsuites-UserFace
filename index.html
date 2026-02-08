@@ -5,105 +5,137 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moore Hotel And Suites</title>
     <link rel="icon" href="/MooreM.png" sizes="any">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+
+  <!-- Optimized Font Loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;700&display=swap"
-        rel="stylesheet">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        rel="stylesheet" />
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#EAB308",
-                        secondary: "#D4AF37",
-                        "background-dark": "#0A0A0A",
-                        "surface-dark": "#121212",
-                        "border-gold": "rgba(234, 179, 8, 0.2)",
-                    },
-                    fontFamily: {
-                        display: ["Playfair Display", "serif"],
-                        sans: ["Inter", "sans-serif"],
-                        accent: ["Cinzel", "serif"],
-                    },
-                    animation: {
-                        'luxury-logo': 'luxury-logo 5s ease-in-out infinite',
-                        'luxury-spin': 'luxury-spin 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-                    },
-                    keyframes: {
-                        'luxury-logo': {
-                            '0%, 100%': {
-                                transform: 'translateY(0) scale(1)',
-                                'box-shadow': '0 0 15px rgba(234, 179, 8, 0.2)'
-                            },
-                            '50%': {
-                                transform: 'translateY(-6px) scale(1.03)',
-                                'box-shadow': '0 0 35px rgba(234, 179, 8, 0.6)'
-                            },
-                        },
-                        'luxury-spin': {
-                            '0%': { transform: 'rotateY(0deg) scale(1.1)' },
-                            '100%': { transform: 'rotateY(360deg) scale(1.1)' },
-                        }
-                    }
-                },
-            },
-        };
-    </script>
-    <style type="text/tailwindcss">
-        @layer base {
-            body {
-                @apply bg-background-dark text-gray-100 antialiased overflow-x-hidden;
-                font-family: 'Inter', sans-serif;
-            }
-            .serif-font { font-family: 'Playfair Display', serif; }
-            .accent-font { font-family: 'Cinzel', serif; }
-        }
-        .luxury-gradient {
-            background: linear-gradient(to top, rgba(10,10,10,1) 0%, rgba(10,10,10,0.4) 50%, rgba(10,10,10,0) 100%);
-        }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #0A0A0A; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #EAB308; border-radius: 10px; }
-        
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
-        /* Material Symbols Style */
-        .material-symbols-outlined {
-          font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-        }
 
-        .logo-box {
-            perspective: 1000px;
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        primary: "#EAB308",
+        secondary: "#D4AF37",
+        "background-dark": "#0A0A0A",
+        "surface-dark": "#121212",
+        "border-gold": "rgba(234, 179, 8, 0.2)",
+      },
+      fontFamily: {
+        display: ["Playfair Display", "serif"],
+        sans: ["Inter", "sans-serif"],
+        accent: ["Cinzel", "serif"],
+      },
+      maxWidth: {
+        "luxury": "1600px",
+      },
+      animation: {
+        "luxury-logo": "luxury-logo 5s ease-in-out infinite",
+        "luxury-spin": "luxury-spin 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+      },
+      keyframes: {
+        "luxury-logo": {
+          "0%, 100%": {
+            transform: "translateY(0) scale(1)",
+            "box-shadow": "0 0 15px rgba(234, 179, 8, 0.2)"
+          },
+          "50%": {
+            transform: "translateY(-6px) scale(1.03)",
+            "box-shadow": "0 0 35px rgba(234, 179, 8, 0.6)"
+          },
+        },
+        "luxury-spin": {
+          "0%": { transform: "rotateY(0deg) scale(1.1)" },
+          "100%": { transform: "rotateY(360deg) scale(1.1)" },
         }
-    </style>
-    <script type="importmap">
+      }
+    }
+  }
+}
+</script>
+
+<style type="text/tailwindcss">
+@layer base {
+
+  html {
+    font-size: clamp(15px, 0.3vw + 14px, 18px);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background-dark text-gray-100 antialiased overflow-x-hidden
+           text-[clamp(1rem,0.5vw+0.875rem,1.125rem)] leading-relaxed;
+    font-family: 'Inter', sans-serif;
+  }
+
+  img {
+    @apply block max-w-full object-cover object-center;
+    width: 100%;
+    height: auto;
+  }
+
+  section {
+    padding-top: clamp(2rem, 8vh, 10rem);
+    padding-bottom: clamp(2rem, 8vh, 10rem);
+  }
+
+  .container-fluid {
+    width: 100%;
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: clamp(1rem, 4vw, 5rem);
+    padding-right: clamp(1rem, 4vw, 5rem);
+  }
+
+  .container-luxury {
+    @apply container-fluid mx-auto;
+  }
+
+  .serif-font { font-family: 'Playfair Display', serif; }
+  .accent-font { font-family: 'Cinzel', serif; }
+}
+
+.luxury-gradient {
+  background: linear-gradient(to top, rgba(10,10,10,1) 0%, rgba(10,10,10,0.4) 50%, rgba(10,10,10,0) 100%);
+}
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #0A0A0A; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #EAB308; border-radius: 10px; }
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+.logo-box { perspective: 1000px; }
+</style>
+
+<script type="importmap">
 {
   "imports": {
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.12.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.12.0"
   }
 }
 </script>
-    <link rel="stylesheet" href="/index.css">
+
+<link rel="stylesheet" href="/index.css">
 </head>
 
 <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
 </body>
-
 </html>

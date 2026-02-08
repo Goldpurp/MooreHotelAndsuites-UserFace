@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-black border-t border-white/5 pt-16 pb-8 px-6">
+    <footer className="bg-black border-t border-white/5 pt-[clamp(3rem,6vw,6rem)] pb-[clamp(2rem,4vw,3rem)] px-[clamp(1rem,4vw,3rem)]">
       <NotificationModal 
         isOpen={modal.show}
         onClose={() => setModal({ ...modal, show: false })}
@@ -44,21 +44,21 @@ const Footer: React.FC = () => {
         type={modal.type}
       />
 
-      <div className="max-w-[1800px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+      <div className="max-w-[1800px] mx-auto grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] gap-[clamp(1.5rem,3vw,2.5rem)] mb-[clamp(2rem,4vw,3rem)]">
         <div className="space-y-6">
           <Link to="/" className="flex items-center gap-4 text-white group">
-            <div className="w-10 h-10 bg-primary rounded flex items-center justify-center text-black font-bold text-lg shadow-lg shadow-primary/10 transition-all animate-luxury-logo group-hover:animate-luxury-spin">M</div>
-            <span className="accent-font tracking-widest text-2xl font-bold group-hover:text-primary transition-colors">MOORE</span>
+            <div className="w-[clamp(2.5rem,3vw,3rem)] h-[clamp(2.5rem,3vw,3rem)] bg-primary rounded flex items-center justify-center text-black font-bold text-[clamp(1rem,1vw,1.125rem)] shadow-lg shadow-primary/10 transition-all animate-luxury-logo group-hover:animate-luxury-spin">M</div>
+            <span className="accent-font tracking-widest text-[clamp(1.4rem,2vw,2rem)] font-bold group-hover:text-primary transition-colors">MOORE</span>
           </Link>
-          <p className="text-xs leading-relaxed text-gray-500 max-w-xs">
+          <p className="text-[clamp(0.75rem,0.7vw,0.875rem)] leading-relaxed text-gray-500 max-w-xs">
             Redefining professional 4-star hospitality. Experience the epitome of modern elegance and Nigerian warmth at Moore Hotels & Suites.
           </p>
         </div>
 
         <div>
-          <h5 className="text-white text-[11px] uppercase tracking-[0.2em] font-bold mb-6">Explore</h5>
-          <ul className="space-y-4 text-xs font-medium text-gray-500">
-            <li><Link to="/rooms" className="hover:text-primary transition-colors">Executive Suites</Link></li>
+          <h5 className="text-white text-[clamp(0.65rem,0.6vw,0.75rem)] uppercase tracking-[0.2em] font-bold mb-6">Explore</h5>
+          <ul className="space-y-4 text-[clamp(0.75rem,0.7vw,0.875rem)] font-medium text-gray-500">
+            <li><Link to="/rooms" className="hover:text-primary transition-colors">Exclusive Suites</Link></li>
             <li><Link to="/dining" className="hover:text-primary transition-colors">Fine Dining</Link></li>
             <li><Link to="/services" className="hover:text-primary transition-colors">Hotel Services</Link></li>
             <li><Link to="/about" className="hover:text-primary transition-colors">Our History</Link></li>
@@ -66,8 +66,8 @@ const Footer: React.FC = () => {
         </div>
 
         <div>
-          <h5 className="text-white text-[11px] uppercase tracking-[0.2em] font-bold mb-6">Guest Services</h5>
-          <ul className="space-y-4 text-xs font-medium text-gray-500">
+          <h5 className="text-white text-[clamp(0.65rem,0.6vw,0.75rem)] uppercase tracking-[0.2em] font-bold mb-6">Guest Services</h5>
+          <ul className="space-y-4 text-[clamp(0.75rem,0.7vw,0.875rem)] font-medium text-gray-500">
             <li className="flex gap-4">
               <span className="material-symbols-outlined text-primary text-lg">location_on</span>
               <span>Victoria Island,<br />Lagos, Nigeria</span>
@@ -84,23 +84,25 @@ const Footer: React.FC = () => {
         </div>
 
         <div>
-          <h5 className="text-white text-[11px] uppercase tracking-[0.2em] font-bold mb-6">Stay Connected</h5>
-          <p className="text-xs text-gray-500 mb-6">Receive exclusive invitations to private events and corporate previews.</p>
+          <h5 className="text-white text-[clamp(0.65rem,0.6vw,0.75rem)] uppercase tracking-[0.2em] font-bold mb-6">Stay Connected</h5>
+          <p className="text-[clamp(0.75rem,0.7vw,0.875rem)] text-gray-500 mb-6">
+            Receive exclusive invitations to private events and corporate previews.
+          </p>
           <form className="space-y-3" onSubmit={handleSubscribe}>
             <div className="space-y-1">
               <input 
                 required
-                className={`w-full bg-white/5 border ${emailError ? 'border-red-500/50' : 'border-none'} text-white placeholder:text-gray-600 text-xs p-4 rounded focus:ring-1 focus:ring-primary`} 
+                className={`w-full bg-white/5 border ${emailError ? 'border-red-500/50' : 'border-none'} text-white placeholder:text-gray-600 text-[clamp(0.75rem,0.7vw,0.875rem)] p-[clamp(0.75rem,1vw,1rem)] rounded focus:ring-1 focus:ring-primary`} 
                 placeholder="Business Email" 
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              {emailError && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{emailError}</p>}
+              {emailError && <p className="text-red-500 text-[clamp(0.55rem,0.6vw,0.65rem)] uppercase font-black tracking-widest ml-1">{emailError}</p>}
             </div>
             <button 
               disabled={subscribing}
-              className="w-full bg-primary text-black py-4 text-[10px] uppercase tracking-widest font-black hover:bg-yellow-500 transition-colors rounded shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
+              className="w-full bg-primary text-black py-[clamp(0.75rem,1vw,1rem)] text-[clamp(0.65rem,0.6vw,0.75rem)] uppercase tracking-widest font-black hover:bg-yellow-500 transition-colors rounded shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {subscribing && <div className="w-3 h-3 border border-black/30 border-t-black rounded-full animate-spin"></div>}
               {subscribing ? "SUBSCRIBING..." : "Join Moore Circle"}
@@ -108,9 +110,10 @@ const Footer: React.FC = () => {
           </form>
         </div>
       </div>
-      <div className="max-w-[1800px] mx-auto pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase tracking-widest text-gray-600">
+
+      <div className="max-w-[1800px] mx-auto pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[clamp(0.6rem,0.6vw,0.75rem)] uppercase tracking-widest text-gray-600">
         <p>© 2024 MOORE HOTELS & SUITES. 4-STAR HOSPITALITY GROUP.</p>
-        <div className="flex gap-8">
+        <div className="flex flex-wrap justify-center gap-6">
           <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
           <Link to="/terms" className="hover:text-primary transition-colors">Terms of Use</Link>
           <Link to="/help" className="hover:text-primary transition-colors">Help Center</Link>

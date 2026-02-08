@@ -128,13 +128,13 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           className="w-full h-full object-cover grayscale brightness-50"
           alt="Luxury Interior"
         />
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-20 text-center space-y-8 animate-reveal">
-          <div className="w-24 h-24 bg-primary rounded-sm flex items-center justify-center text-black font-black text-5xl shadow-2xl animate-luxury-logo">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-[clamp(2rem,5vw,6rem)] text-center space-y-[clamp(1.5rem,3vw,3rem)] animate-reveal">
+          <div className="w-[clamp(4rem,8vw,6rem)] h-[clamp(4rem,8vw,6rem)] bg-primary rounded-sm flex items-center justify-center text-black font-black text-[clamp(2rem,5vw,5rem)] shadow-2xl animate-luxury-logo">
             M
           </div>
-          <div className="space-y-4">
-            <h2 className="serif-font text-6xl text-white italic">Sanctuary Awaits</h2>
-            <p className="text-gray-400 text-sm uppercase tracking-[0.4em] font-light max-w-sm mx-auto leading-loose">
+          <div className="space-y-[clamp(0.5rem,1vw,1.5rem)]">
+            <h2 className="serif-font text-[clamp(2rem,4vw,5rem)] text-white italic">Sanctuary Awaits</h2>
+            <p className="text-gray-400 text-[clamp(0.6rem,1vw,0.9rem)] uppercase tracking-[0.4em] font-light max-w-sm mx-auto leading-loose">
               Exclusive access to Lagos' most prestigious private collection of suites and services.
             </p>
           </div>
@@ -142,23 +142,23 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       </div>
 
       {/* Auth Form Container */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12 lg:p-24 relative z-30">
-        <div className="w-full max-w-md space-y-12 animate-reveal">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-[clamp(1rem,4vw,3rem)] lg:p-[clamp(3rem,6vw,6rem)] relative z-30">
+        <div className="w-full max-w-md space-y-[clamp(2rem,5vw,3rem)] animate-reveal">
           {/* Mobile Identity Branding */}
-          <div className="lg:hidden flex flex-col items-center space-y-6 mb-12">
-            <div className="w-16 h-16 bg-primary rounded-sm flex items-center justify-center text-black font-black text-3xl shadow-2xl animate-luxury-logo">
+          <div className="lg:hidden flex flex-col items-center space-y-[clamp(1rem,2vw,2rem)] mb-[clamp(2rem,4vw,3rem)]">
+            <div className="w-[clamp(4rem,10vw,6rem)] h-[clamp(4rem,10vw,6rem)] bg-primary rounded-sm flex items-center justify-center text-black font-black text-[clamp(2rem,6vw,4rem)] shadow-2xl animate-luxury-logo">
               M
             </div>
-            <h1 className="serif-font text-4xl text-white italic">
+            <h1 className="serif-font text-[clamp(2rem,5vw,3rem)] text-white italic">
               {mode === 'register' ? "Join Circle" : mode === 'forgot' ? "Reset Access" : "Welcome Back"}
             </h1>
           </div>
 
           <div className="space-y-4">
-            <h2 className="serif-font text-4xl text-white italic hidden lg:block">
+            <h2 className="serif-font text-[clamp(2rem,5vw,3rem)] text-white italic hidden lg:block">
               {mode === 'register' ? "Begin Your Story" : mode === 'forgot' ? "Recover Identity" : "Verify Identity"}
             </h2>
-            <p className="text-gray-500 text-[9px] uppercase tracking-[0.5em] font-black italic">
+            <p className="text-gray-500 text-[clamp(0.6rem,1vw,0.8rem)] uppercase tracking-[0.5em] font-black italic">
               {mode === 'register' 
                 ? "Identify yourself for a tailored residency" 
                 : mode === 'forgot' 
@@ -167,12 +167,12 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             </p>
           </div>
 
-          <form className="space-y-8" onSubmit={handleSubmit}>
+          <form className="space-y-[clamp(1rem,2vw,2rem)]" onSubmit={handleSubmit}>
             {mode === "register" && (
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[clamp(0.5rem,2vw,1rem)]">
                   <div className="space-y-2">
-                    <label className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                    <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
                       First Name
                     </label>
                     <input
@@ -188,7 +188,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                    <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
                       Last Name
                     </label>
                     <input
@@ -205,7 +205,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                  <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
                     Identity Contact (Phone)
                   </label>
                   <input
@@ -223,7 +223,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             )}
 
             <div className="space-y-2">
-              <label className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+              <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
                 Email Registry
               </label>
               <input
@@ -241,7 +241,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             {mode !== "forgot" && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                  <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
                     Access Key
                   </label>
                   {mode === "login" && (
@@ -249,7 +249,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                       type="button"
                       disabled={loading}
                       onClick={() => setMode("forgot")}
-                      className="text-[8px] text-primary uppercase font-black tracking-widest italic border-b border-primary/20 pb-0.5 hover:text-white transition-colors disabled:opacity-50"
+                      className="text-[clamp(0.5rem,0.7vw,0.6rem)] text-primary uppercase font-black tracking-widest italic border-b border-primary/20 pb-0.5 hover:text-white transition-colors disabled:opacity-50"
                     >
                       FORGOT KEY?
                     </button>
@@ -271,12 +271,12 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary hover:bg-yellow-500 text-black font-black py-4.5 rounded-sm transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-4 group disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 h-14 mt-4"
+              className="w-full bg-primary hover:bg-yellow-500 text-black font-black py-4.5 rounded-sm transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-4 group disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 h-[clamp(3.5rem,6vw,4rem)] mt-4"
             >
               {loading && (
                 <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
               )}
-              <span className="text-[10px] uppercase tracking-[0.4em]">
+              <span className="text-[clamp(0.7rem,1vw,0.8rem)] uppercase tracking-[0.4em]">
                 {getButtonText()}
               </span>
               {!loading && (
@@ -287,7 +287,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             </button>
           </form>
 
-          <div className="pt-6 text-center text-[9px] uppercase tracking-[0.2em] font-black border-t border-white/5 space-y-4">
+          <div className="pt-6 text-center text-[clamp(0.6rem,1vw,0.7rem)] uppercase tracking-[0.2em] font-black border-t border-white/5 space-y-4">
             <div>
               <span className="text-gray-700">
                 {mode === 'register' ? "EXISTING MEMBER?" : "NEW TO ANTHOLOGY?"}

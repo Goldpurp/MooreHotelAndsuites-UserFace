@@ -1,3 +1,0 @@
-# Redirect all non-file requests to index.html
-- path: /*
-  rewrite: /index.html
