@@ -111,9 +111,9 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const totalAmount = room ? room.pricePerNight * nights : 0;
 
   const bankDetails = {
-    bankName: "Zenith Bank",
-    accountName: "Moore Hotels Ltd",
-    accountNumber: "1234567890",
+    bankName: "Moniepoint",
+    accountName: "Yakubu Omobolanle Or Moore Hotel",
+    accountNumber: "5452508008",
     note: "Booking will be confirmed immediately after payment is confirmed",
   };
 

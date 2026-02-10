@@ -154,7 +154,7 @@ const HelpCenter: React.FC = () => {
             <h3 className="text-lg sm:text-xl font-serif italic">Email Support</h3>
             <p className="text-gray-400 text-center text-sm sm:text-base">Send inquiries directly to our team</p>
             <a 
-              href="mailto:customercare@moorehotels.com" 
+              href="mailto:moorehotelandsuites@gmail.com" 
               className="mt-2 px-4 sm:px-6 py-2 bg-primary text-black font-medium rounded hover:bg-yellow-500 transition"
             >
               Send Email
@@ -169,10 +169,10 @@ const HelpCenter: React.FC = () => {
             <h3 className="text-lg sm:text-xl font-serif italic">Call Us</h3>
             <p className="text-gray-400 text-center text-sm sm:text-base">Reach our front desk for urgent needs</p>
             <a 
-              href="tel:+23410000000" 
+              href="tel:+2348033774544" 
               className="mt-2 px-4 sm:px-6 py-2 bg-primary text-black font-medium rounded hover:bg-yellow-500 transition"
             >
-              +234 1 000 0000
+            +234 803 377 4544
             </a>
           </div>
         </div>

@@ -70,15 +70,15 @@ const Footer: React.FC = () => {
           <ul className="space-y-4 text-[clamp(0.75rem,0.7vw,0.875rem)] font-medium text-gray-500">
             <li className="flex gap-4">
               <span className="material-symbols-outlined text-primary text-lg">location_on</span>
-              <span>Victoria Island,<br />Lagos, Nigeria</span>
+              <span>Harmony Estate, Along Sagamu Ikenne Road, <br /> Beside Nysc Camp Sagamu,<br />Ogun State,Nigeria</span>
             </li>
             <li className="flex gap-4">
               <span className="material-symbols-outlined text-primary text-lg">phone</span>
-              <span>+234 123 456 7890</span>
+              <span>+234 803 377 4544</span>
             </li>
             <li className="flex gap-4">
               <span className="material-symbols-outlined text-primary text-lg">mail</span>
-              <span>reservations@moorehotel.com</span>
+              <span>moorehotelandsuites@gmail.com</span>
             </li>
           </ul>
         </div>
