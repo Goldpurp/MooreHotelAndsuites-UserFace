@@ -1,41 +1,76 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const sections = [
+  {
+    title: "24-Hour Front Desk",
+    tag: "ALWAYS AVAILABLE",
+    desc: "Our reception is open 24/7 to assist you with check-in, check-out, and any inquiries, ensuring a seamless experience at any hour.",
+    img: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&q=80&w=1200",
+    features: ["Round-the-Clock Service", "Concierge", "Guest Assistance"],
+  },
+  {
+    title: "Restaurant (Local & Continental Dishes)",
+    tag: "CULINARY DELIGHTS",
+    desc: "Enjoy a diverse menu of local Nigerian favorites and continental classics, prepared by our expert chefs in a refined dining atmosphere.",
+    img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1200",
+    features: ["Buffet & À la Carte", "Room Service", "Breakfast, Lunch & Dinner"],
+  },
+  {
+    title: "Lounge & Bar",
+    tag: "RELAX & UNWIND",
+    desc: "Sip on signature cocktails or your favorite drinks in our stylish lounge and bar, perfect for both business and leisure guests.",
+    img: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&q=80&w=1200",
+    features: ["Cocktails", "Wine Selection", "Relaxed Ambience"],
+  },
+  {
+    title: "Secure Parking Space",
+    tag: "CONVENIENT PARKING",
+    desc: "Ample, secure parking space is available for all guests, monitored 24/7 for your peace of mind.",
+    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=1200",
+    features: ["24/7 Security", "Spacious Lot", "Easy Access"],
+  },
+  {
+    title: "Laundry & Dry-Cleaning Services",
+    tag: "FRESH & CLEAN",
+    desc: "Professional laundry and dry-cleaning services are available to keep your wardrobe fresh throughout your stay.",
+    img: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&q=80&w=1200",
+    features: ["Express Service", "Gentle Care", "Pickup & Delivery"],
+  },
+  {
+    title: "Free High-Speed Wi-Fi",
+    tag: "CONNECTED ALWAYS",
+    desc: "Enjoy complimentary high-speed Wi-Fi throughout the hotel, perfect for work, streaming, and staying in touch.",
+    img: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1200",
+    features: ["Unlimited Access", "Secure Connection", "Hotel-wide Coverage"],
+  },
+  {
+    title: "24-Hour Power Supply",
+    tag: "UNINTERRUPTED COMFORT",
+    desc: "Our facility is equipped with generator and inverter backup, guaranteeing 24-hour electricity for your comfort.",
+    img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&q=80&w=1200",
+    features: ["Generator Backup", "Inverter System", "No Power Outages"],
+  },
+  {
+    title: "Room Service",
+    tag: "IN-ROOM DINING",
+    desc: "Order from our extensive menu and enjoy delicious meals and drinks delivered directly to your room, any time of day.",
+    img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1200",
+    features: ["24/7 Service", "Wide Menu", "Prompt Delivery"],
+  },
+  {
+    title: "CCTV Surveillance & Security Personnel",
+    tag: "SAFE & SECURE",
+    desc: "Your safety is our priority. The hotel is monitored by CCTV and professional security personnel at all times.",
+    img: "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&q=80&w=1200",
+    features: ["24/7 CCTV", "Trained Security", "Controlled Access"],
+  },
+];
+
 const Services: React.FC = () => {
   const navigate = useNavigate();
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-
-  const sections = [
-    {
-      title: "The Infinity Pool",
-      tag: "AQUATIC EXCELLENCE",
-      desc: "Our rooftop pool offers a professional yet relaxing environment with sweeping views of the Lagos skyline. Perfect for business travelers looking for a morning lap or evening relaxation in a premier 4-star hotel setting.",
-      img: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&q=80&w=1200",
-      features: ["Temperature Controlled", "Private Cabanas", "Towel Service", "City Views"],
-    },
-    {
-      title: "The Executive Lounge",
-      tag: "PROFESSIONAL LEISURE",
-      desc: "A sophisticated space for our executive guests. Featuring high-speed connectivity, artisanal coffee, and a quiet atmosphere designed for networking or focused work sessions in the heart of Victoria Island.",
-      img: "https://images.unsplash.com/photo-1517841078499-2815ec1966a4?auto=format&fit=crop&q=80&w=1200",
-      features: ["High-Speed Wi-Fi", "Business Center", "All-Day Refreshments", "Meeting Pods"],
-    },
-    {
-      title: "The Sky Bar",
-      tag: "EVENING REFINEMENT",
-      desc: "Experience the transition from a productive business day to a relaxed Lagos evening. Our sky bar serves artisanal cocktails and local craft beverages with professional service and a premium vibe.",
-      img: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=1200",
-      features: ["Premium Spirits", "Live Music", "Intimate Seating", "Late Night Menu"],
-    },
-    {
-      title: "Hotel Spa & Wellness",
-      tag: "GUEST REJUVENATION",
-      desc: "Our 4-star wellness center provides professional therapeutic treatments. From deep tissue massages to skin rejuvenation, we use premium local and international products to ensure your stay is refreshing.",
-      img: "https://images.unsplash.com/photo-1544161515-4ae6ce6db87e?auto=format&fit=crop&q=80&w=1200",
-      features: ["Sauna & Steam", "Therapeutic Massage", "Fitness Center", "Professional Staff"],
-    },
-  ];
 
   const handleAction = (action: string) => {
     setLoadingAction(action);
