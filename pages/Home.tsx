@@ -128,7 +128,7 @@ const Home: React.FC = () => {
             <img
               alt="Moore Lobby"
               className="w-full h-full object-cover opacity-70 scale-105 animate-[pulse_25s_ease-in-out_infinite]"
-              src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1920"
+              src="https://images.unsplash.com/photo-1445019980597-93fa8acb246c?q=80&w=2348&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               loading="lazy"
             />
           </div>
@@ -222,7 +222,7 @@ const Home: React.FC = () => {
                 <button
                   type="submit"
                   disabled={searching}
-                  className="bg-primary text-black h-14 md:h-auto px-10 flex items-center justify-center rounded-sm hover:bg-yellow-500 transition-all font-black uppercase tracking-[0.3em] text-[10px] shadow-xl shadow-primary/20 active:scale-95 disabled:opacity-70 gap-3"
+                  className="bg-primary text-black h-14 md:h-auto px-10 flex items-center justify-center rounded-sm hover:bg-[#B04110] transition-all font-black uppercase tracking-[0.3em] text-[10px] shadow-xl shadow-primary/20 active:scale-95 disabled:opacity-70 gap-3"
                 >
                   {searching && (
                     <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
@@ -416,7 +416,7 @@ const Home: React.FC = () => {
               <button
                 type="submit"
                 disabled={subscribing}
-                className="bg-primary text-black px-12 py-5 text-[11px] font-black uppercase tracking-[0.4em] rounded-sm hover:bg-yellow-500 transition-all shadow-2xl shadow-primary/40 flex items-center justify-center gap-3 disabled:opacity-70"
+                className="bg-primary text-black px-12 py-5 text-[11px] font-black uppercase tracking-[0.4em] rounded-sm hover:bg-[#B04110] transition-all shadow-2xl shadow-primary/40 flex items-center justify-center gap-3 disabled:opacity-70"
               >
                 {subscribing && (
                   <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>

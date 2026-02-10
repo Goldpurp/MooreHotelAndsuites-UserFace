@@ -139,7 +139,7 @@ const BookingConfirmation: React.FC = () => {
         <p className="text-gray-400 text-sm mt-2">{error}</p>
         <Link
           to="/"
-          className="mt-6 px-6 py-3 text-xs uppercase font-black tracking-widest bg-primary text-black rounded shadow hover:bg-yellow-500 transition-all"
+          className="mt-6 px-6 py-3 text-xs uppercase font-black tracking-widest bg-primary text-black rounded shadow hover:bg-[#B04110] transition-all"
         >
           Return Home
         </Link>
@@ -210,13 +210,13 @@ const BookingConfirmation: React.FC = () => {
         <div className="flex flex-col gap-3">
           <button
             onClick={downloadPDF}
-            className="w-full bg-yellow-500 text-black py-3 rounded font-black text-xs uppercase tracking-widest hover:bg-yellow-600 transition-all"
+            className="w-full bg-[#B04110]text-black py-3 rounded font-black text-xs uppercase tracking-widest hover:bg-yellow-600 transition-all"
           >
             Download PDF
           </button>
           <Link
             to="/profile"
-            className="w-full bg-primary text-black py-3 rounded font-black text-xs uppercase tracking-widest hover:bg-yellow-500 transition-all text-center"
+            className="w-full bg-primary text-black py-3 rounded font-black text-xs uppercase tracking-widest hover:bg-[#B04110] transition-all text-center"
           >
             View My Reservation
           </Link>

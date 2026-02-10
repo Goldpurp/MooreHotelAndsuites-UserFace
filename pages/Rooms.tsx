@@ -283,7 +283,7 @@ const Rooms: React.FC = () => {
 
             <button
               onClick={handleReset}
-              className="bg-primary text-black px-8 sm:px-10 md:px-12 py-3 sm:py-4 md:py-5 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.35em] rounded-sm hover:bg-yellow-500 transition-all shadow-2xl shadow-primary/40 active:scale-95 mx-auto"
+              className="bg-primary text-black px-8 sm:px-10 md:px-12 py-3 sm:py-4 md:py-5 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.35em] rounded-sm hover:bg-[#B04110] transition-all shadow-2xl shadow-primary/40 active:scale-95 mx-auto"
             >
               Reset Registry Filter
             </button>
@@ -379,7 +379,7 @@ const Rooms: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setFiltersOpen(false)}
-                  className="flex-1 bg-primary text-black py-4 sm:py-5 text-[9px] sm:text-[10px] uppercase tracking-widest font-black shadow-xl shadow-primary/20 hover:bg-yellow-500 transition-all"
+                  className="flex-1 bg-primary text-black py-4 sm:py-5 text-[9px] sm:text-[10px] uppercase tracking-widest font-black shadow-xl shadow-primary/20 hover:bg-[#B04110] transition-all"
                 >
                   Apply Protocol
                 </button>

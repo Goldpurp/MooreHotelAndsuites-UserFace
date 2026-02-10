@@ -135,7 +135,7 @@ const Services: React.FC = () => {
 
             <button
               onClick={() => setShowModal(false)}
-              className="w-full bg-primary text-black py-4 md:py-5 uppercase text-[11px] md:text-[12px] font-black tracking-widest hover:bg-yellow-500 transition-all shadow-xl shadow-primary/20 active:scale-95 rounded-xl"
+              className="w-full bg-primary text-black py-4 md:py-5 uppercase text-[11px] md:text-[12px] font-black tracking-widest hover:bg-[#B04110]transition-all shadow-xl shadow-primary/20 active:scale-95 rounded-xl"
             >
               Return to Registry
             </button>
@@ -226,7 +226,7 @@ const Services: React.FC = () => {
             <button
               onClick={() => handleAction("contact")}
               disabled={loadingAction === "contact"}
-              className="bg-primary text-black w-full sm:w-auto px-10 py-3 sm:px-12 sm:py-4 md:px-16 md:py-5 text-[11px] sm:text-[12px] md:text-[14px] font-black uppercase tracking-widest hover:bg-yellow-500 transition-all rounded-full shadow-xl shadow-primary/30 h-14 flex items-center justify-center gap-3 disabled:opacity-70"
+              className="bg-primary text-black w-full sm:w-auto px-10 py-3 sm:px-12 sm:py-4 md:px-16 md:py-5 text-[11px] sm:text-[12px] md:text-[14px] font-black uppercase tracking-widest hover:bg-[#B04110] transition-all rounded-full shadow-xl shadow-primary/30 h-14 flex items-center justify-center gap-3 disabled:opacity-70"
             >
               {loadingAction === "contact" && <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>}
               {loadingAction === "contact" ? "CONTACTING..." : "Contact Us"}

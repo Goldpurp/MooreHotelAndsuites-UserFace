@@ -143,7 +143,7 @@ const HelpCenter: React.FC = () => {
             </div>
             <h3 className="text-lg sm:text-xl font-serif italic">Live Chat</h3>
             <p className="text-gray-400 text-center text-sm sm:text-base">Instant assistance via our guest portal</p>
-            <button className="mt-2 px-4 sm:px-6 py-2 bg-primary text-black font-medium rounded hover:bg-yellow-500 transition">Start Chat</button>
+            <button className="mt-2 px-4 sm:px-6 py-2 bg-primary text-black font-medium rounded hover:bg-[#B04110] transition">Start Chat</button>
           </div>
 
           {/* Email */}
@@ -155,7 +155,7 @@ const HelpCenter: React.FC = () => {
             <p className="text-gray-400 text-center text-sm sm:text-base">Send inquiries directly to our team</p>
             <a 
               href="mailto:moorehotelandsuites@gmail.com" 
-              className="mt-2 px-4 sm:px-6 py-2 bg-primary text-black font-medium rounded hover:bg-yellow-500 transition"
+              className="mt-2 px-4 sm:px-6 py-2 bg-primary text-black font-medium rounded hover:bg-[#B04110] transition"
             >
               Send Email
             </a>
@@ -170,7 +170,7 @@ const HelpCenter: React.FC = () => {
             <p className="text-gray-400 text-center text-sm sm:text-base">Reach our front desk for urgent needs</p>
             <a 
               href="tel:+2348033774544" 
-              className="mt-2 px-4 sm:px-6 py-2 bg-primary text-black font-medium rounded hover:bg-yellow-500 transition"
+              className="mt-2 px-4 sm:px-6 py-2 bg-primary text-black font-medium rounded hover:bg-[#B04110] transition"
             >
             +234 803 377 4544
             </a>

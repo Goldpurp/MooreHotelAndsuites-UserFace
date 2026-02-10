@@ -61,16 +61,16 @@ const getDisplayName = () => {
 
           <Link to="/" onClick={handleLogoClick} className="flex items-center gap-[clamp(0.5rem,1vw,1rem)] group">
             <div className="logo-box relative">
-              <div className="w-[clamp(2.5rem,3vw,3rem)] h-[clamp(2.5rem,3vw,3rem)] bg-primary rounded-sm flex items-center justify-center text-black font-black text-[clamp(1.1rem,1vw+0.8rem,1.6rem)] shadow-2xl shadow-primary/20 transition-all duration-500 animate-luxury-logo group-hover:scale-105">
-                M
+              <div className="w-[clamp(2.7rem,3vw,3rem)] h-[clamp(2.7rem,3vw,3rem)] bg-[#dee2e6] rounded-sm flex items-center justify-center text-black font-black text-[clamp(1.1rem,1vw+0.8rem,1.6rem)] shadow-2xl shadow-primary/20 transition-all duration-500 animate-luxury-logo group-hover:scale-105">
+              <img src="/public/Logo/logo.png" alt="Moore Hotels & Suites" />
               </div>
             </div>
 
             <div className="flex flex-col">
-              <span className="accent-font tracking-[0.5em] text-[clamp(0.9rem,0.8vw+0.6rem,1.25rem)] font-bold text-white group-hover:text-primary transition-colors">
+              <span className="tracking-[0.5em] text-[clamp(0.9rem,0.8vw+0.6rem,1.25rem)] font-bold text-whitetransition-colors">
                 MOORE
               </span>
-              <span className="tracking-[0.3em] text-gray-500 uppercase font-black -mt-1 block text-[clamp(0.45rem,0.3vw+0.35rem,0.6rem)]">
+              <span className="tracking-[0.3em] text-gray-500 uppercase font-black -mt-1 block text-[clamp(0.50rem,0.3vw+0.35rem,0.7rem)]">
                 Hotels & Suites
               </span>
             </div>

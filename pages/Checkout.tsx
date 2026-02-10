@@ -398,7 +398,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                 <button
                   disabled={loading}
                   onClick={handleDirectPaymentSent}
-                  className="flex-1 py-3 text-[10px] uppercase font-black tracking-widest text-black bg-primary rounded hover:bg-yellow-500 transition shadow-md shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="flex-1 py-3 text-[10px] uppercase font-black tracking-widest text-black bg-primary rounded hover:bg-[#B04110] transition shadow-md shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {loading ? (
                     <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
@@ -649,7 +649,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                 <button
                   onClick={handleBooking}
                   disabled={loading || !selectedMethod || !isAvailable}
-                  className="w-full bg-primary hover:bg-yellow-500 text-black py-5 uppercase text-[10px] font-black tracking-[0.4em] transition active:scale-95 disabled:opacity-50 shadow-2xl shadow-primary/20 flex items-center justify-center gap-3"
+                  className="w-full bg-primary hover:bg-[#B04110] text-black py-5 uppercase text-[10px] font-black tracking-[0.4em] transition active:scale-95 disabled:opacity-50 shadow-2xl shadow-primary/20 flex items-center justify-center gap-3"
                 >
                   {loading && (
                     <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>

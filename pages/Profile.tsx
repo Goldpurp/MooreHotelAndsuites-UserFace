@@ -228,7 +228,7 @@ const getLastName = (name: string) => {
                 <button
                   type="submit"
                   disabled={updating}
-                  className="w-full bg-primary text-black font-black text-[10px] uppercase tracking-[0.5em] py-4 md:py-5 rounded-sm disabled:opacity-50 hover:bg-yellow-500 transition-all shadow-xl shadow-primary/20 active:scale-95 flex items-center justify-center gap-3"
+                  className="w-full bg-primary text-black font-black text-[10px] uppercase tracking-[0.5em] py-4 md:py-5 rounded-sm disabled:opacity-50 hover:bg-[#B04110] transition-all shadow-xl shadow-primary/20 active:scale-95 flex items-center justify-center gap-3"
                 >
                   {updating ? (
                     <>

@@ -67,7 +67,7 @@ const Dining: React.FC = () => {
             </div>
             <button
               onClick={() => setShowModal(false)}
-              className="w-full bg-primary text-black py-4 uppercase text-[10px] font-black tracking-[0.4em] hover:bg-yellow-500 transition-all shadow-xl shadow-primary/20"
+              className="w-full bg-primary text-black py-4 uppercase text-[10px] font-black tracking-[0.4em] hover:bg-[#B04110] transition-all shadow-xl shadow-primary/20"
             >
               I Understand
             </button>
@@ -158,7 +158,7 @@ const Dining: React.FC = () => {
                   <button
                     onClick={() => handleVenueReservation(venue.name)}
                     disabled={reservingVenue === venue.name}
-                    className="bg-primary text-black w-full md:w-auto px-10 py-4 text-[11px] font-black uppercase tracking-widest hover:bg-yellow-500 transition-all rounded-full flex items-center justify-center gap-4 shadow-xl shadow-primary/10 active:scale-95 disabled:opacity-70 h-14"
+                    className="bg-primary text-black w-full md:w-auto px-10 py-4 text-[11px] font-black uppercase tracking-widest hover:bg-[#B04110] transition-all rounded-full flex items-center justify-center gap-4 shadow-xl shadow-primary/10 active:scale-95 disabled:opacity-70 h-14"
                   >
                     {reservingVenue === venue.name && <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>}
                     {reservingVenue === venue.name ? "CONTACTING..." : "Reserve Table"} 

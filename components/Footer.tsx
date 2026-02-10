@@ -102,7 +102,7 @@ const Footer: React.FC = () => {
             </div>
             <button 
               disabled={subscribing}
-              className="w-full bg-primary text-black py-[clamp(0.75rem,1vw,1rem)] text-[clamp(0.65rem,0.6vw,0.75rem)] uppercase tracking-widest font-black hover:bg-yellow-500 transition-colors rounded shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
+              className="w-full bg-primary text-black py-[clamp(0.75rem,1vw,1rem)] text-[clamp(0.65rem,0.6vw,0.75rem)] uppercase tracking-widest font-black hover:bg-[#E15515] transition-colors rounded shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {subscribing && <div className="w-3 h-3 border border-black/30 border-t-black rounded-full animate-spin"></div>}
               {subscribing ? "SUBSCRIBING..." : "Join Moore Circle"}

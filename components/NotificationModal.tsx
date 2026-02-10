@@ -56,7 +56,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
         {/* Acknowledge Button */}
         <button
           onClick={onClose}
-          className="w-full bg-primary text-black py-4 uppercase text-[10px] font-black tracking-[0.4em] hover:bg-yellow-500 transition-all shadow-xl shadow-primary/20 active:scale-95"
+          className="w-full bg-primary text-black py-4 uppercase text-[10px] font-black tracking-[0.4em] hover:bg-[#B04110] transition-all shadow-xl shadow-primary/20 active:scale-95"
         >
           Acknowledge
         </button>

@@ -272,7 +272,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary hover:bg-yellow-500 text-black font-black py-4.5 rounded-sm transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-4 group disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 h-[clamp(3.5rem,6vw,4rem)] mt-4"
+              className="w-full bg-primary hover:bg-[#B04110] text-black font-black py-4.5 rounded-sm transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-4 group disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 h-[clamp(3.5rem,6vw,4rem)] mt-4"
             >
               {loading && (
                 <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
