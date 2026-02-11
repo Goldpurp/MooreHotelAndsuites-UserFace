@@ -24,7 +24,7 @@ const AestheticLoader: React.FC<AestheticLoaderProps> = ({
         <div className="absolute inset-0 border-2 border-primary border-t-transparent rounded-full animate-[spin_1.5s_linear_infinite]"></div>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-12 h-12 md:w-16 md:h-16 rounded-sm flex items-center justify-center text-black font-black text-2xl md:text-3xl shadow-[0_0_60px_rgba(234,179,8,0.5)] animate-luxury-logo">
-            <img src="/public/Logo/Moore primary logo.jpg" alt="Moore Hotels & Suites" />
+            <img src="https://res.cloudinary.com/diovckpyb/image/upload/v1770752301/d6qqrpcxf1cqnkm9mzm5.jpg" alt="Moore Hotels & Suites" />
           </div>
         </div>
       </div>
