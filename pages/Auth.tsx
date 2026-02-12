@@ -8,7 +8,7 @@ interface AuthProps {
   onLogin: (user: ApplicationUser, token: string) => void;
 }
 
-type AuthMode = "login" | "register" | "forgot";
+type AuthMode = "login" | "register" | "forgot" | "verify";
 
 const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   const [mode, setMode] = useState<AuthMode>("login");
@@ -19,7 +19,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     lastName: "",
     phone: "",
   });
-  
+
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState<{ show: boolean; title: string; message: string; type: 'success' | 'error' | 'info' }>({
@@ -28,6 +28,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     message: '',
     type: 'info'
   });
+
+  const [pendingEmail, setPendingEmail] = useState<string>("");
 
   const navigate = useNavigate();
 
@@ -74,6 +76,16 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       let res;
       if (mode === "register") {
         res = await api.register(formData);
+        setPendingEmail(formData.email);
+        setModal({
+          show: true,
+          title: 'Confirm Your Email',
+          message: 'A confirmation link has been sent to your email. Please verify your email before logging in.',
+          type: 'info'
+        });
+        setMode("verify");
+        setLoading(false);
+        return;
       } else {
         res = await api.login({
           email: formData.email,
@@ -82,8 +94,19 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       }
 
       if (res && res.token) {
-        api.setToken(res.token);
+        // Fetch user to check email confirmation
         const user = await api.getMe();
+        if (!user.emailConfirmed) {
+          setModal({
+            show: true,
+            title: 'Email Not Confirmed',
+            message: 'Please confirm your email address using the link sent to your email before logging in.',
+            type: 'error'
+          });
+          setLoading(false);
+          return;
+        }
+        api.setToken(res.token);
         onLogin(user, res.token);
         navigate("/profile");
       }
@@ -151,168 +174,194 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
               M
             </div>
             <h1 className="serif-font text-[clamp(2rem,5vw,3rem)] text-white italic">
-              {mode === 'register' ? "Join Circle" : mode === 'forgot' ? "Reset Access" : "Welcome Back"}
+              {mode === 'register' ? "Join Circle" : mode === 'forgot' ? "Reset Access" : mode === 'verify' ? "Verify Email" : "Welcome Back"}
             </h1>
           </div>
 
           <div className="space-y-4">
             <h2 className="serif-font text-[clamp(2rem,5vw,3rem)] text-white italic hidden lg:block">
-              {mode === 'register' ? "Begin Your Story" : mode === 'forgot' ? "Recover Identity" : "Verify Identity"}
+              {mode === 'register' ? "Begin Your Story" : mode === 'forgot' ? "Recover Identity" : mode === 'verify' ? "Verify Email" : "Verify Identity"}
             </h2>
             <p className="text-gray-500 text-[clamp(0.6rem,1vw,0.8rem)] uppercase tracking-[0.5em] font-black italic">
               {mode === 'register' 
                 ? "Identify yourself for a tailored residency" 
                 : mode === 'forgot' 
                   ? "Provide your registry email to initiate recovery"
-                  : "Provide your credentials to access the vault"}
+                  : mode === 'verify'
+                    ? "A confirmation link has been sent to your email. Please verify your email before logging in."
+                    : "Provide your credentials to access the vault"}
             </p>
           </div>
 
-          <form className="space-y-[clamp(1rem,2vw,2rem)]" onSubmit={handleSubmit}>
-            {mode === "register" && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[clamp(0.5rem,2vw,1rem)]">
-                  <div className="space-y-2">
-                    <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
-                      First Name
-                    </label>
-                    <input
-                      required
-                      disabled={loading}
-                      className={`w-full bg-white/[0.03] border ${fieldErrors.firstName ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
-                      placeholder="First"
-                      type="text"
-                      value={formData.firstName}
-                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    />
-                    {fieldErrors.firstName && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.firstName}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
-                      Last Name
-                    </label>
-                    <input
-                      required
-                      disabled={loading}
-                      className={`w-full bg-white/[0.03] border ${fieldErrors.lastName ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
-                      placeholder="Last"
-                      type="text"
-                      value={formData.lastName}
-                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    />
-                    {fieldErrors.lastName && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.lastName}</p>}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
-                    Identity Contact (Phone)
-                  </label>
-                  <input
-                    required
-                    disabled={loading}
-                    className={`w-full bg-white/[0.03] border ${fieldErrors.phone ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
-                    placeholder="+234 ..."
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                  {fieldErrors.phone && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.phone}</p>}
-                </div>
-              </>
-            )}
-
-            <div className="space-y-2">
-              <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
-                Email Registry
-              </label>
-              <input
-                required
-                disabled={loading}
-                className={`w-full bg-white/[0.03] border ${fieldErrors.email ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
-                placeholder="concierge@moore.com"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-              {fieldErrors.email && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.email}</p>}
-            </div>
-
-            {mode !== "forgot" && (
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
-                    Access Key
-                  </label>
-                  {mode === "login" && (
-                    <button 
-                      type="button"
-                      disabled={loading}
-                      onClick={() => setMode("forgot")}
-                      className="text-[clamp(0.5rem,0.7vw,0.6rem)] text-primary uppercase font-black tracking-widest italic border-b border-primary/20 pb-0.5 hover:text-white transition-colors disabled:opacity-50"
-                    >
-                      FORGOT KEY?
-                    </button>
-                  )}
-                </div>
-                <input
-                  required
-                  disabled={loading}
-                  className={`w-full bg-white/[0.03] border ${fieldErrors.password ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 disabled:opacity-50`}
-                  placeholder="••••••••"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                />
-                {fieldErrors.password && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.password}</p>}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary hover:bg-[#B04110] text-black font-black py-4.5 rounded-sm transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-4 group disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 h-[clamp(3.5rem,6vw,4rem)] mt-4"
-            >
-              {loading && (
-                <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-              )}
-              <span className="text-[clamp(0.7rem,1vw,0.8rem)] uppercase tracking-[0.4em]">
-                {getButtonText()}
-              </span>
-              {!loading && (
+          {mode === "verify" ? (
+            <div className="bg-white/5 border border-primary/20 rounded-sm p-8 text-center space-y-6">
+              <span className="material-symbols-outlined text-5xl text-primary mb-4">mark_email_unread</span>
+              <p className="text-white text-lg font-semibold">Check your email</p>
+              <p className="text-gray-400 text-sm">
+                We’ve sent a confirmation link to <span className="text-primary">{pendingEmail}</span>.<br />
+                Please verify your email to activate your account.
+              </p>
+              <button
+                className="w-full bg-primary hover:bg-[#B04110] text-black font-black py-4.5 rounded-sm transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-4 group active:scale-95 h-[clamp(3.5rem,6vw,4rem)] mt-4"
+                onClick={() => setMode("login")}
+              >
+                <span className="text-[clamp(0.7rem,1vw,0.8rem)] uppercase tracking-[0.4em]">
+                  RETURN TO LOGIN
+                </span>
                 <span className="material-symbols-outlined text-xl transition-transform group-hover:translate-x-2">
                   arrow_right_alt
                 </span>
-              )}
-            </button>
-          </form>
-
-          <div className="pt-6 text-center text-[clamp(0.6rem,1vw,0.7rem)] uppercase tracking-[0.2em] font-black border-t border-white/5 space-y-4">
-            <div>
-              <span className="text-gray-700">
-                {mode === 'register' ? "EXISTING MEMBER?" : "NEW TO ANTHOLOGY?"}
-              </span>
-              <button
-                disabled={loading}
-                onClick={() => setMode(mode === 'register' ? 'login' : 'register')}
-                className="text-primary hover:text-white ml-3 transition-colors border-b border-primary/20 pb-0.5 italic disabled:opacity-50"
-              >
-                {mode === 'register' ? "SIGN IN" : "JOIN CIRCLE"}
               </button>
             </div>
-            {mode === 'forgot' && (
+          ) : (
+            <form className="space-y-[clamp(1rem,2vw,2rem)]" onSubmit={handleSubmit}>
+              {mode === "register" && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-[clamp(0.5rem,2vw,1rem)]">
+                    <div className="space-y-2">
+                      <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                        First Name
+                      </label>
+                      <input
+                        required
+                        disabled={loading}
+                        className={`w-full bg-white/[0.03] border ${fieldErrors.firstName ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
+                        placeholder="First"
+                        type="text"
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      />
+                      {fieldErrors.firstName && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.firstName}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                        Last Name
+                      </label>
+                      <input
+                        required
+                        disabled={loading}
+                        className={`w-full bg-white/[0.03] border ${fieldErrors.lastName ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
+                        placeholder="Last"
+                        type="text"
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      />
+                      {fieldErrors.lastName && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.lastName}</p>}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                      Identity Contact (Phone)
+                    </label>
+                    <input
+                      required
+                      disabled={loading}
+                      className={`w-full bg-white/[0.03] border ${fieldErrors.phone ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
+                      placeholder="+234 ..."
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    />
+                    {fieldErrors.phone && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.phone}</p>}
+                  </div>
+                </>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                  Email Registry
+                </label>
+                <input
+                  required
+                  disabled={loading}
+                  className={`w-full bg-white/[0.03] border ${fieldErrors.email ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
+                  placeholder="concierge@moore.com"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+                {fieldErrors.email && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.email}</p>}
+              </div>
+
+              {mode !== "forgot" && (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                      Access Key
+                    </label>
+                    {mode === "login" && (
+                      <button 
+                        type="button"
+                        disabled={loading}
+                        onClick={() => setMode("forgot")}
+                        className="text-[clamp(0.5rem,0.7vw,0.6rem)] text-primary uppercase font-black tracking-widest italic border-b border-primary/20 pb-0.5 hover:text-white transition-colors disabled:opacity-50"
+                      >
+                        FORGOT KEY?
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    required
+                    disabled={loading}
+                    className={`w-full bg-white/[0.03] border ${fieldErrors.password ? 'border-red-500/50' : 'border-white/10'} rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 disabled:opacity-50`}
+                    placeholder="••••••••"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  />
+                  {fieldErrors.password && <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">{fieldErrors.password}</p>}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-primary hover:bg-[#B04110] text-black font-black py-4.5 rounded-sm transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-4 group disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 h-[clamp(3.5rem,6vw,4rem)] mt-4"
+              >
+                {loading && (
+                  <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                )}
+                <span className="text-[clamp(0.7rem,1vw,0.8rem)] uppercase tracking-[0.4em]">
+                  {getButtonText()}
+                </span>
+                {!loading && (
+                  <span className="material-symbols-outlined text-xl transition-transform group-hover:translate-x-2">
+                    arrow_right_alt
+                  </span>
+                )}
+              </button>
+            </form>
+          )}
+
+          {mode !== "verify" && (
+            <div className="pt-6 text-center text-[clamp(0.6rem,1vw,0.7rem)] uppercase tracking-[0.2em] font-black border-t border-white/5 space-y-4">
               <div>
+                <span className="text-gray-700">
+                  {mode === 'register' ? "EXISTING MEMBER?" : "NEW TO ANTHOLOGY?"}
+                </span>
                 <button
                   disabled={loading}
-                  onClick={() => setMode('login')}
-                  className="text-gray-500 hover:text-white transition-colors border-b border-white/10 pb-0.5 italic disabled:opacity-50"
+                  onClick={() => setMode(mode === 'register' ? 'login' : 'register')}
+                  className="text-primary hover:text-white ml-3 transition-colors border-b border-primary/20 pb-0.5 italic disabled:opacity-50"
                 >
-                  RETURN TO SIGN IN
+                  {mode === 'register' ? "SIGN IN" : "JOIN CIRCLE"}
                 </button>
               </div>
-            )}
-          </div>
+              {mode === 'forgot' && (
+                <div>
+                  <button
+                    disabled={loading}
+                    onClick={() => setMode('login')}
+                    className="text-gray-500 hover:text-white transition-colors border-b border-white/10 pb-0.5 italic disabled:opacity-50"
+                  >
+                    RETURN TO SIGN IN
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

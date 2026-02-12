@@ -94,6 +94,18 @@ class ApiService {
   };
 
   // =========================
+  // Email Confirmation
+  // =========================
+
+  async verifyEmail(userId: string, token: string): Promise<{ message: string }> {
+    const queryParams = new URLSearchParams();
+    queryParams.append("userId", userId);
+    queryParams.append("token", token);
+
+    return this.request<{ message: string }>(`/Auth/verify-email?${queryParams.toString()}`);
+  }
+
+  // =========================
   // Rooms (Guest Portal)
   // =========================
 

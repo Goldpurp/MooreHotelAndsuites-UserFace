@@ -65,6 +65,7 @@ export interface ApplicationUser {
   avatarUrl?: string | null;
   emailVerified?: boolean;
   createdAt?: string;
+  emailConfirmed?: boolean;
 }
 
 export interface Room {
