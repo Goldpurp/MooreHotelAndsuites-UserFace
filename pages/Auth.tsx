@@ -167,7 +167,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           loading="lazy"
         />
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-[clamp(2rem,5vw,6rem)] text-center space-y-[clamp(1.5rem,3vw,3rem)] animate-reveal">
-          <div className="w-12 h-12 md:w-16 md:h-16 rounded-sm flex items-center justify-center text-black font-black text-2xl md:text-3xl shadow-[0_0_60px_rgba(234,179,8,0.5)] animate-luxury-logo">
+          <div className="w-16 h-16 md:w-20 md:h-20 ">
             <img
               src="https://res.cloudinary.com/diovckpyb/image/upload/v1770752301/d6qqrpcxf1cqnkm9mzm5.jpg"
               alt="Moore Hotels & Suites"
@@ -190,9 +190,13 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         <div className="w-full max-w-md space-y-[clamp(2rem,5vw,3rem)] animate-reveal">
           {/* Mobile Branding */}
           <div className="lg:hidden flex flex-col items-center space-y-[clamp(1rem,2vw,2rem)] mb-[clamp(2rem,4vw,3rem)]">
-            <div className="w-[clamp(4rem,10vw,6rem)] h-[clamp(4rem,10vw,6rem)] bg-primary rounded-sm flex items-center justify-center text-black font-black text-[clamp(2rem,6vw,4rem)] shadow-2xl animate-luxury-logo">
-              M
-            </div>
+             <div className="w-16 h-16 md:w-20 md:h-20 ">
+            <img
+              src="https://res.cloudinary.com/diovckpyb/image/upload/v1770752301/d6qqrpcxf1cqnkm9mzm5.jpg"
+              alt="Moore Hotels & Suites"
+              loading="lazy"
+            />
+          </div>
             <h1 className="serif-font text-[clamp(2rem,5vw,3rem)] text-white italic">
               {mode === "register"
                 ? "Join Circle"

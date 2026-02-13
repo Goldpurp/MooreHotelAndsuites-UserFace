@@ -10,6 +10,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -27,10 +28,16 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
   }, [location]);
 
   const handleLogoClick = () => {
-  if (location.pathname === "/") {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-};
+    if (location.pathname === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate loading, or call your async logout logic here
+    onLogout();
+    setLogoutLoading(false);
+  };
 
   const navLinks = [
     { name: "ROOMS", path: "/rooms" },
@@ -39,14 +46,14 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
     { name: "HISTORY", path: "/about" },
   ];
 
-const isAdmin = user && (user.role === UserRole.Admin || user.role === UserRole.Manager);
-const getDisplayName = () => {
-  if (!user || !user.name) return "GUEST LOGIN";
-  const nameParts = user.name.trim().split(/\s+/);
-  const lastName = nameParts[nameParts.length - 1];
-  return lastName.toUpperCase();
-};
-
+  const isAdmin =
+    user && (user.role === UserRole.Admin || user.role === UserRole.Manager);
+  const getDisplayName = () => {
+    if (!user || !user.name) return "GUEST LOGIN";
+    const nameParts = user.name.trim().split(/\s+/);
+    const lastName = nameParts[nameParts.length - 1];
+    return lastName.toUpperCase();
+  };
 
   return (
     <>
@@ -58,11 +65,17 @@ const getDisplayName = () => {
         }`}
       >
         <div className="container-luxury flex justify-between items-center">
-
-          <Link to="/" onClick={handleLogoClick} className="flex items-center gap-[clamp(0.5rem,1vw,1rem)] group">
+          <Link
+            to="/"
+            onClick={handleLogoClick}
+            className="flex items-center gap-[clamp(0.5rem,1vw,1rem)] group"
+          >
             <div className="logo-box relative">
               <div className="w-[clamp(2.7rem,3vw,3rem)] h-[clamp(2.7rem,3vw,3rem)] bg-[#dee2e6] rounded-sm flex items-center justify-center text-black font-black text-[clamp(1.1rem,1vw+0.8rem,1.6rem)] shadow-2xl shadow-primary/20 transition-all duration-500 animate-luxury-logo group-hover:scale-105">
-              <img src="https://res.cloudinary.com/diovckpyb/image/upload/v1770752129/qkwdjjwzinvo3l6qa3jj.png" alt="Moore Hotels & Suites" />
+                <img
+                  src="https://res.cloudinary.com/diovckpyb/image/upload/v1770752129/qkwdjjwzinvo3l6qa3jj.png"
+                  alt="Moore Hotels & Suites"
+                />
               </div>
             </div>
 
@@ -83,13 +96,17 @@ const getDisplayName = () => {
                   key={link.name}
                   to={link.path}
                   className={`hover:text-primary transition-all relative py-2 ${
-                    location.pathname === link.path ? "text-primary" : "text-gray-400"
+                    location.pathname === link.path
+                      ? "text-primary"
+                      : "text-gray-400"
                   }`}
                 >
                   {link.name}
                   <span
                     className={`absolute bottom-0 left-0 h-px bg-primary transition-all duration-500 ease-out ${
-                      location.pathname === link.path ? "w-full opacity-100" : "w-0 opacity-0"
+                      location.pathname === link.path
+                        ? "w-full opacity-100"
+                        : "w-0 opacity-0"
                     }`}
                   />
                 </Link>
@@ -99,7 +116,9 @@ const getDisplayName = () => {
                 <Link
                   to="/admin"
                   className={`hover:text-primary transition-all relative py-2 ${
-                    location.pathname === "/admin" ? "text-primary font-black" : "text-primary/60 font-black"
+                    location.pathname === "/admin"
+                      ? "text-primary font-black"
+                      : "text-primary/60 font-black"
                   }`}
                 >
                   ADMIN
@@ -109,21 +128,26 @@ const getDisplayName = () => {
           </div>
 
           <div className="flex items-center gap-[clamp(1rem,2vw,2.5rem)]">
-
             <div className="hidden lg:flex items-center gap-[clamp(1.5rem,2vw,2.5rem)]">
               <Link
                 to={user ? "/profile" : "/auth"}
                 className="text-[clamp(0.55rem,0.4vw+0.4rem,0.7rem)] font-black tracking-[0.5em] uppercase text-gray-400 hover:text-white transition-all flex items-center gap-3 bg-white/5 px-[clamp(1rem,1.5vw,1.5rem)] py-[clamp(0.5rem,0.7vw,0.8rem)] rounded-sm border border-white/5 hover:border-white/10"
               >
-                <span className="material-symbols-outlined text-sm">lock_open</span>
+                <span className="material-symbols-outlined text-sm">
+                  lock_open
+                </span>
                 {getDisplayName()}
               </Link>
 
               {user && (
                 <button
-                  onClick={onLogout}
-                  className="text-[clamp(0.55rem,0.4vw+0.4rem,0.7rem)] font-black tracking-[0.4em] uppercase text-red-500/60 hover:text-red-500 transition-colors"
+                  onClick={handleLogout}
+                  disabled={logoutLoading}
+                  className="text-[clamp(0.55rem,0.4vw+0.4rem,0.7rem)] font-black tracking-[0.4em] uppercase text-red-500/60 hover:text-red-500 transition-colors flex items-center gap-2"
                 >
+                  {logoutLoading ? (
+                    <span className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></span>
+                  ) : null}
                   LOGOUT
                 </button>
               )}
@@ -149,16 +173,27 @@ const getDisplayName = () => {
         </div>
       </nav>
 
-      <div className={`fixed inset-0 z-[100] transition-all duration-700 ease-in-out ${mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
-        <div className={`absolute inset-0 bg-black/98 backdrop-blur-3xl transform transition-transform duration-700 ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}>
+      <div
+        className={`fixed inset-0 z-[100] transition-all duration-700 ease-in-out ${mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+      >
+        <div
+          className={`absolute inset-0 bg-black/98 backdrop-blur-3xl transform transition-transform duration-700 ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+        >
           <div className="h-full flex flex-col p-[clamp(1.5rem,5vw,4rem)] pt-[clamp(6rem,10vh,10rem)] relative z-10">
-            <button onClick={() => setMobileMenuOpen(false)} className="absolute top-10 right-10 text-primary active:scale-90 transition-all">
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="absolute top-10 right-10 text-primary active:scale-90 transition-all"
+            >
               <span className="material-symbols-outlined text-5xl">close</span>
             </button>
 
             <div className="flex flex-col gap-[clamp(1.5rem,4vh,3rem)] mt-8">
               {navLinks.map((link) => (
-                <Link key={link.name} to={link.path} className="serif-font text-[clamp(2.5rem,5vw,4rem)] text-white italic hover:text-primary transition-all leading-tight">
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className="serif-font text-[clamp(2.5rem,5vw,4rem)] text-white italic hover:text-primary transition-all leading-tight"
+                >
                   {link.name.toLowerCase()}
                 </Link>
               ))}
@@ -166,12 +201,22 @@ const getDisplayName = () => {
               <div className="h-px w-24 bg-primary/20 my-10"></div>
 
               <div className="space-y-8">
-                <Link to={user ? "/profile" : "/auth"} className="block text-[clamp(1.2rem,2vw,1.6rem)] font-light text-gray-400 hover:text-white transition-all">
+                <Link
+                  to={user ? "/profile" : "/auth"}
+                  className="block text-[clamp(1.2rem,2vw,1.6rem)] font-light text-gray-400 hover:text-white transition-all"
+                >
                   {user ? "Guest Dashboard" : "Guest Login"}
                 </Link>
 
                 {user && (
-                  <button onClick={onLogout} className="text-left text-red-500/60 text-[clamp(0.9rem,1vw,1.1rem)] uppercase tracking-widest font-black pt-4">
+                  <button
+                    onClick={handleLogout}
+                    disabled={logoutLoading}
+                    className="text-left text-red-500/60 text-[clamp(0.9rem,1vw,1.1rem)] uppercase tracking-widest font-black pt-4 flex items-center gap-2"
+                  >
+                    {logoutLoading ? (
+                      <span className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></span>
+                    ) : null}
                     Secure Exit
                   </button>
                 )}

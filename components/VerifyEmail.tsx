@@ -41,13 +41,13 @@ const VerifyEmail: React.FC = () => {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center text-center p-6">
       <div className="max-w-md space-y-6">
-        <div className="w-12 h-12 md:w-16 md:h-16 rounded-sm flex items-center justify-center animate-luxury-logo">
-          <img
-            src="https://res.cloudinary.com/diovckpyb/image/upload/v1770752301/d6qqrpcxf1cqnkm9mzm5.jpg"
-            alt="Moore Hotels & Suites"
-            loading="lazy"
-          />
-        </div>
+          <div className="w-16 h-16 md:w-20 md:h-20 ">
+            <img
+              src="https://res.cloudinary.com/diovckpyb/image/upload/v1770752301/d6qqrpcxf1cqnkm9mzm5.jpg"
+              alt="Moore Hotels & Suites"
+              loading="lazy"
+            />
+          </div>
 
         {status === "loading" && (
           <p className="text-white text-xl italic serif-font">
