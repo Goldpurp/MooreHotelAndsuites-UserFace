@@ -25,7 +25,7 @@ const VerifyEmail: React.FC = () => {
 
         if (isMounted) {
           setStatus("success");
-          setTimeout(() => navigate("/auth?verified=1"), 9000);
+          setTimeout(() => navigate("/auth?verified=1"), 4000);
         }
       } catch {
         if (isMounted) setStatus("error");
