@@ -35,10 +35,10 @@ const VerifyEmail: React.FC = () => {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center text-center p-6">
       <div className="max-w-md space-y-6">
-        <div className="text-primary text-6xl font-black mb-8 animate-pulse">
+        <div className="w-12 h-12 md:w-16 md:h-16 rounded-sm flex items-center justify-center text-black font-black text-2xl md:text-3xl shadow-[0_0_60px_rgba(234,179,8,0.5)] animate-luxury-logo">
           <img
             src="https://res.cloudinary.com/diovckpyb/image/upload/v1770752301/d6qqrpcxf1cqnkm9mzm5.jpg"
-            alt="Moore Hotel and Suites"
+            alt="Moore Hotels & Suites"
             loading="lazy"
           />
         </div>
