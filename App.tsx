@@ -20,6 +20,7 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
+const VerifyEmail = lazy(() => import("./components/VerifyEmail"));
 
 const App: React.FC = () => {
   const [user, setUser] = useState<ApplicationUser | null>(null);
@@ -90,6 +91,7 @@ const App: React.FC = () => {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/help" element={<HelpCenter />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
               
               {/* Redirect to home ONLY if the path is truly unrecognized */}
               <Route path="*" element={<Navigate to="/" replace />} />
