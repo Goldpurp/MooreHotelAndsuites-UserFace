@@ -44,19 +44,6 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    if (searchParams.get("verified") === "1") {
-      setModal({
-        show: true,
-        title: "Email Verified",
-        message: "Your email has been confirmed. You can now sign in.",
-        type: "success",
-      });
-      navigate("/auth", { replace: true });
-    }
-  }, [location.search, navigate]);
-
   const validate = () => {
     const errors: Partial<Record<keyof FormData, string>> = {};
 

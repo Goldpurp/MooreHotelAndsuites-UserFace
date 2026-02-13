@@ -100,11 +100,9 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     ),
   );
 
-  // Add state for toast notification
   const handleCopy = () => {
     navigator.clipboard.writeText(bankDetails.accountNumber);
     setToast(true);
-    // Hide toast after 2 seconds
     setTimeout(() => setToast(false), 2000);
   };
 
@@ -153,7 +151,6 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
     const isValid = Object.keys(errors).length === 0;
     if (!isValid) {
-      // Smooth scroll to the top of the form section on mobile/desktop
       formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
@@ -172,7 +169,6 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
           "Please select a payment instrument to proceed with the reservation.",
         type: "info",
       });
-      // Scroll to payment section if missing
       document
         .getElementById("payment-section")
         ?.scrollIntoView({ behavior: "smooth", block: "center" });
