@@ -29,11 +29,13 @@ export enum BookingStatus {
   Cancelled = "Cancelled",
 }
 
-export enum PaymentStatus {
-  Paid = "Paid",
-  Unpaid = "Unpaid",
-  Partial = "Partial",
-  AwaitingVerification = "AwaitingVerification",
+export enum PaymentStatus
+{
+    Paid = "Paid",
+    Unpaid = "Unpaid",
+    AwaitingVerification = "AwaitingVerification",
+    RefundPending = "RefundPending",
+    Refunded = "Refunded"
 }
 
 export enum PaymentMethod {

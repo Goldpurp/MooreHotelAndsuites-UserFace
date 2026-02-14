@@ -210,7 +210,7 @@ const BookingConfirmation: React.FC = () => {
         <div className="flex flex-col gap-3">
           <button
             onClick={downloadPDF}
-            className="w-full bg-[#B04110]text-black py-3 rounded font-black text-xs uppercase tracking-widest hover:bg-yellow-600 transition-all"
+            className="w-full bg-primary text-black py-3 rounded font-black text-xs uppercase tracking-widest hover:bg-[#B04110] transition-all"
           >
             Download PDF
           </button>

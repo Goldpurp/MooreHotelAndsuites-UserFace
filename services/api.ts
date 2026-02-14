@@ -180,6 +180,21 @@ async verifyEmail(userId: string, token: string): Promise<{ message: string }> {
     });
   }
 
+    // =========================
+  // Booking Cancellation (Guest)
+  // =========================
+
+  async cancelBookingAsGuest(data: {
+    bookingCode: string;
+    email: string;
+    reason: string;
+  }): Promise<{ message: string }> {
+    return this.request<{ message: string }>("/bookings/guest/cancel", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
   // =========================
   // Profile (Guest)
   // =========================
