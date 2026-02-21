@@ -78,7 +78,7 @@ const Footer: React.FC = () => {
             </li>
             <li className="flex gap-4">
               <span className="material-symbols-outlined text-primary text-lg">mail</span>
-              <span>moorehotelandsuites@gmail.com</span>
+              <span>info@moorehotelandsuites.com</span>
             </li>
           </ul>
         </div>

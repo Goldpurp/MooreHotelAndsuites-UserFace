@@ -14,7 +14,11 @@ const sections = [
     tag: "CULINARY DELIGHTS",
     desc: "Enjoy a diverse menu of local Nigerian favorites and continental classics, prepared by our expert chefs in a refined dining atmosphere.",
     img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1200",
-    features: ["Buffet & À la Carte", "Room Service", "Breakfast, Lunch & Dinner"],
+    features: [
+      "Buffet & À la Carte",
+      "Room Service",
+      "Breakfast, Lunch & Dinner",
+    ],
   },
   {
     title: "Lounge & Bar",
@@ -100,20 +104,42 @@ const Services: React.FC = () => {
           ></div>
           <div className="relative bg-surface-dark border border-primary/20 p-8 md:p-12 max-w-xl w-full rounded-xl shadow-2xl text-center space-y-10 animate-in slide-in-from-bottom-8 duration-500">
             <div className="w-20 h-20 bg-primary/10 border border-primary/30 rounded-full flex items-center justify-center text-primary mx-auto animate-luxury-logo">
-              <span className="material-symbols-outlined text-4xl">contact_support</span>
+              <span className="material-symbols-outlined text-4xl">
+                contact_support
+              </span>
             </div>
             <div className="space-y-4">
-              <h3 className="serif-font text-3xl md:text-4xl text-white italic">Guest Relations</h3>
+              <h3 className="serif-font text-3xl md:text-4xl text-white italic">
+                Guest Relations
+              </h3>
               <p className="text-gray-400 text-base md:text-lg font-light leading-relaxed max-w-sm mx-auto">
-                Our dedicated concierge team is available 24/7 to manage your inquiries, bespoke bookings, and service requests with professional precision.
+                Our dedicated concierge team is available 24/7 to manage your
+                inquiries, bespoke bookings, and service requests with
+                professional precision.
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-4 text-left">
               {[
-                { icon: "location_on", label: "Location", value: "Victoria Island, Lagos, Nigeria", href: "https://www.google.com/maps/search/?api=1&query=Victoria+Island,+Lagos,+Nigeria" },
-                { icon: "phone", label: "Direct Line", value: "+234 123 456 7890", href: "tel:+2341234567890" },
-                { icon: "mail", label: "Registry Email", value: "reservations@moorehotel.com", href: "mailto:reservations@moorehotel.com" },
+                {
+                  icon: "location_on",
+                  label: "Location",
+                  value:
+                    "Harmony Estate, Along Sagamu Ikenne Road, Beside Nysc Camp Sagamu, Ogun State,Nigeria",
+                  href: "https://www.google.com/maps/search/?api=1&query=Harmony+Estate,+Along+Sagamu+Ikenne+Road,+Beside+Nysc+Camp+Sagamu,+Ogun+State,Nigeria",
+                },
+                {
+                  icon: "phone",
+                  label: "Direct Line",
+                  value: "+234 803 377 4544",
+                  href: "tel:+2348033774544",
+                },
+                {
+                  icon: "mail",
+                  label: "Registry Email",
+                  value: "info@moorehotelandsuites.com",
+                  href: "mailto:info@moorehotelandsuites.com",
+                },
               ].map((item) => (
                 <a
                   key={item.label}
@@ -123,11 +149,17 @@ const Services: React.FC = () => {
                   className="flex items-center gap-6 p-5 bg-white/[0.03] border border-white/5 rounded-xl hover:border-primary/40 transition-all group"
                 >
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all">
-                    <span className="material-symbols-outlined">{item.icon}</span>
+                    <span className="material-symbols-outlined">
+                      {item.icon}
+                    </span>
                   </div>
                   <div>
-                    <p className="text-[8px] md:text-[9px] uppercase tracking-[0.3em] text-gray-500 font-black mb-1">{item.label}</p>
-                    <p className="text-white text-sm md:text-base font-medium">{item.value}</p>
+                    <p className="text-[8px] md:text-[9px] uppercase tracking-[0.3em] text-gray-500 font-black mb-1">
+                      {item.label}
+                    </p>
+                    <p className="text-white text-sm md:text-base font-medium">
+                      {item.value}
+                    </p>
                   </div>
                 </a>
               ))}
@@ -215,11 +247,14 @@ const Services: React.FC = () => {
       <section className="pb-16 px-4 sm:px-6 md:py-24 md:px-10">
         <div className="max-w-[900px] mx-auto text-center bg-gradient-to-r from-background-dark via-background-dark/80 to-background-dark rounded-3xl shadow-2xl relative overflow-hidden border border-white/10 p-8 sm:p-12 md:p-16">
           <div className="inline-flex items-center justify-center w-20 sm:w-24 md:w-28 h-20 sm:h-24 md:h-28 rounded-full bg-primary/10 border-2 border-primary text-primary mb-4 sm:mb-6 md:mb-8 shadow-lg animate-luxury-logo">
-            <span className="material-symbols-outlined text-4xl sm:text-5xl md:text-6xl">support_agent</span>
+            <span className="material-symbols-outlined text-4xl sm:text-5xl md:text-6xl">
+              support_agent
+            </span>
           </div>
 
           <h2 className="serif-font text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white italic leading-tight mb-6 sm:mb-8 md:mb-10">
-            Professional Support, <br className="hidden md:block" /> Every Moment
+            Professional Support, <br className="hidden md:block" /> Every
+            Moment
           </h2>
 
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-8 justify-center items-center">
@@ -228,7 +263,9 @@ const Services: React.FC = () => {
               disabled={loadingAction === "contact"}
               className="bg-primary text-black w-full sm:w-auto px-10 py-3 sm:px-12 sm:py-4 md:px-16 md:py-5 text-[11px] sm:text-[12px] md:text-[14px] font-black uppercase tracking-widest hover:bg-[#B04110] transition-all rounded-full shadow-xl shadow-primary/30 h-14 flex items-center justify-center gap-3 disabled:opacity-70"
             >
-              {loadingAction === "contact" && <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>}
+              {loadingAction === "contact" && (
+                <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+              )}
               {loadingAction === "contact" ? "CONTACTING..." : "Contact Us"}
             </button>
             <button
@@ -236,7 +273,9 @@ const Services: React.FC = () => {
               disabled={loadingAction === "helpdesk"}
               className="border border-white/20 text-white w-full sm:w-auto px-10 py-3 sm:px-12 sm:py-4 md:px-16 md:py-5 text-[11px] sm:text-[12px] md:text-[14px] font-black uppercase tracking-widest hover:bg-white/10 transition-all rounded-full shadow-md h-14 flex items-center justify-center gap-3 disabled:opacity-70"
             >
-              {loadingAction === "helpdesk" && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+              {loadingAction === "helpdesk" && (
+                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              )}
               {loadingAction === "helpdesk" ? "FETCHING..." : "Visit Help Desk"}
             </button>
           </div>
