@@ -56,7 +56,7 @@ const VerifyEmail: React.FC = () => {
 
           <div className="mb-10 w-20 h-20 overflow-hidden border border-amber-500/30">
             <img
-              src="https://res.cloudinary.com/diovckpyb/image/upload/v1770752301/d6qqrpcxf1cqnkm9mzm5.jpg"
+              src="https://res.cloudinary.com/dxryndnhl/image/upload/v1772007930/MooreHotels/website-assets/zda9mbs2f3wrke1f2mtd.jpg"
               alt="Moore Hotels"
               className="w-full h-full object-cover"
             />

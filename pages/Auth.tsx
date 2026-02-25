@@ -156,7 +156,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-[clamp(2rem,5vw,6rem)] text-center space-y-[clamp(1.5rem,3vw,3rem)] animate-reveal">
           <div className="w-16 h-16 md:w-20 md:h-20 ">
             <img
-              src="https://res.cloudinary.com/diovckpyb/image/upload/v1770752301/d6qqrpcxf1cqnkm9mzm5.jpg"
+              src="https://res.cloudinary.com/dxryndnhl/image/upload/v1772007930/MooreHotels/website-assets/zda9mbs2f3wrke1f2mtd.jpg"
               alt="Moore Hotels & Suites"
               loading="lazy"
             />
@@ -179,7 +179,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           <div className="lg:hidden flex flex-col items-center space-y-[clamp(1rem,2vw,2rem)] mb-[clamp(2rem,4vw,3rem)]">
              <div className="w-16 h-16 md:w-20 md:h-20 ">
             <img
-              src="https://res.cloudinary.com/diovckpyb/image/upload/v1770752301/d6qqrpcxf1cqnkm9mzm5.jpg"
+              src="https://res.cloudinary.com/dxryndnhl/image/upload/v1772007930/MooreHotels/website-assets/zda9mbs2f3wrke1f2mtd.jpg"
               alt="Moore Hotels & Suites"
               loading="lazy"
             />
