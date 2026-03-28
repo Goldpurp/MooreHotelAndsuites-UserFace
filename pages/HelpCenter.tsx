@@ -14,7 +14,7 @@ const HelpCenter: React.FC = () => {
         },
         {
           q: "What are check-in and check-out times?",
-          a: "Check-in is from 2:00 PM, and check-out is at 12:00 PM. Early or late check-ins may be arranged for premium members or on request."
+          a: "Check-in is from 2:00pm, and check-out is at 12:00pm. Early or late check-ins may be arranged for premium members or on request."
         },
         {
           q: "Do you accommodate group bookings?",

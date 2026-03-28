@@ -1,16 +1,14 @@
 export enum RoomCategory {
   Standard = "Standard",
-  Business = "Business",
+  Deluxe = "Deluxe",
   Executive = "Executive",
-  Suite = "Suite",
+  PresidentialSuite = "PresidentialSuite",
 }
 
 export enum PropertyFloor {
   GroundFloor = "GroundFloor",
   FirstFloor = "FirstFloor",
   SecondFloor = "SecondFloor",
-  ThirdFloor = "ThirdFloor",
-  Penthouse = "Penthouse",
 }
 
 export enum RoomStatus {

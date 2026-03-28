@@ -389,7 +389,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
                           const checkInDate = new Date(b.checkIn);
                           const now = new Date();
                           const isToday = checkInDate.toDateString() === now.toDateString();
-                          const isAfterCheckInTime = now.getHours() >= 14; // 2:00 PM
+                          const isAfterCheckInTime = now.getHours() >= 14; // 2:00pm
                           const isEligible = isToday && isAfterCheckInTime && b.status === "Confirmed";
 
                           if (isEligible) {
