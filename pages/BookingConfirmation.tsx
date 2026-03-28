@@ -112,8 +112,8 @@ const BookingConfirmation: React.FC = () => {
       : 1;
 
     addField("Stay Duration:", `${nights} night(s)`);
-    addField("Check-In:", booking.checkIn ? new Date(booking.checkIn).toLocaleDateString() : "—");
-    addField("Check-Out:", booking.checkOut ? new Date(booking.checkOut).toLocaleDateString() : "—");
+    addField("Check-In:", booking.checkIn ? `${new Date(booking.checkIn).toLocaleDateString()} (2:00 PM)` : "—");
+    addField("Check-Out:", booking.checkOut ? `${new Date(booking.checkOut).toLocaleDateString()} (12:00 PM)` : "—");
     addField("Amount Paid:", `₦${booking.amount?.toLocaleString() || '—'}`);
 
     y += 20;
@@ -192,11 +192,11 @@ const BookingConfirmation: React.FC = () => {
             </div>
             <div className="space-y-1">
               <p className="uppercase font-black tracking-widest">Check-In</p>
-              <p className="text-white">{booking?.checkIn ? new Date(booking.checkIn).toLocaleDateString() : '—'}</p>
+              <p className="text-white">{booking?.checkIn ? `${new Date(booking.checkIn).toLocaleDateString()} @ 2:00 PM` : '—'}</p>
             </div>
             <div className="space-y-1">
               <p className="uppercase font-black tracking-widest">Check-Out</p>
-              <p className="text-white">{booking?.checkOut ? new Date(booking.checkOut).toLocaleDateString() : '—'}</p>
+              <p className="text-white">{booking?.checkOut ? `${new Date(booking.checkOut).toLocaleDateString()} @ 12:00 PM` : '—'}</p>
             </div>
           </div>
 

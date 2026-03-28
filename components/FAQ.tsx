@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const FAQ_DATA = [
   {
     question: "What are your standard check-in and check-out times?",
-    answer: "Check-in begins from 3:00 PM, while check-out is at 11:30 AM. Early check-in or late check-out may be arranged through the front desk, subject to room availability."
+    answer: "Check-in begins from 2:00 PM, while check-out is at 12:00 PM. Early check-in or late check-out may be arranged through the front desk, subject to room availability."
   },
   {
     question: "Do you provide airport pickup or drop-off services?",

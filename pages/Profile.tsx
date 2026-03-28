@@ -364,13 +364,57 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
                       </div>
                     </div>
 
-                    <button
-                      className="bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase px-5 py-2 rounded-sm shadow transition-all disabled:opacity-50"
-                      onClick={() => setCancelModal({ open: true, booking: b })}
-                      disabled={b.status?.toLowerCase() === "cancelled"}
-                    >
-                      Cancel Booking
-                    </button>
+                    <div className="flex flex-col gap-4 w-full md:w-auto">
+                      {/* Status Banners */}
+                      {b.notificationMessage === "Booking expires in 30min" && (
+                        <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-sm flex items-center gap-3 animate-pulse">
+                          <span className="material-symbols-outlined text-yellow-500 text-sm">warning</span>
+                          <p className="text-yellow-500 text-[9px] uppercase font-black tracking-widest">
+                            Heads up! Your check-in window is closing in 30 minutes. Please arrive soon!
+                          </p>
+                        </div>
+                      )}
+                      {b.notificationMessage === "Booking is in the past" && (
+                        <div className="bg-gray-500/10 border border-gray-500/20 p-3 rounded-sm flex items-center gap-3">
+                          <span className="material-symbols-outlined text-gray-500 text-sm">history</span>
+                          <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest">
+                            This booking period has ended.
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap gap-3">
+                        {/* Check-In Action Safeguard */}
+                        {(() => {
+                          const checkInDate = new Date(b.checkIn);
+                          const now = new Date();
+                          const isToday = checkInDate.toDateString() === now.toDateString();
+                          const isAfterCheckInTime = now.getHours() >= 14; // 2:00 PM
+                          const isEligible = isToday && isAfterCheckInTime && b.status === "Confirmed";
+
+                          if (isEligible) {
+                            return (
+                              <button
+                                className="bg-primary text-black text-xs font-black uppercase px-5 py-2 rounded-sm shadow-xl shadow-primary/20 hover:bg-[#B04110] transition-all flex items-center gap-2"
+                                onClick={() => triggerNotification("Check-In Active", "Your room is ready! Please proceed to the front desk for your digital key.", "success")}
+                              >
+                                <span className="material-symbols-outlined text-sm">login</span>
+                                Check-In
+                              </button>
+                            );
+                          }
+                          return null;
+                        })()}
+
+                        <button
+                          className="bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase px-5 py-2 rounded-sm shadow transition-all disabled:opacity-50"
+                          onClick={() => setCancelModal({ open: true, booking: b })}
+                          disabled={b.status?.toLowerCase() === "cancelled"}
+                        >
+                          Cancel Booking
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 ))
               ) : (

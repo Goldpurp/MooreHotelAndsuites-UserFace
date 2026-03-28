@@ -106,6 +106,7 @@ export interface Booking {
   createdAt: string;
   paymentUrl?: string | null;
   paymentInstruction?: string | null;
+  notificationMessage?: string | null;
 }
 
 export interface AuthResponse {
