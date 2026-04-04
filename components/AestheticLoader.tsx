@@ -7,8 +7,8 @@ interface AestheticLoaderProps {
 }
 
 const AestheticLoader: React.FC<AestheticLoaderProps> = ({
-  message = "Decrypting Registry",
-  subtext = "Establishing Secure Link...",
+  message = "Loading Content",
+  subtext = "Connecting to Secure Server...",
   isFullPage = true,
 }) => {
   const containerClass = isFullPage
@@ -47,7 +47,7 @@ const AestheticLoader: React.FC<AestheticLoaderProps> = ({
       {/* Footer Text */}
       {isFullPage && (
         <p className="text-gray-600 text-[8px] uppercase tracking-[0.3em] mt-16 font-bold opacity-30 fixed bottom-12">
-          Moore Hotels & Suites • Private Registry Access
+          Moore Hotels & Suites • Secure Connection
         </p>
       )}
     </div>

@@ -11,7 +11,7 @@ const FAQ_DATA = [
   },
   {
     question: "Can additional guests or children stay in the room?",
-    answer: "Children and additional occupants are welcome. Extra beds or connecting rooms can be arranged on request, depending on the room category booked and availability at the time of arrival."
+    answer: "Children and additional occupants are welcome. Extra beds or connecting rooms can be arranged on request, depending on the room category booked and availability at the time of check-in."
   },
   {
     question: "What security measures are available at the hotel?",

@@ -139,7 +139,7 @@ const RoomDetail: React.FC = () => {
   }, [room, selectedCheckIn, selectedCheckOut]);
 
   if (isLoading) {
-    return <AestheticLoader message="Sanctuary Registry" subtext="Decrypting Room Specifications..." />;
+    return <AestheticLoader message="Loading Details" subtext="Fetching Room information..." />;
   }
 
   if (!room) return null;
@@ -222,7 +222,7 @@ const RoomDetail: React.FC = () => {
         <div className="lg:col-span-8 space-y-12 md:space-y-16">
           <section className="my-[-110px]">
             <h2 className="serif-font text-2xl md:text-4xl text-white leading-tight">
-              {room.description || "A refined sanctuary crafted for stillness."}
+              {room.description || "A refined room crafted for comfort."}
             </h2>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 py-10 border-y border-white/5 mt-10">
@@ -279,7 +279,7 @@ const RoomDetail: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-[8px] uppercase tracking-[0.2em] text-gray-600 font-black ml-1">Arrival</label>
+                <label className="text-[8px] uppercase tracking-[0.2em] text-gray-600 font-black ml-1">Check-in</label>
                 <input
                   type="date"
                   value={selectedCheckIn}
@@ -288,7 +288,7 @@ const RoomDetail: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[8px] uppercase tracking-[0.2em] text-gray-600 font-black ml-1">Departure</label>
+                <label className="text-[8px] uppercase tracking-[0.2em] text-gray-600 font-black ml-1">Check-out</label>
                 <input
                   type="date"
                   value={selectedCheckOut}
@@ -300,11 +300,11 @@ const RoomDetail: React.FC = () => {
 
             <div className="flex justify-between items-end text-xs pt-6 border-t border-white/5">
               <div className="space-y-1">
-                <p className="text-[9px] text-gray-600 uppercase tracking-widest font-black">Stay Record</p>
+                <p className="text-[9px] text-gray-600 uppercase tracking-widest font-black">Stay Summary</p>
                 <p className="text-white text-lg italic font-medium">{stayCalculations.nights} Nights</p>
               </div>
               <div className="text-right space-y-1">
-                <p className="text-[9px] text-gray-600 uppercase tracking-widest font-black">Total Investment</p>
+                <p className="text-[9px] text-gray-600 uppercase tracking-widest font-black">Total Price</p>
                 <p className="serif-font text-3xl text-primary italic font-bold">₦{stayCalculations.total.toLocaleString()}</p>
               </div>
             </div>
@@ -320,7 +320,7 @@ const RoomDetail: React.FC = () => {
                 "Confirm Booking"
               )}
             </button>
-            <p className="text-[8px] text-center text-gray-600 uppercase tracking-[0.3em] font-black italic">Secure Handshake Protocol Active</p>
+            <p className="text-[8px] text-center text-gray-600 uppercase tracking-[0.3em] font-black italic">Secure Payment Active</p>
           </div>
         </aside>
       </div>

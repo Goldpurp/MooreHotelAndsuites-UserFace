@@ -114,8 +114,8 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
     try {
       await api.rotateSecurity(securityData);
       triggerNotification(
-        "Security Update",
-        "Your access keys have been successfully rotated. Please use your new key for future logins.",
+        "Password Update",
+        "Your password has been successfully updated. Please use your new password for future logins.",
       );
       setSecurityData({
         oldPassword: "",
@@ -138,6 +138,12 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
 
   const confirmCancelBooking = async () => {
     if (!cancelModal.booking || !cancelReason.trim()) return;
+
+    const status = cancelModal.booking.status?.toLowerCase();
+    if (["checkedin", "checkedout", "cancelled"].includes(status || "")) {
+      triggerNotification("Action Prohibited", "This booking is active or completed and cannot be cancelled.", "error");
+      return;
+    }
 
     setCancelling(true);
     try {
@@ -227,7 +233,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
         {/* Header */}
         <header className="mb-16 md:mb-20 text-center space-y-6 animate-in fade-in duration-1000">
           <p className="text-primary text-[10px] sm:text-[11px] uppercase tracking-[0.8em] font-black">
-            Private Registry
+            Guest Profile
           </p>
           <h1 className="serif-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white">
             Welcome, {getLastName(user.name)}
@@ -245,10 +251,10 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
                 }`}
               >
                 {tab === "vault"
-                  ? "Registry"
+                  ? "Profile"
                   : tab === "archive"
-                    ? "History"
-                    : "Security"}
+                    ? "Bookings"
+                    : "Settings"}
               </button>
             ))}
           </div>
@@ -275,7 +281,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
                 {/* <div className="absolute top-0 right-0 p-10 text-white/[0.02] font-black text-6xl md:text-7xl select-none group-hover:text-primary/[0.02] transition-colors">@</div> */}
                 <div className="space-y-4">
                   <p className="text-[10px] uppercase tracking-[0.5em] text-gray-600 font-black">
-                    Email Identity
+                    Email Address
                   </p>
                   <p className="text-2xl md:text-3xl text-white group-hover:text-primary transition-colors">
                     {user.email}
@@ -286,7 +292,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
               <div className="bg-surface-dark border border-white/5 px-8 py-4 md:px-12 md:py-8 hover:border-primary/20 transition-all group relative overflow-hidden">
                 <div className="space-y-4">
                   <p className="text-[10px] uppercase tracking-[0.5em] text-gray-600 font-black">
-                    Joined On
+                    Member Since
                   </p>
                   <p className="text-sm md:text-xl text-white group-hover:text-primary transition-colors">
                     {user.createdAt ? formatDate(user.createdAt) : "—"}
@@ -307,7 +313,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
                   >
                     <div className="space-y-1">
                       <p className="text-[9px] text-primary uppercase tracking-[0.5em] font-black">
-                        Stay Record
+                        Booking Ref
                       </p>
                       <h4 className="serif-font text-2xl md:text-3xl text-white group-hover:text-primary transition-colors">
                         {b.bookingCode}
@@ -390,16 +396,30 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
                           const now = new Date();
                           const isToday = checkInDate.toDateString() === now.toDateString();
                           const isAfterCheckInTime = now.getHours() >= 14; // 2:00pm
-                          const isEligible = isToday && isAfterCheckInTime && b.status === "Confirmed";
+                          const isConfirmed = b.status === "Confirmed";
+                          const isCheckedIn = b.status === "CheckedIn";
 
-                          if (isEligible) {
+                          if ((isToday && isAfterCheckInTime && isConfirmed) || isCheckedIn) {
                             return (
                               <button
-                                className="bg-primary text-black text-xs font-black uppercase px-5 py-2 rounded-sm shadow-xl shadow-primary/20 hover:bg-[#B04110] transition-all flex items-center gap-2"
-                                onClick={() => triggerNotification("Check-In Active", "Your room is ready! Please proceed to the front desk for your digital key.", "success")}
+                                disabled={isCheckedIn}
+                                className={`text-xs font-black uppercase px-5 py-2 rounded-sm shadow-xl transition-all flex items-center gap-2 ${
+                                  isCheckedIn
+                                    ? "bg-white/5 text-gray-500 border border-white/5 cursor-not-allowed shadow-none"
+                                    : "bg-primary text-black shadow-primary/20 hover:bg-[#B04110]"
+                                }`}
+                                onClick={() =>
+                                  triggerNotification(
+                                    "Check-In Active",
+                                    "Your room is ready! Please proceed to the front desk for your digital key.",
+                                    "success",
+                                  )
+                                }
                               >
-                                <span className="material-symbols-outlined text-sm">login</span>
-                                Check-In
+                                <span className="material-symbols-outlined text-sm">
+                                  {isCheckedIn ? "verified" : "login"}
+                                </span>
+                                {isCheckedIn ? "Checked In" : "Check-In"}
                               </button>
                             );
                           }
@@ -409,7 +429,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
                         <button
                           className="bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase px-5 py-2 rounded-sm shadow transition-all disabled:opacity-50"
                           onClick={() => setCancelModal({ open: true, booking: b })}
-                          disabled={b.status?.toLowerCase() === "cancelled"}
+                          disabled={["cancelled", "checkedin", "checkedout"].includes(b.status?.toLowerCase() || "")}
                         >
                           Cancel Booking
                         </button>
@@ -420,7 +440,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
               ) : (
                 <div className="py-32 md:py-40 text-center border border-white/5 border-dashed rounded-sm bg-white/[0.01]">
                   <p className="serif-font text-2xl md:text-3xl text-gray-700">
-                    No historical records found in registry.
+                    No bookings found in your history.
                   </p>
                 </div>
               )}
@@ -436,10 +456,10 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
               >
                 <div className="space-y-2">
                   <h3 className="serif-font text-3xl md:text-4xl text-white">
-                    Rotate Security Key
+                    Change Password
                   </h3>
                   <p className="text-gray-500 text-[9px] sm:text-[10px] uppercase tracking-widest font-black opacity-60">
-                    Maintain vault integrity through regular rotation.
+                    Keep your account secure by updating your password.
                   </p>
                 </div>
 
@@ -449,10 +469,10 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
                       <div key={idx} className="space-y-1">
                         <label className="text-[9px] text-gray-600 font-black uppercase tracking-[0.3em] ml-1">
                           {field === "oldPassword"
-                            ? "Current Key"
+                            ? "Current Password"
                             : field === "newPassword"
-                              ? "New Key"
-                              : "Confirm New Key"}
+                              ? "New Password"
+                              : "Confirm New Password"}
                         </label>
                         <input
                           required
@@ -487,10 +507,10 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout }) => {
                   {updating ? (
                     <>
                       <span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></span>
-                      <span>Encrypting...</span>
+                      <span>Updating...</span>
                     </>
                   ) : (
-                    "Authorize Rotation"
+                    "Update Password"
                   )}
                 </button>
               </form>

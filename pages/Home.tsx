@@ -68,9 +68,9 @@ const Home: React.FC = () => {
     setTimeout(() => {
       setModal({
         show: true,
-        title: "Membership Requested",
+        title: "Subscription Successful",
         message:
-          "Welcome to the Moore Circle. Your request is being reviewed by our membership board.",
+          "Welcome to the Moore newsletter. You'll receive updates and offers at this email.",
         type: "success",
       });
       setSubscribing(false);
@@ -97,7 +97,7 @@ const Home: React.FC = () => {
             Connection <span className="text-primary">Offline</span>
           </h1>
           <p className="text-gray-500 text-[10px] uppercase tracking-[0.5em] font-black max-w-sm mx-auto">
-            Unable to establish connection to the hotel registry.
+            Unable to establish connection to the hotel database.
           </p>
         </div>
         <button
@@ -227,7 +227,7 @@ const Home: React.FC = () => {
                   {searching && (
                     <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
                   )}
-                  {searching ? "Verifying..." : "Reserve Now"}
+                  {searching ? "Searching..." : "Book Now"}
                 </button>
               </div>
             </form>
@@ -284,14 +284,14 @@ const Home: React.FC = () => {
                 Executive Room Collection
               </p>
               <h2 className="serif-font text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-white italic leading-none">
-                The Registry
+                Our Rooms
               </h2>
             </div>
             <Link
               to="/rooms"
               className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.4em] text-gray-500 hover:text-primary transition-all flex items-center gap-2 md:gap-4"
             >
-              View All Accommodations <span className="material-symbols-outlined text-lg">arrow_forward</span>
+              View All Rooms <span className="material-symbols-outlined text-lg">arrow_forward</span>
             </Link>
           </div>
 
@@ -389,7 +389,7 @@ const Home: React.FC = () => {
       <section className="py-32 md:py-48 px-6 text-center">
         <div className="max-w-4xl mx-auto space-y-8 md:space-y-12">
           <h2 className="serif-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-white italic leading-none">
-            Join Moore Circle.
+            Join Our Newsletter.
           </h2>
           <p className="text-gray-500 text-base sm:text-lg md:text-xl lg:text-2xl font-light">
             Receive exclusive invitations, corporate rates, and priority guest services.
@@ -421,7 +421,7 @@ const Home: React.FC = () => {
                 {subscribing && (
                   <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
                 )}
-                {subscribing ? "SUBSCRIBING..." : "Request Membership"}
+                {subscribing ? "SUBSCRIBING..." : "Subscribe Now"}
               </button>
             </form>
           </div>

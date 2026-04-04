@@ -121,7 +121,7 @@ const Rooms: React.FC = () => {
             Connection <span className="text-primary">Offline</span>
           </h1>
           <p className="text-gray-500 text-[10px] uppercase tracking-[0.5em] font-black max-w-sm mx-auto">
-            Unable to establish connection to the hotel registry.
+            Unable to establish connection to the hotel database.
           </p>
         </div>
         <button
@@ -142,8 +142,8 @@ const Rooms: React.FC = () => {
         <header className="mb-12 space-y-8 sm:space-y-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8">
             <div className="space-y-3 sm:space-y-4">
-              <p className="text-primary text-[9px] sm:text-[10px] font-black uppercase tracking-[0.5em]">Sanctuary Registry</p>
-              <h1 className="serif-font text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white italic leading-tight">The Collection</h1>
+              <p className="text-primary text-[9px] sm:text-[10px] font-black uppercase tracking-[0.5em]">Room List</p>
+              <h1 className="serif-font text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white italic leading-tight">Our Rooms</h1>
             </div>
             <button
               onClick={() => setFiltersOpen(true)}
@@ -285,7 +285,7 @@ const Rooms: React.FC = () => {
               onClick={handleReset}
               className="bg-primary text-black px-8 sm:px-10 md:px-12 py-3 sm:py-4 md:py-5 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.35em] rounded-sm hover:bg-[#B04110] transition-all shadow-2xl shadow-primary/40 active:scale-95 mx-auto"
             >
-              Reset Registry Filter
+              Reset Filters
             </button>
           </div>
         )}
@@ -297,8 +297,8 @@ const Rooms: React.FC = () => {
             <div className="relative w-full sm:max-w-sm md:max-w-md bg-background-dark border-l border-white/10 h-full p-6 sm:p-8 md:p-10 flex flex-col animate-in slide-in-from-right duration-500 shadow-2xl">
               <div className="flex justify-between items-center mb-12 sm:mb-16">
                 <div className="space-y-1">
-                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.45em] font-black text-primary">Advanced Registry</p>
-                  <p className="text-[7px] sm:text-[8px] text-gray-500 uppercase tracking-widest font-black italic">Refine your sanctuary search</p>
+                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.45em] font-black text-primary">Filters</p>
+                  <p className="text-[7px] sm:text-[8px] text-gray-500 uppercase tracking-widest font-black italic">Search for rooms</p>
                 </div>
                 <button onClick={() => setFiltersOpen(false)} className="text-white hover:text-primary transition-colors">
                   <span className="material-symbols-outlined">close</span>
@@ -308,7 +308,7 @@ const Rooms: React.FC = () => {
               <div className="space-y-8 sm:space-y-10 flex-1 overflow-y-auto pr-2 sm:pr-4 custom-scrollbar">
                 {/* Search */}
                 <div className="space-y-3 sm:space-y-4">
-                  <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.3em] text-gray-600 font-black">Search Room Registry</p>
+                  <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.3em] text-gray-600 font-black">Search Rooms</p>
                   <input
                     placeholder="Room Name, Number or Tier"
                     value={searchQuery}
@@ -355,7 +355,7 @@ const Rooms: React.FC = () => {
                 {/* Budget */}
                 <div className="space-y-4 sm:space-y-6">
                   <div className="flex justify-between items-end">
-                    <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.3em] text-gray-600 font-black">Nightly Investment Max</p>
+                    <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.3em] text-gray-600 font-black">Max Price per Night</p>
                     <p className="serif-font text-xl sm:text-2xl text-primary italic">₦{budget.toLocaleString()}</p>
                   </div>
                   <input
@@ -381,7 +381,7 @@ const Rooms: React.FC = () => {
                   onClick={() => setFiltersOpen(false)}
                   className="flex-1 bg-primary text-black py-4 sm:py-5 text-[9px] sm:text-[10px] uppercase tracking-widest font-black shadow-xl shadow-primary/20 hover:bg-[#B04110] transition-all"
                 >
-                  Apply Protocol
+                  Apply Filters
                 </button>
               </div>
             </div>

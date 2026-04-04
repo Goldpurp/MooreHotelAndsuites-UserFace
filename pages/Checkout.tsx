@@ -164,9 +164,9 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     if (!selectedMethod) {
       setNotification({
         show: true,
-        title: "Payment Instrument",
+        title: "Payment Method",
         message:
-          "Please select a payment instrument to proceed with the reservation.",
+          "Please select a payment method to proceed with your booking.",
         type: "info",
       });
       document
@@ -178,7 +178,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     if (!isAvailable) {
       setNotification({
         show: true,
-        title: "Sanctuary Unavailable",
+        title: "Hotel Unavailable",
         message:
           availabilityMessage || "Room is unavailable for the selected dates.",
         type: "error",
@@ -204,7 +204,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
         checkIn,
         checkOut,
         paymentMethod: PaymentMethod.Paystack,
-        notes: user ? "Authorized via Member Portal" : "Guest Booking",
+        notes: user ? "Member Booking" : "Guest Booking",
       });
 
       if (booking.paymentUrl) {
@@ -221,10 +221,10 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     } catch (err: any) {
       setNotification({
         show: true,
-        title: "Transaction Failed",
+        title: "Booking Failed",
         message:
           err.message ||
-          "We encountered an error while securing your reservation.",
+          "We encountered an error while processing your booking.",
         type: "error",
       });
       setProcessing(false);
@@ -272,8 +272,8 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     } catch (err: any) {
       setNotification({
         show: true,
-        title: "Transaction Error",
-        message: err.message || "Failed to log the transaction registry.",
+        title: "Payment Error",
+        message: err.message || "Failed to record your payment.",
         type: "error",
       });
       setProcessing(false);
@@ -284,8 +284,8 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   if (fetchingRoom || !room) {
     return (
       <AestheticLoader
-        message="Fetching Registry"
-        subtext="Locating Sanctuary Records..."
+        message="Loading Booking"
+        subtext="Fetching Room details..."
       />
     );
   }
@@ -303,8 +303,8 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
       <div className="max-w-[1400px] mx-auto">
         {(processing || loading) && (
           <AestheticLoader
-            message="Validating Registry"
-            subtext="Securing High-Security Handshake..."
+            message="Processing Booking"
+            subtext="Securing your payment..."
           />
         )}
 
@@ -319,10 +319,10 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   </span>
                 </div>
                 <h2 className="serif-font text-2xl text-white italic">
-                  Registry <span className="text-primary">Transfer</span>
+                  Bank <span className="text-primary">Transfer</span>
                 </h2>
                 <p className="text-[9px] uppercase tracking-widest text-gray-400 font-black mt-1">
-                  Secure Bank Settlement Protocol
+                  Secure Payment Protocol
                 </p>
               </div>
 
@@ -416,12 +416,12 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
           <div className="lg:col-span-8 space-y-12">
             <header className="space-y-4">
               <h1 className="serif-font text-5xl md:text-7xl text-white italic">
-                Authorise <span className="text-primary">Stay</span>
+                Confirm <span className="text-primary">Booking</span>
               </h1>
               <div className="flex items-center gap-4 text-gray-600">
                 <span className="w-8 h-px bg-gray-600"></span>
                 <p className="text-[10px] uppercase tracking-[0.5em] font-black">
-                  Step 02: Verification & Payment
+                  Step 02: Details & Payment
                 </p>
               </div>
             </header>
@@ -485,7 +485,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
-                    Email Registry
+                    Email Address
                   </label>
                   <input
                     type="email"
@@ -527,8 +527,8 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
               {!user && (
                 <p className="text-[9px] text-gray-600 uppercase tracking-widest italic pt-4">
-                  * Note: Creating an account later will allow you to track this
-                  stay in your private vault.
+                  * Note: Creating an account later will allow you to track your
+                  bookings in your profile.
                 </p>
               )}
             </section>
@@ -538,7 +538,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
               className="bg-surface-dark border border-white/5 p-8 md:p-12 space-y-10 scroll-mt-32"
             >
               <h3 className="serif-font text-2xl text-white italic">
-                Payment Instrument
+                Payment Method
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
@@ -635,7 +635,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
                 <div className="pt-6 border-t border-white/10 text-right space-y-1">
                   <p className="text-[9px] uppercase font-black text-gray-600 tracking-widest">
-                    Total Authorised Investment
+                    Total Price
                   </p>
                   <p className="serif-font text-4xl text-primary font-bold italic drop-shadow-lg">
                     ₦{totalAmount.toLocaleString()}
@@ -650,11 +650,11 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   {loading && (
                     <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
                   )}
-                  {loading ? "SECURING..." : "Authorise Reservation"}
+                  {loading ? "PROCESSING..." : "Confirm Booking"}
                 </button>
 
                 <p className="text-[8px] text-center text-gray-700 uppercase tracking-[0.3em] font-black italic">
-                  Encrypted Handshake Link Active
+                  Secure Payment Active
                 </p>
               </div>
             </div>

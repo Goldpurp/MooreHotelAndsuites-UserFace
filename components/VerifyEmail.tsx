@@ -42,8 +42,8 @@ const VerifyEmail: React.FC = () => {
   if (status === "loading") {
     return (
       <AestheticLoader
-        message="Verifying Identity"
-        subtext="Consulting the Moore Registry..."
+        message="Verifying Email"
+        subtext="Checking our records..."
         isFullPage
       />
     );
@@ -65,11 +65,11 @@ const VerifyEmail: React.FC = () => {
           {status === "success" && (
             <div className="animate-in fade-in zoom-in duration-700">
               <h2 className="text-[#354c9d] text-4xl font-serif italic mb-2">
-                Identity Confirmed
+                Email Verified
               </h2>
               <div className="h-px w-12 bg-[#31458E] mx-auto my-4" />
               <p className="text-primary uppercase tracking-[0.2em] text-[10px] leading-relaxed">
-                Your sanctuary is being prepared. Access granted shortly.
+                Your account is ready. You can sign in shortly.
               </p>
             </div>
           )}
@@ -94,7 +94,7 @@ const VerifyEmail: React.FC = () => {
         </div>
 
         <p className="mt-8 text-[9px] text-zinc-700 tracking-[0.5em] uppercase text-center">
-          © Moore Hotels & Suites • Private Access
+          © Moore Hotels & Suites • Secure Access
         </p>
       </div>
     </div>

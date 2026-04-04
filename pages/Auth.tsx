@@ -52,9 +52,9 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       errors.email = "Enter a valid email.";
 
     if (mode !== "forgot") {
-      if (!formData.password) errors.password = "Access key is required.";
+      if (!formData.password) errors.password = "Password is required.";
       else if (formData.password.length < 6)
-        errors.password = "Key must be at least 6 characters.";
+        errors.password = "Password must be at least 6 characters.";
     }
 
     if (mode === "register") {
@@ -79,8 +79,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         await api.resetPasswordRequest(formData.email);
         setModal({
           show: true,
-          title: "Recovery Initiated",
-          message: "Instructions to reset your access key have been sent to your email.",
+          title: "Password Reset Sent",
+          message: "Instructions to reset your password have been sent to your email.",
           type: "success",
         });
         return;
@@ -114,8 +114,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     } catch (err: any) {
       setModal({
         show: true,
-        title: "Authentication Failed",
-        message: err.message || "Credential verification failed.",
+        title: "Login Failed",
+        message: err.message || "Invalid credentials provided.",
         type: "error",
       });
     } finally {
@@ -125,13 +125,13 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
 
   const getButtonText = () => {
     if (loading) {
-      if (mode === "register") return "ESTABLISHING IDENTITY...";
-      if (mode === "forgot") return "INITIATING RECOVERY...";
-      return "VERIFYING ACCESS...";
+      if (mode === "register") return "CREATING ACCOUNT...";
+      if (mode === "forgot") return "RESETTING PASSWORD...";
+      return "SIGNING IN...";
     }
-    if (mode === "register") return "ESTABLISH IDENTITY";
-    if (mode === "forgot") return "INITIATE RECOVERY";
-    return "VERIFY ACCESS";
+    if (mode === "register") return "CREATE ACCOUNT";
+    if (mode === "forgot") return "RESET PASSWORD";
+    return "SIGN IN";
   };
 
   return (
@@ -163,10 +163,10 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           </div>
           <div className="space-y-[clamp(0.5rem,1vw,1.5rem)]">
             <h2 className="serif-font text-[clamp(2rem,4vw,5rem)] text-white italic">
-              Sanctuary Awaits
+              Welcome to Moore
             </h2>
             <p className="text-gray-400 text-[clamp(0.6rem,1vw,0.9rem)] uppercase tracking-[0.4em] font-light max-w-sm mx-auto leading-loose">
-              Exclusive access to Lagos' most prestigious private collection of suites and services.
+              Experience the finest collection of suites and professional services in Lagos.
             </p>
           </div>
         </div>
@@ -186,27 +186,27 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           </div>
             <h1 className="serif-font text-[clamp(2rem,5vw,3rem)] text-white italic">
               {mode === "register"
-                ? "Join Circle"
+                ? "Sign Up"
                 : mode === "forgot"
-                  ? "Reset Access"
-                  : "Welcome Back"}
+                  ? "Reset Password"
+                  : "Sign In"}
             </h1>
           </div>
 
           <div className="space-y-4">
             <h2 className="serif-font text-[clamp(2rem,5vw,3rem)] text-white italic hidden lg:block">
               {mode === "register"
-                ? "Begin Your Story"
+                ? "Join Our Hotel"
                 : mode === "forgot"
-                  ? "Recover Identity"
-                  : "Verify Identity"}
+                  ? "Reset Password"
+                  : "Welcome Back"}
             </h2>
             <p className="text-gray-500 text-[clamp(0.6rem,1vw,0.8rem)] uppercase tracking-[0.5em] font-black italic">
               {mode === "register"
-                ? "Identify yourself for a tailored residency"
+                ? "Enter your details to create an account"
                 : mode === "forgot"
-                  ? "Provide your registry email to initiate recovery"
-                  : "Provide your credentials to access the vault"}
+                  ? "Enter your email to receive reset instructions"
+                  : "Enter your credentials to access your account"}
             </p>
           </div>
 
@@ -287,7 +287,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             {mode !== "forgot" && (
               <div className="space-y-2">
                 <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
-                  Access Key
+                  Password
                 </label>
                 <input
                   required
@@ -322,13 +322,13 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           {/* Footer */}
           <div className="pt-6 text-center text-[clamp(0.6rem,1vw,0.7rem)] uppercase tracking-[0.2em] font-black border-t border-white/5 space-y-4">
             <div>
-              <span className="text-gray-700">{mode === "register" ? "EXISTING MEMBER?" : "NEW TO ANTHOLOGY?"}</span>
+              <span className="text-gray-700">{mode === "register" ? "ALREADY HAVE AN ACCOUNT?" : "NEW TO MOORE?"}</span>
               <button
                 disabled={loading}
                 onClick={() => setMode(mode === "register" ? "login" : "register")}
                 className="text-primary hover:text-white ml-3 transition-colors border-b border-primary/20 pb-0.5 italic disabled:opacity-50"
               >
-                {mode === "register" ? "SIGN IN" : "JOIN CIRCLE"}
+                {mode === "register" ? "SIGN IN" : "SIGN UP"}
               </button>
             </div>
             {mode === "forgot" && (

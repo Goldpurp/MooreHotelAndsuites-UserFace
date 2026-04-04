@@ -7,7 +7,7 @@ const Privacy: React.FC = () => {
         {/* HEADER */}
         <header className="space-y-4 border-b border-white/5 pb-8 md:pb-12">
           <p className="text-primary text-[10px] sm:text-[11px] font-black uppercase tracking-[0.5em]">
-            Legal Sanctuary
+            Privacy Policy
           </p>
           <h1 className="serif-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white">
             Privacy <span className="italic">Policy</span>
@@ -24,7 +24,7 @@ const Privacy: React.FC = () => {
               1. Our Commitment
             </h2>
             <p>
-              At Moore Hotels & Suites, we recognize that your privacy is a cornerstone of your peace of mind. As a provider of sanctuary, we are committed to protecting the personal data you entrust to us. This policy outlines how we collect, use, and safeguard your information across our global portfolio of properties and digital platforms.
+              At Moore Hotels & Suites, we recognize that your privacy is a cornerstone of your peace of mind. As a provider of hospitality, we are committed to protecting the personal data you entrust to us. This policy outlines how we collect, use, and safeguard your information across our property and digital platforms.
             </p>
           </section>
 
@@ -36,13 +36,13 @@ const Privacy: React.FC = () => {
               <p>To provide an unrivaled hospitality experience, we collect the following categories of data:</p>
               <ul className="list-disc pl-6 space-y-2 md:space-y-3 marker:text-primary">
                 <li>
-                  <strong className="text-white">Identity Data:</strong> Legal name, passport details, nationality, and biometric identifiers where applicable for secure access.
+                  <strong className="text-white">Personal Data:</strong> Legal name, passport details, nationality, and digital identifiers where applicable for secure access.
                 </li>
                 <li>
                   <strong className="text-white">Contact Data:</strong> Residential address, personal email, and phone numbers.
                 </li>
                 <li>
-                  <strong className="text-white">Stay Preferences:</strong> Dietary requirements, pillow choices, room temperature preferences, and historical stay feedback to personalize your next arrival.
+                  <strong className="text-white">Stay Preferences:</strong> Dietary requirements, pillow choices, room temperature preferences, and historical stay feedback to personalize your next check-in.
                 </li>
                 <li>
                   <strong className="text-white">Financial Data:</strong> Encrypted payment card information and transaction history within the Moore ecosystem.
@@ -78,7 +78,7 @@ const Privacy: React.FC = () => {
               5. Your Rights
             </h2>
             <p>
-              You maintain the absolute right to access, rectify, or request the deletion of your personal identity records. You may exercise these rights at any time by contacting our Privacy Concierge at{" "}
+              You maintain the absolute right to access, rectify, or request the deletion of your personal records. You may exercise these rights at any time by contacting us at{" "}
               <span className="text-primary italic">privacy@moorehotel.com</span>.
             </p>
           </section>

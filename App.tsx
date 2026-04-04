@@ -72,8 +72,8 @@ const App: React.FC = () => {
         {/* If still checking auth, show loader. Otherwise, show routes */}
         {loading ? (
           <AestheticLoader 
-            message="Establishing Sanctuary" 
-            subtext="Secure Registry Link Active..." 
+            message="Loading Application" 
+            subtext="Connecting to Hotel Services..." 
           />
         ) : (
           <Suspense fallback={<AestheticLoader message="Loading page..." subtext="Please wait..." />}>

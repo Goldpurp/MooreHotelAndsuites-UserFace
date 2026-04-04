@@ -136,7 +136,7 @@ const Services: React.FC = () => {
                 },
                 {
                   icon: "mail",
-                  label: "Registry Email",
+                  label: "Contact Email",
                   value: "info@moorehotelandsuites.com",
                   href: "mailto:info@moorehotelandsuites.com",
                 },
@@ -169,7 +169,7 @@ const Services: React.FC = () => {
               onClick={() => setShowModal(false)}
               className="w-full bg-primary text-black py-4 md:py-5 uppercase text-[11px] md:text-[12px] font-black tracking-widest hover:bg-[#B04110]transition-all shadow-xl shadow-primary/20 active:scale-95 rounded-xl"
             >
-              Return to Registry
+              Back to Services
             </button>
           </div>
         </div>

@@ -20,15 +20,15 @@ const Terms: React.FC = () => {
           {[
             {
               title: "Acceptance of Terms",
-              content: "By accessing the Moore Hotels & Suites digital platforms or reserving a sanctuary within our properties, you agree to be bound by these Terms of Use. These terms constitute a binding legal agreement between you and the Sanctuary Group."
+              content: "By accessing the Moore Hotels & Suites digital platforms or booking a room within our properties, you agree to be bound by these Terms of Use. These terms constitute a binding legal agreement between you and Moore Hotels & Suites."
             },
             {
               title: "Reservation & Guarantee",
-              content: "All reservations must be guaranteed by a valid credit instrument or through pre-authorized Moore Circle credentials. A sanctuary is only considered 'Reserved' upon the issuance of a unique MHS Booking Code."
+              content: "All reservations must be guaranteed by a valid payment method or through authorized member credentials. A room is only considered 'Reserved' upon the issuance of a unique MHS Booking Code."
             },
             {
               title: "Cancellation & No-Show",
-              content: "To maintain the integrity of our quietude, cancellations must be made 48 hours prior to arrival. Late cancellations or no-shows will incur a fee equivalent to one night's base rate plus applicable resort taxes."
+              content: "To maintain the integrity of our quietude, cancellations must be made 48 hours prior to check-in. Late cancellations or no-shows will incur a fee equivalent to one night's base rate plus applicable resort taxes."
             },
             {
               title: "Guest Conduct",
@@ -36,7 +36,7 @@ const Terms: React.FC = () => {
             },
             {
               title: "Limitation of Liability",
-              content: "While we strive for perfection, the Sanctuary Group is not liable for indirect, incidental, or consequential damages resulting from the use of our facilities or digital services, except where strictly mandated by law."
+              content: "While we strive for perfection, Moore Hotels & Suites is not liable for indirect, incidental, or consequential damages resulting from the use of our facilities or digital services, except where strictly mandated by law."
             },
             {
               title: "Governing Law",

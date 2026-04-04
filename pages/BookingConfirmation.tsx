@@ -22,7 +22,7 @@ const BookingConfirmation: React.FC = () => {
       setBooking(updatedBooking);
       return updatedBooking;
     } catch (err) {
-      console.error("Registry sync failed", err);
+      console.error("Booking sync failed", err);
     }
   };
 
@@ -35,14 +35,14 @@ const BookingConfirmation: React.FC = () => {
           currentBooking = await api.getBookingByCode(code);
           setBooking(currentBooking);
         } catch {
-          setError("Reservation not found.");
+          setError("Booking not found.");
           setLoading(false);
           return;
         }
       }
 
       if (!currentBooking) {
-        setError("No active reservation detected.");
+        setError("No active booking detected.");
         setLoading(false);
         return;
       }
@@ -81,7 +81,7 @@ const BookingConfirmation: React.FC = () => {
     pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
     pdf.setTextColor("#666");
-    pdf.text("Moore Hotels & Suites • Guest Registry", pageWidth / 2, 70, { align: "center" });
+    pdf.text("Moore Hotels & Suites • Guest Record", pageWidth / 2, 70, { align: "center" });
 
     pdf.setDrawColor(234, 179, 8);
     pdf.setLineWidth(1);
@@ -129,7 +129,7 @@ const BookingConfirmation: React.FC = () => {
     pdf.save(`Booking-${booking.bookingCode}.pdf`);
   };
 
-  if (loading) return <AestheticLoader message="Syncing Reservation..." subtext="Verifying details..." />;
+  if (loading) return <AestheticLoader message="Loading Booking..." subtext="Verifying details..." />;
 
   if (error)
     return (
@@ -166,7 +166,7 @@ const BookingConfirmation: React.FC = () => {
           <h2 className="serif-font text-2xl md:text-3xl text-white italic">
             {isPending ? 'Pending' : 'Confirmed'}
           </h2>
-          <p className="text-gray-400 text-[10px] uppercase tracking-widest">Guest Registry</p>
+          <p className="text-gray-400 text-[10px] uppercase tracking-widest">Guest Record</p>
         </div>
 
         {/* Booking Summary */}
@@ -218,7 +218,7 @@ const BookingConfirmation: React.FC = () => {
             to="/profile"
             className="w-full bg-primary text-black py-3 rounded font-black text-xs uppercase tracking-widest hover:bg-[#B04110] transition-all text-center"
           >
-            View My Reservation
+            View My Bookings
           </Link>
           <Link
             to="/"
