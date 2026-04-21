@@ -405,7 +405,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
               </div>
 
               {/* Footer */}
-              <p className="text-[7px] text-center text-gray-600 uppercase tracking-widest font-black italic py-2">
+              <p className="text-[7px] text-center text-white uppercase tracking-widest font-black italic py-2">
                 End-to-End Encryption Enabled
               </p>
             </div>
@@ -418,7 +418,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
               <h1 className="serif-font text-5xl md:text-7xl text-white italic">
                 Confirm <span className="text-primary">Booking</span>
               </h1>
-              <div className="flex items-center gap-4 text-gray-600">
+              <div className="flex items-center gap-4 text-white">
                 <span className="w-8 h-px bg-gray-600"></span>
                 <p className="text-[10px] uppercase tracking-[0.5em] font-black">
                   Step 02: Details & Payment
@@ -444,7 +444,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-white ml-1">
                     First Name
                   </label>
                   <input
@@ -464,7 +464,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-white ml-1">
                     Last Name
                   </label>
                   <input
@@ -484,7 +484,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-white ml-1">
                     Email Address
                   </label>
                   <input
@@ -504,7 +504,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
+                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-white ml-1">
                     Contact Phone
                   </label>
                   <input
@@ -526,7 +526,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
               </div>
 
               {!user && (
-                <p className="text-[9px] text-gray-600 uppercase tracking-widest italic pt-4">
+                <p className="text-[9px] text-white uppercase tracking-widest italic pt-4">
                   * Note: Creating an account later will allow you to track your
                   bookings in your profile.
                 </p>
@@ -634,7 +634,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                 </div>
 
                 <div className="pt-6 border-t border-white/10 text-right space-y-1">
-                  <p className="text-[9px] uppercase font-black text-gray-600 tracking-widest">
+                  <p className="text-[9px] uppercase font-black text-white tracking-widest">
                     Total Price
                   </p>
                   <p className="serif-font text-4xl text-primary font-bold italic drop-shadow-lg">

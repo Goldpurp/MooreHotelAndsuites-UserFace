@@ -187,7 +187,7 @@ const RoomDetail: React.FC = () => {
             <p className="text-primary text-[9px] uppercase tracking-[0.6em] font-black">
               Room {room.roomNumber}
             </p>
-            <h1 className="serif-font text-4xl md:text-7xl italic text-white">
+            <h1 className="serif-font text-3xl md:text-5xl italic text-white">
               {room.name}
             </h1>
           </div>
@@ -221,7 +221,7 @@ const RoomDetail: React.FC = () => {
       <div className="max-w-[1600px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
         <div className="lg:col-span-8 space-y-12 md:space-y-16">
           <section className="my-[-110px]">
-            <h2 className="serif-font text-2xl md:text-4xl text-white leading-tight">
+            <h2 className="serif-font text-l md:text-2xl text-white leading-tight">
               {room.description || "A refined room crafted for comfort."}
             </h2>
 

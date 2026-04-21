@@ -236,7 +236,7 @@ const Home: React.FC = () => {
       </header>
 
       {/* All sections below now fully fluid/responsive */}
-      <section className="py-24 md:py-40 px-6 overflow-hidden">
+      <section className="py-14 md:py-20 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 md:gap-24">
           <div className="flex-1 space-y-8 lg:space-y-10 order-2 lg:order-1">
             <div className="space-y-4">
@@ -276,7 +276,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* EXECUTIVE ROOM COLLECTION */}
-      <section className="py-24 md:py-40 px-6 bg-surface-dark/40">
+      <section className="py-4 md:py-10 px-6 bg-surface-dark/40">
         <div className="max-w-[1800px] mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 md:mb-16 gap-6 md:gap-8">
             <div className="space-y-2 md:space-y-4 text-left">
@@ -330,7 +330,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* HOTEL PERSPECTIVE */}
-      <section className="py-24 md:py-40 bg-black relative overflow-hidden px-6">
+      <section className="py-10 md:py-20 bg-black relative overflow-hidden px-6">
         <div className="max-w-[1800px] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             <div className="lg:col-span-5 space-y-8 md:space-y-10">
@@ -373,11 +373,11 @@ const Home: React.FC = () => {
       </section>
 
       {/* QUOTE */}
-      <section className="py-24 md:py-32 bg-black text-center px-6 border-y border-white/5">
+      <section className="md:pb-12 bg-black text-center px-6 border-y border-white/5">
         <div className="max-w-4xl mx-auto space-y-8 md:space-y-12">
           <span className="material-symbols-outlined text-primary/30 text-6xl md:text-8xl">format_quote</span>
           <h2 className="serif-font text-2xl sm:text-3xl md:text-5xl lg:text-6xl text-white italic leading-relaxed font-light">
-            "At Moore Hotels, every guest experience is handled with professional precision and Nigerian warmth."
+            At Moore Hotels, every guest experience is handled with professional precision and Nigerian warmth.
           </h2>
           <p className="text-[11px] uppercase tracking-[0.4em] text-primary font-black">Alase Moore</p>
         </div>
@@ -386,7 +386,7 @@ const Home: React.FC = () => {
       <FAQ />
 
       {/* NEWSLETTER */}
-      <section className="py-32 md:py-48 px-6 text-center">
+      <section className="py-20 md:py-28 px-6 text-center">
         <div className="max-w-4xl mx-auto space-y-8 md:space-y-12">
           <h2 className="serif-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-white italic leading-none">
             Join Our Newsletter.
