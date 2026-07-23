@@ -2,100 +2,149 @@ import React from "react";
 
 const Privacy: React.FC = () => {
   return (
-    <div className="bg-background-dark pt-24 md:pt-32 pb-16 md:pb-20 min-h-screen px-4 sm:px-6 lg:px-12">
-      <div className="max-w-4xl mx-auto space-y-12 md:space-y-16">
-        {/* HEADER */}
-        <header className="space-y-4 border-b border-white/5 pb-8 md:pb-12">
-          <p className="text-primary text-[10px] sm:text-[11px] font-black uppercase tracking-[0.5em]">
-            Privacy Policy
+    <div className="min-h-screen bg-background-dark px-4 pb-20 pt-32 sm:px-6">
+      <div className="ui-container max-w-4xl">
+        <header className="border-b border-white/10 pb-9">
+          <p className="ui-eyebrow">
+            Privacy Notice
           </p>
-          <h1 className="serif-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white">
-            Privacy <span className="italic">Policy</span>
+          <h1 className="ui-page-title mt-3 text-white">
+            Your Data, <span className="italic">Clearly Explained</span>
           </h1>
-          <p className="text-gray-500 text-[9px] sm:text-xs uppercase tracking-widest font-medium">
-            Last Updated: October 24, 2024
+          <p className="mt-4 text-sm text-gray-500">
+            Last Updated: July 13, 2026
           </p>
         </header>
 
-        {/* CONTENT SECTIONS */}
-        <div className="space-y-10 md:space-y-12 text-gray-400 font-light leading-relaxed">
-          <section className="space-y-4 md:space-y-6">
-            <h2 className="serif-font text-2xl sm:text-3xl md:text-3xl lg:text-3xl text-white italic">
-              1. Our Commitment
-            </h2>
+        <div className="mt-10 space-y-10 text-[0.96rem] leading-8 text-gray-400">
+          <PolicySection title="1. Who This Notice Covers">
             <p>
-              At Moore Hotels & Suites, we recognize that your privacy is a cornerstone of your peace of mind. As a provider of hospitality, we are committed to protecting the personal data you entrust to us. This policy outlines how we collect, use, and safeguard your information across our property and digital platforms.
+              This notice explains how Moore Hotels &amp; Suites handles personal data when you
+              browse this website, create an account, make or manage a reservation, contact us,
+              pay for a stay, or interact with the hotel. It should be read together with the
+              terms attached to your reservation.
             </p>
-          </section>
+          </PolicySection>
 
-          <section className="space-y-4 md:space-y-6">
-            <h2 className="serif-font text-2xl sm:text-3xl md:text-3xl lg:text-3xl text-white italic">
-              2. Information We Collect
-            </h2>
-            <div className="space-y-3 md:space-y-4">
-              <p>To provide an unrivaled hospitality experience, we collect the following categories of data:</p>
-              <ul className="list-disc pl-6 space-y-2 md:space-y-3 marker:text-primary">
-                <li>
-                  <strong className="text-white">Personal Data:</strong> Legal name, passport details, nationality, and digital identifiers where applicable for secure access.
-                </li>
-                <li>
-                  <strong className="text-white">Contact Data:</strong> Residential address, personal email, and phone numbers.
-                </li>
-                <li>
-                  <strong className="text-white">Stay Preferences:</strong> Dietary requirements, pillow choices, room temperature preferences, and historical stay feedback to personalize your next check-in.
-                </li>
-                <li>
-                  <strong className="text-white">Financial Data:</strong> Encrypted payment card information and transaction history within the Moore ecosystem.
-                </li>
-              </ul>
-            </div>
-          </section>
-
-          <section className="space-y-4 md:space-y-6">
-            <h2 className="serif-font text-2xl sm:text-3xl md:text-3xl lg:text-3xl text-white italic">
-              3. How We Use Your Data
-            </h2>
-            <p>Your information is used solely to enhance your journey with us. This includes:</p>
-            <ul className="list-disc pl-6 space-y-2 md:space-y-3 marker:text-primary">
-              <li>Executing your reservations and processing payments.</li>
-              <li>Anticipating your needs through curated concierge services.</li>
-              <li>Maintaining the security and safety of our sanctuaries and guests.</li>
-              <li>Inviting you to exclusive events via the Moore Circle membership.</li>
+          <PolicySection title="2. Information We Collect">
+            <p>Depending on how you use our services, we may collect:</p>
+            <ul className="list-disc pl-6 space-y-2 marker:text-primary">
+              <li>Your name, email address, telephone number, and account details.</li>
+              <li>Reservation dates, room selection, booking reference, status, and requests.</li>
+              <li>Payment status and transaction references supplied by our payment provider.</li>
+              <li>Messages, cancellation reasons, support requests, and stay history.</li>
+              <li>
+                Basic technical and security records, such as request times, device or browser
+                information, and service logs where generated by our hosting or security systems.
+              </li>
             </ul>
-          </section>
-
-          <section className="space-y-4 md:space-y-6">
-            <h2 className="serif-font text-2xl sm:text-3xl md:text-3xl lg:text-3xl text-white italic">
-              4. Data Sharing & Security
-            </h2>
             <p>
-              Moore Hotels & Suites never sells your data. We only share information with trusted partners (such as private chauffeurs or specialized spa practitioners) when necessary to fulfill your requests. All data is stored in encrypted, high-security environments compliant with global protection standards (GDPR, NDPR).
+              Online card payments are handled by the payment provider. This website is not
+              designed to receive or store your full card number or card security code.
             </p>
-          </section>
+          </PolicySection>
 
-          <section className="space-y-4 md:space-y-6">
-            <h2 className="serif-font text-2xl sm:text-3xl md:text-3xl lg:text-3xl text-white italic">
-              5. Your Rights
-            </h2>
+          <PolicySection title="3. Why We Use It">
+            <ul className="list-disc pl-6 space-y-2 marker:text-primary">
+              <li>To search availability, create reservations, and provide hotel services.</li>
+              <li>To process or verify payments, cancellations, and refunds.</li>
+              <li>To authenticate accounts and protect guests, staff, and our systems.</li>
+              <li>To send operational messages about accounts, payments, and reservations.</li>
+              <li>To meet legal, accounting, safety, fraud-prevention, and dispute obligations.</li>
+              <li>
+                To send marketing only where a lawful basis applies; the current website does not
+                complete an online newsletter subscription.
+              </li>
+            </ul>
+          </PolicySection>
+
+          <PolicySection title="4. Service Providers and Sharing">
             <p>
-              You maintain the absolute right to access, rectify, or request the deletion of your personal records. You may exercise these rights at any time by contacting us at{" "}
-              <span className="text-primary italic">privacy@moorehotel.com</span>.
+              We may share only the data needed with providers that support payment processing,
+              email delivery, cloud hosting, image delivery, security, and other hotel operations.
+              We may also disclose data where required by law, to protect a person or the hotel,
+              or as part of a properly governed business transaction. We do not sell guest data.
             </p>
-          </section>
+          </PolicySection>
+
+          <PolicySection title="5. Storage, Retention, and Security">
+            <p>
+              We retain information only for as long as needed for reservations, guest service,
+              accounting, legal claims, security, and other documented business requirements.
+              Retention periods can differ by record type. We use measures such as HTTPS,
+              authenticated staff access, and access controls, but no online service can promise
+              absolute security. Please do not send card security codes or passwords by email.
+            </p>
+          </PolicySection>
+
+          <PolicySection title="6. Browser Storage and External Content">
+            <p>
+              The website uses tab-scoped browser storage to keep you signed in and to securely
+              reconnect you with a booking after payment. That information is removed when the tab
+              session ends or you sign out. Pages may load fonts, images, video, or payment pages
+              from third-party services, which may receive ordinary connection information under
+              their own notices. We do not currently use advertising cookies on this website.
+            </p>
+          </PolicySection>
+
+          <PolicySection title="7. Your Rights">
+            <p>
+              Subject to applicable law and identity verification, you may ask whether we process
+              your data and request access, correction, deletion, restriction, portability, or an
+              objection to certain processing. You may also complain to the Nigeria Data
+              Protection Commission. The Commission publishes further information about data
+              subject rights under the Nigeria Data Protection Act 2023 on its official website.
+            </p>
+            <a
+              href="https://www.ndpc.gov.ng/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block text-primary hover:text-white transition-colors"
+            >
+              Nigeria Data Protection Commission
+            </a>
+          </PolicySection>
+
+          <PolicySection title="8. Contact Us">
+            <p>
+              For privacy questions or requests, contact{" "}
+              <a
+                className="text-primary italic hover:text-white"
+                href="mailto:info@moorehotelandsuites.com"
+              >
+                info@moorehotelandsuites.com
+              </a>
+              , call +234 803 377 4544, or write to Moore Hotels &amp; Suites, Harmony
+              Estate, Along Sagamu–Ikenne Road, Beside NYSC Camp, Sagamu, Ogun State,
+              Nigeria.
+            </p>
+          </PolicySection>
         </div>
 
-        {/* FOOTER */}
-        <footer className="pt-8 md:pt-12 border-t border-white/5 flex justify-center">
+        <footer className="mt-12 flex justify-center border-t border-white/10 pt-8">
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-2 md:gap-3 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-primary hover:text-white transition-all"
+            className="ui-button ui-button-secondary"
           >
-            <span className="material-symbols-outlined">print</span> Print Documentation
+            <span className="material-symbols-outlined" aria-hidden="true">print</span> Print notice
           </button>
         </footer>
       </div>
     </div>
   );
 };
+
+const PolicySection = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <section>
+    <h2 className="ui-card-title mb-4 italic text-white">{title}</h2>
+    {children}
+  </section>
+);
 
 export default Privacy;

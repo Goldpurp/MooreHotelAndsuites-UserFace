@@ -10,10 +10,15 @@ const VerifyEmail: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true;
+    let redirectTimer: number | undefined;
 
     const triggerVerification = async () => {
       const userId = searchParams.get("userId");
       const token = searchParams.get("token");
+
+      // Remove the one-time token from browser history before any third-party
+      // image or font request can inherit the page URL as a referrer.
+      window.history.replaceState(null, "", "/verify-email");
 
       if (!userId || !token) {
         if (isMounted) setStatus("error");
@@ -25,7 +30,7 @@ const VerifyEmail: React.FC = () => {
 
         if (isMounted) {
           setStatus("success");
-          setTimeout(() => navigate("/auth?verified=1"), 4000);
+          redirectTimer = window.setTimeout(() => navigate("/auth?verified=1"), 4000);
         }
       } catch {
         if (isMounted) setStatus("error");
@@ -35,6 +40,7 @@ const VerifyEmail: React.FC = () => {
     triggerVerification();
     return () => {
       isMounted = false;
+      if (redirectTimer) window.clearTimeout(redirectTimer);
     };
   }, [searchParams, navigate]);
 
@@ -50,52 +56,49 @@ const VerifyEmail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6 font-sans">
-      <div className="max-w-md w-full">
-        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-10 shadow-2xl flex flex-col items-center text-center">
+    <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] p-6 pt-28">
+      <div className="w-full max-w-md">
+        <div className="ui-card flex flex-col items-center p-8 text-center shadow-2xl sm:p-10">
 
-          <div className="mb-10 w-20 h-20 overflow-hidden border border-amber-500/30">
+          <div className="mb-8 size-16 overflow-hidden rounded border border-primary/30 bg-[#e4e6e8]">
             <img
-              src="https://res.cloudinary.com/dxryndnhl/image/upload/v1772007930/MooreHotels/website-assets/zda9mbs2f3wrke1f2mtd.jpg"
+              src="https://res.cloudinary.com/dxryndnhl/image/upload/v1777386017/slazzer-preview-w1yad_jizukz.png"
               alt="Moore Hotels"
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover"
             />
           </div>
 
           {status === "success" && (
-            <div className="animate-in fade-in zoom-in duration-700">
-              <h2 className="text-[#354c9d] text-4xl font-serif italic mb-2">
+            <div className="route-transition">
+              <h1 className="ui-card-title mb-2 italic text-primary">
                 Email Verified
-              </h2>
-              <div className="h-px w-12 bg-[#31458E] mx-auto my-4" />
-              <p className="text-primary uppercase tracking-[0.2em] text-[10px] leading-relaxed">
+              </h1>
+              <div className="mx-auto my-4 h-px w-12 bg-primary/50" />
+              <p className="ui-copy text-sm">
                 Your account is ready. You can sign in shortly.
               </p>
             </div>
           )}
 
           {status === "error" && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <h2 className="text-rose-400 text-3xl font-serif italic mb-2">
+            <div className="route-transition">
+              <h1 className="ui-card-title mb-2 italic text-rose-400">
                 Verification Failed
-              </h2>
-              <p className="text-zinc-500 text-sm font-light mb-8">
+              </h1>
+              <p className="ui-copy mb-8 text-sm">
                 This verification link is invalid or has expired.
               </p>
               <button
                 onClick={() => navigate("/auth")}
-                className="group relative px-10 py-3 overflow-hidden border border-amber-500/30 text-amber-500 text-[10px] tracking-[0.3em] transition-all hover:text-black"
+                className="ui-button ui-button-primary"
               >
-                <span className="absolute inset-0 w-0 bg-amber-500 transition-all duration-300 group-hover:w-full" />
-                <span className="relative z-10 uppercase">Return to Portal</span>
+                Return to sign in
               </button>
             </div>
           )}
         </div>
 
-        <p className="mt-8 text-[9px] text-zinc-700 tracking-[0.5em] uppercase text-center">
-          © Moore Hotels & Suites • Secure Access
-        </p>
+        <p className="mt-7 text-center text-xs text-zinc-600">Secure guest access · Moore Hotels &amp; Suites</p>
       </div>
     </div>
   );

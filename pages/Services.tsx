@@ -1,288 +1,201 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 
-const sections = [
+type SignatureService = {
+  title: string;
+  tag: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+  icon: string;
+  note: string;
+  features: string[];
+};
+
+const signatureServices: SignatureService[] = [
   {
-    title: "24-Hour Front Desk",
-    tag: "ALWAYS AVAILABLE",
-    desc: "Our reception is open 24/7 to assist you with check-in, check-out, and any inquiries, ensuring a seamless experience at any hour.",
-    img: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&q=80&w=1200",
-    features: ["Round-the-Clock Service", "Concierge", "Guest Assistance"],
+    title: "24-hour front desk",
+    tag: "Always available",
+    description: "From a smooth arrival to local recommendations and late-night requests, our reception team remains available throughout your stay.",
+    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1779385274/Screenshot_2026-05-20_at_6.27.21_pm_dtspvl.png",
+    imageAlt: "Moore Hotels guest reception",
+    icon: "support_agent",
+    note: "Assistance at every hour",
+    features: ["Arrival and departure support", "Local guidance", "Guest requests"],
   },
   {
-    title: "Restaurant (Local & Continental Dishes)",
-    tag: "CULINARY DELIGHTS",
-    desc: "Enjoy a diverse menu of local Nigerian favorites and continental classics, prepared by our expert chefs in a refined dining atmosphere.",
-    img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1200",
-    features: [
-      "Buffet & À la Carte",
-      "Room Service",
-      "Breakfast, Lunch & Dinner",
-    ],
+    title: "Restaurant & in-room dining",
+    tag: "Local and continental",
+    description: "Enjoy familiar Nigerian favourites and continental classics in our dining spaces, or settle in and have a considered meal brought to your room.",
+    image: "/Images/L'Horizon.jpg",
+    imageAlt: "Elegant dining at L’Horizon",
+    icon: "room_service",
+    note: "Breakfast, lunch and dinner",
+    features: ["À la carte dining", "Breakfast service", "Room delivery"],
   },
   {
-    title: "Lounge & Bar",
-    tag: "RELAX & UNWIND",
-    desc: "Sip on signature cocktails or your favorite drinks in our stylish lounge and bar, perfect for both business and leisure guests.",
-    img: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&q=80&w=1200",
-    features: ["Cocktails", "Wine Selection", "Relaxed Ambience"],
+    title: "Lounge & bar",
+    tag: "Meet and unwind",
+    description: "A relaxed setting for informal meetings, a quiet evening, or a well-made drink after the day’s plans are complete.",
+    image: "/Images/TheMeridinLounge.jpg",
+    imageAlt: "The Meridian Lounge at Moore Hotels",
+    icon: "local_bar",
+    note: "Open to residents and visitors",
+    features: ["Signature cocktails", "Wine selection", "Light plates"],
   },
   {
-    title: "Secure Parking Space",
-    tag: "CONVENIENT PARKING",
-    desc: "Ample, secure parking space is available for all guests, monitored 24/7 for your peace of mind.",
-    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=1200",
-    features: ["24/7 Security", "Spacious Lot", "Easy Access"],
+    title: "Wellness & recreation",
+    tag: "Time for yourself",
+    description: "Restore your pace with calm leisure spaces created for unhurried mornings, quiet resets, and easy moments between plans.",
+    image: "/Images/WellnessAndSanctuary.jpg",
+    imageAlt: "Wellness and leisure space at Moore Hotels",
+    icon: "spa",
+    note: "Leisure at your own pace",
+    features: ["Wellness spaces", "Poolside relaxation", "Quiet seating"],
   },
   {
-    title: "Laundry & Dry-Cleaning Services",
-    tag: "FRESH & CLEAN",
-    desc: "Professional laundry and dry-cleaning services are available to keep your wardrobe fresh throughout your stay.",
-    img: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&q=80&w=1200",
-    features: ["Express Service", "Gentle Care", "Pickup & Delivery"],
+    title: "Games & social spaces",
+    tag: "Stay entertained",
+    description: "Gather for friendly competition or spend an easy evening together in spaces designed for connection beyond the room.",
+    image: "/Images/TheApexGamesRoom.jpg",
+    imageAlt: "The Apex games room at Moore Hotels",
+    icon: "sports_esports",
+    note: "Made for groups and downtime",
+    features: ["Games room", "Social seating", "Group leisure"],
   },
   {
-    title: "Free High-Speed Wi-Fi",
-    tag: "CONNECTED ALWAYS",
-    desc: "Enjoy complimentary high-speed Wi-Fi throughout the hotel, perfect for work, streaming, and staying in touch.",
-    img: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1200",
-    features: ["Unlimited Access", "Secure Connection", "Hotel-wide Coverage"],
-  },
-  {
-    title: "24-Hour Power Supply",
-    tag: "UNINTERRUPTED COMFORT",
-    desc: "Our facility is equipped with generator and inverter backup, guaranteeing 24-hour electricity for your comfort.",
-    img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&q=80&w=1200",
-    features: ["Generator Backup", "Inverter System", "No Power Outages"],
-  },
-  {
-    title: "Room Service",
-    tag: "IN-ROOM DINING",
-    desc: "Order from our extensive menu and enjoy delicious meals and drinks delivered directly to your room, any time of day.",
-    img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1200",
-    features: ["24/7 Service", "Wide Menu", "Prompt Delivery"],
-  },
-  {
-    title: "CCTV Surveillance & Security Personnel",
-    tag: "SAFE & SECURE",
-    desc: "Your safety is our priority. The hotel is monitored by CCTV and professional security personnel at all times.",
-    img: "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&q=80&w=1200",
-    features: ["24/7 CCTV", "Trained Security", "Controlled Access"],
+    title: "Laundry & garment care",
+    tag: "Travel light",
+    description: "Professional laundry and dry-cleaning support keeps your wardrobe ready, whether you are staying for one night or settling in for longer.",
+    image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&q=82&w=1400",
+    imageAlt: "Professional garment care service",
+    icon: "dry_cleaning",
+    note: "Collected and returned to your room",
+    features: ["Laundry service", "Dry cleaning", "Garment handling"],
   },
 ];
 
-const Services: React.FC = () => {
-  const navigate = useNavigate();
-  const [loadingAction, setLoadingAction] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
+const stayEssentials = [
+  { icon: "wifi", title: "High-speed Wi-Fi", description: "Complimentary connectivity across guest rooms and shared spaces." },
+  { icon: "bolt", title: "Resilient power", description: "Generator and inverter support for dependable round-the-clock comfort." },
+  { icon: "local_parking", title: "Secure parking", description: "Convenient on-site parking with monitored guest access." },
+  { icon: "shield", title: "Guest safety", description: "CCTV coverage, controlled access, and trained security personnel." },
+];
 
-  const handleAction = (action: string) => {
-    setLoadingAction(action);
+const serviceHighlights = [
+  { icon: "schedule", value: "24/7", label: "Front desk" },
+  { icon: "wifi", value: "Included", label: "Hotel-wide Wi-Fi" },
+  { icon: "local_parking", value: "On site", label: "Guest parking" },
+  { icon: "room_service", value: "Available", label: "Room dining" },
+];
 
-    if (action === "helpdesk") {
-      setTimeout(() => {
-        setLoadingAction(null);
-        navigate("/help");
-      }, 1000);
-      return;
-    }
+const Services: React.FC = () => (
+  <div className="min-h-screen bg-background-dark">
+    <header className="relative flex min-h-[40rem] items-center overflow-hidden px-4 pb-24 pt-32 text-center sm:min-h-[44rem] sm:px-6">
+      <img
+        src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=84&w=1920"
+        alt="A calm hotel wellness setting"
+        className="absolute inset-0 h-full w-full object-cover opacity-50 image-luxury"
+        fetchPriority="high"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/45 to-background-dark" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background-dark to-transparent" />
+      <div className="ui-container relative z-10 max-w-4xl">
+        <p className="ui-eyebrow">Four-star hospitality standards</p>
+        <h1 className="ui-display mt-5 italic text-white">Guest services, <span className="text-primary">thoughtfully delivered.</span></h1>
+        <p className="ui-copy mx-auto mt-6 max-w-2xl text-gray-300">Professional support, useful comforts, and restorative spaces—brought together to make every part of your stay feel effortless.</p>
+        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <a href="#signature-services" className="ui-button ui-button-primary">Explore services <span className="material-symbols-outlined text-lg" aria-hidden="true">south</span></a>
+          <a href="tel:+2348033774544" className="ui-button ui-button-secondary bg-black/30 backdrop-blur-lg"><span className="material-symbols-outlined text-lg" aria-hidden="true">call</span> Guest relations</a>
+        </div>
+      </div>
+    </header>
 
-    setTimeout(() => {
-      setLoadingAction(null);
-      setShowModal(true);
-    }, 1000);
-  };
-
-  return (
-    <div className="bg-background-dark pt-24 min-h-screen relative">
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 animate-in fade-in duration-500">
-          <div
-            className="absolute inset-0 bg-black/90 backdrop-blur-md"
-            onClick={() => setShowModal(false)}
-          ></div>
-          <div className="relative bg-surface-dark border border-primary/20 p-8 md:p-12 max-w-xl w-full rounded-xl shadow-2xl text-center space-y-10 animate-in slide-in-from-bottom-8 duration-500">
-            <div className="w-20 h-20 bg-primary/10 border border-primary/30 rounded-full flex items-center justify-center text-primary mx-auto animate-luxury-logo">
-              <span className="material-symbols-outlined text-4xl">
-                contact_support
-              </span>
-            </div>
-            <div className="space-y-4">
-              <h3 className="serif-font text-3xl md:text-4xl text-white italic">
-                Guest Relations
-              </h3>
-              <p className="text-gray-400 text-base md:text-lg font-light leading-relaxed max-w-sm mx-auto">
-                Our dedicated concierge team is available 24/7 to manage your
-                inquiries, bespoke bookings, and service requests with
-                professional precision.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 text-left">
-              {[
-                {
-                  icon: "location_on",
-                  label: "Location",
-                  value:
-                    "Harmony Estate, Along Sagamu Ikenne Road, Beside Nysc Camp Sagamu, Ogun State,Nigeria",
-                  href: "https://www.google.com/maps/search/?api=1&query=Harmony+Estate,+Along+Sagamu+Ikenne+Road,+Beside+Nysc+Camp+Sagamu,+Ogun+State,Nigeria",
-                },
-                {
-                  icon: "phone",
-                  label: "Direct Line",
-                  value: "+234 803 377 4544",
-                  href: "tel:+2348033774544",
-                },
-                {
-                  icon: "mail",
-                  label: "Contact Email",
-                  value: "info@moorehotelandsuites.com",
-                  href: "mailto:info@moorehotelandsuites.com",
-                },
-              ].map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-6 p-5 bg-white/[0.03] border border-white/5 rounded-xl hover:border-primary/40 transition-all group"
-                >
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all">
-                    <span className="material-symbols-outlined">
-                      {item.icon}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-[8px] md:text-[9px] uppercase tracking-[0.3em] text-gray-500 font-black mb-1">
-                      {item.label}
-                    </p>
-                    <p className="text-white text-sm md:text-base font-medium">
-                      {item.value}
-                    </p>
-                  </div>
-                </a>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setShowModal(false)}
-              className="w-full bg-primary text-black py-4 md:py-5 uppercase text-[11px] md:text-[12px] font-black tracking-widest hover:bg-[#B04110]transition-all shadow-xl shadow-primary/20 active:scale-95 rounded-xl"
-            >
-              Back to Services
-            </button>
+    <section className="relative z-20 -mt-12 px-4 sm:px-6" aria-label="Service highlights">
+      <div className="ui-container-wide grid gap-px overflow-hidden rounded-lg border border-white/10 bg-white/10 shadow-2xl backdrop-blur-xl sm:grid-cols-2 lg:grid-cols-4">
+        {serviceHighlights.map((highlight) => (
+          <div key={highlight.label} className="flex items-center gap-4 bg-[#101010]/95 p-5 sm:p-6">
+            <span className="grid size-10 flex-none place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined" aria-hidden="true">{highlight.icon}</span></span>
+            <div><p className="text-sm font-semibold text-white">{highlight.value}</p><p className="mt-1 text-xs text-gray-500">{highlight.label}</p></div>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
+    </section>
 
-      {/* Header */}
-      <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden px-6">
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=1920"
-            className="w-full h-full object-cover opacity-30 scale-105"
-            alt="Moore Hotel Services"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-background-dark"></div>
+    <section id="signature-services" className="scroll-mt-24 py-20 sm:py-24 lg:py-32">
+      <div className="ui-container-wide">
+        <div className="mb-16 grid gap-6 border-b border-white/10 pb-10 md:grid-cols-2 md:items-end lg:mb-24">
+          <div><p className="ui-eyebrow">Signature services</p><h2 className="ui-section-title mt-4 italic text-white">Care that moves with your stay.</h2></div>
+          <p className="ui-copy max-w-xl md:justify-self-end">Each service is designed around the same standard: clear assistance, considered spaces, and fewer interruptions to your day.</p>
         </div>
-        <div className="relative z-10 text-center px-6">
-          <p className="text-[8px] md:text-[10px] uppercase tracking-[0.6em] text-primary font-black mb-6 md:mb-8 animate-pulse">
-            4-STAR HOSPITALITY STANDARDS
-          </p>
-          <h1 className="serif-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white italic drop-shadow-2xl leading-tight">
-            Guest Services
-          </h1>
-          <div className="h-px w-20 md:w-32 bg-primary mx-auto mt-6 md:mt-8 opacity-30"></div>
-        </div>
-      </section>
 
-      {/* Services */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-[1800px] mx-auto px-6 md:px-10 space-y-24 md:space-y-32">
-          {sections.map((section, idx) => (
-            <div
-              key={section.title}
-              className={`flex flex-col ${idx % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-10 md:gap-16 lg:gap-24`}
-            >
-              <div className="flex-1 w-full relative group">
-                <div className="relative w-full overflow-hidden rounded-xl shadow-2xl bg-surface-dark border border-white/5">
-                  <img
-                    src={section.img}
-                    className="w-full h-auto max-h-[500px] object-cover transition-all duration-700 group-hover:scale-105"
-                    alt={section.title}
-                    loading="lazy"
-                  />
+        <div className="space-y-24 lg:space-y-36">
+          {signatureServices.map((service, index) => (
+            <article key={service.title} className="group grid items-center gap-10 lg:grid-cols-12 lg:gap-16 xl:gap-24">
+              <div className={`relative lg:col-span-7 ${index % 2 ? "lg:order-2" : ""}`}>
+                <div className="relative overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-[0_30px_90px_rgba(0,0,0,.35)]">
+                  <img src={service.image} alt={service.imageAlt} className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                  <span className="absolute bottom-5 left-5 font-display text-5xl italic leading-none text-white/80 sm:text-6xl" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
                 </div>
+                <div className={`absolute -bottom-5 hidden h-px w-32 bg-primary/60 sm:block ${index % 2 ? "right-8" : "left-8"}`} aria-hidden="true" />
               </div>
 
-              <div className="flex-1 space-y-6 md:space-y-8">
-                <p className="text-primary text-[10px] md:text-[11px] font-black uppercase tracking-[0.35em]">
-                  {section.tag}
-                </p>
-                <h2 className="serif-font text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white italic leading-tight">
-                  {section.title}
-                </h2>
-                <p className="text-gray-400 text-base md:text-lg font-light leading-relaxed max-w-2xl">
-                  {section.desc}
-                </p>
-                <div className="grid grid-cols-2 gap-4 md:gap-6 pt-4 md:pt-6">
-                  {section.features.map((feature) => (
-                    <div
-                      key={feature}
-                      className="flex items-center gap-2 md:gap-3 text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white transition-colors"
-                    >
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary/30"></div>
-                      {feature}
-                    </div>
+              <div className={`lg:col-span-5 ${index % 2 ? "lg:order-1" : ""}`}>
+                <div className="flex items-center gap-4">
+                  <span className="grid size-11 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined" aria-hidden="true">{service.icon}</span></span>
+                  <p className="ui-eyebrow">{service.tag}</p>
+                </div>
+                <h3 className="ui-section-title mt-5 italic text-white">{service.title}</h3>
+                <p className="ui-copy mt-5 max-w-xl">{service.description}</p>
+                <ul className="mt-7 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3" aria-label={`${service.title} includes`}>
+                  {service.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2 text-sm leading-6 text-gray-300"><span className="material-symbols-outlined mt-1 text-base text-primary" aria-hidden="true">check</span><span>{feature}</span></li>
                   ))}
+                </ul>
+                <div className="mt-8 flex items-center gap-3 border-t border-white/10 pt-6 text-sm text-gray-400">
+                  <span className="material-symbols-outlined text-primary" aria-hidden="true">concierge</span>
+                  <span>{service.note}</span>
                 </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
-      </section>
+      </div>
+    </section>
 
-      {/* CTA */}
-      <section className="pb-16 px-4 sm:px-6 md:py-24 md:px-10">
-        <div className="max-w-[900px] mx-auto text-center bg-gradient-to-r from-background-dark via-background-dark/80 to-background-dark rounded-3xl shadow-2xl relative overflow-hidden border border-white/10 p-8 sm:p-12 md:p-16">
-          <div className="inline-flex items-center justify-center w-20 sm:w-24 md:w-28 h-20 sm:h-24 md:h-28 rounded-full bg-primary/10 border-2 border-primary text-primary mb-4 sm:mb-6 md:mb-8 shadow-lg animate-luxury-logo">
-            <span className="material-symbols-outlined text-4xl sm:text-5xl md:text-6xl">
-              support_agent
-            </span>
-          </div>
+    <section className="border-y border-white/5 bg-black/45 py-20 sm:py-24">
+      <div className="ui-container-wide">
+        <div className="max-w-2xl"><p className="ui-eyebrow">Throughout your stay</p><h2 className="ui-section-title mt-4 italic text-white">The essentials are already considered.</h2><p className="ui-copy mt-5">Reliable everyday services support work, rest, arrivals, and everything in between.</p></div>
+        <div className="mt-10 grid gap-px overflow-hidden rounded-lg border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+          {stayEssentials.map((essential) => (
+            <article key={essential.title} className="group bg-[#101010] p-6 transition-colors duration-300 hover:bg-[#151515] sm:p-7">
+              <span className="grid size-11 place-items-center rounded-full bg-primary/10 text-primary transition-transform duration-300 group-hover:-translate-y-1"><span className="material-symbols-outlined" aria-hidden="true">{essential.icon}</span></span>
+              <h3 className="mt-5 text-base font-semibold text-white">{essential.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-gray-500">{essential.description}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
 
-          <h2 className="serif-font text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white italic leading-tight mb-6 sm:mb-8 md:mb-10">
-            Professional Support, <br className="hidden md:block" /> Every
-            Moment
-          </h2>
-
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-8 justify-center items-center">
-            <button
-              onClick={() => handleAction("contact")}
-              disabled={loadingAction === "contact"}
-              className="bg-primary text-black w-full sm:w-auto px-10 py-3 sm:px-12 sm:py-4 md:px-16 md:py-5 text-[11px] sm:text-[12px] md:text-[14px] font-black uppercase tracking-widest hover:bg-[#B04110] transition-all rounded-full shadow-xl shadow-primary/30 h-14 flex items-center justify-center gap-3 disabled:opacity-70"
-            >
-              {loadingAction === "contact" && (
-                <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-              )}
-              {loadingAction === "contact" ? "CONTACTING..." : "Contact Us"}
-            </button>
-            <button
-              onClick={() => handleAction("helpdesk")}
-              disabled={loadingAction === "helpdesk"}
-              className="border border-white/20 text-white w-full sm:w-auto px-10 py-3 sm:px-12 sm:py-4 md:px-16 md:py-5 text-[11px] sm:text-[12px] md:text-[14px] font-black uppercase tracking-widest hover:bg-white/10 transition-all rounded-full shadow-md h-14 flex items-center justify-center gap-3 disabled:opacity-70"
-            >
-              {loadingAction === "helpdesk" && (
-                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-              )}
-              {loadingAction === "helpdesk" ? "FETCHING..." : "Visit Help Desk"}
-            </button>
+    <section className="px-4 py-20 sm:px-6 sm:py-24 lg:py-32">
+      <div className="ui-container-wide relative overflow-hidden rounded-lg border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-10 sm:py-20">
+        <img src="/Images/SanctuaryOverService.jpg" alt="Attentive service at Moore Hotels" className="absolute inset-0 h-full w-full object-cover opacity-30 image-luxury" loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-black/95" />
+        <div className="relative z-10 mx-auto max-w-3xl">
+          <span className="mx-auto grid size-12 place-items-center rounded-full border border-primary/30 bg-primary/10 text-primary"><span className="material-symbols-outlined text-2xl" aria-hidden="true">support_agent</span></span>
+          <p className="ui-eyebrow mt-6">Professional support, every moment</p>
+          <h2 className="ui-section-title mt-4 italic text-white">Tell us what would make your stay easier.</h2>
+          <p className="ui-copy mx-auto mt-5 max-w-xl">Guest Relations can help with a specific request before arrival or while you are with us.</p>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <a href="tel:+2348033774544" className="ui-button ui-button-primary"><span className="material-symbols-outlined text-lg" aria-hidden="true">call</span> Call guest relations</a>
+            <Link to="/help" className="ui-button ui-button-secondary bg-black/35 backdrop-blur-lg">Visit help center <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span></Link>
           </div>
         </div>
-      </section>
-    </div>
-  );
-};
+      </div>
+    </section>
+  </div>
+);
 
 export default Services;

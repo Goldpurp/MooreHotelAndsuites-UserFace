@@ -1,430 +1,387 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
 import { Room, RoomCategory } from "../types";
 import FAQ from "../components/FAQ";
 import NotificationModal from "../components/NotificationModal";
+import { addDaysToInput, todayInputValue } from "../utils/dates";
+import RoomCard from "../components/RoomCard";
+
+const stayAssurances = [
+  { icon: "support_agent", title: "24-hour reception", text: "Assistance with arrivals, departures, and guest requests at every hour." },
+  { icon: "wifi", title: "Hotel-wide Wi-Fi", text: "Complimentary connectivity for work, calls, streaming, and everyday plans." },
+  { icon: "bolt", title: "Resilient power", text: "Generator and inverter support designed for dependable round-the-clock comfort." },
+  { icon: "local_parking", title: "Secure parking", text: "Convenient on-site parking with monitored access for resident guests." },
+];
+
+const discoverMore = [
+  {
+    eyebrow: "Dining at Moore",
+    title: "Flavour for every part of the day.",
+    description: "Move from relaxed breakfast to considered dinners, lounge plates, and a quiet evening drink.",
+    image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=84&w=1600",
+    imageAlt: "A composed table of local and continental dishes",
+    to: "/dining",
+    action: "Explore dining",
+  },
+  {
+    eyebrow: "Guest services",
+    title: "Thoughtful support, always close.",
+    description: "From reception and room dining to wellness, recreation, and garment care, the details are handled.",
+    image: "/Images/WellnessAndSanctuary.jpg",
+    imageAlt: "Wellness and guest services at Moore Hotels",
+    to: "/services",
+    action: "View guest services",
+  },
+];
 
 const Home: React.FC = () => {
-  const [searching, setSearching] = useState(false);
-  const [subscribing, setSubscribing] = useState(false);
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [modal, setModal] = useState<{
-    show: boolean;
-    title: string;
-    message: string;
-    type: "success" | "error" | "info";
-  }>({ show: false, title: "", message: "", type: "info" });
-
   const navigate = useNavigate();
-
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [searching, setSearching] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(true);
+  const [modal, setModal] = useState<{ show: boolean; title: string; message: string; type: "success" | "error" | "info" }>({
+    show: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
   const [searchData, setSearchData] = useState({
     category: "All",
-    checkIn: new Date().toISOString().split("T")[0],
-    checkOut: new Date(Date.now() + 86400000).toISOString().split("T")[0],
+    checkIn: todayInputValue(),
+    checkOut: addDaysToInput(todayInputValue(), 1),
     guests: "2",
   });
 
-  // Fetch featured rooms using React Query
-  const {
-    data: featuredRooms = [],
-    isLoading,
-    error,
-    refetch,
-  } = useQuery<Room[], Error>({
+  const { data: featuredRooms = [], isLoading, error, refetch } = useQuery<Room[], Error>({
     queryKey: ["featuredRooms"],
-    queryFn: async () => {
-      const rooms = await api.getRooms("");
-      return rooms.filter((r) => r.isOnline).slice(0, 4);
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: 1,
+    queryFn: async () => (await api.getRooms()).slice(0, 4),
+    staleTime: 1000 * 60 * 5,
+    retry: 0,
   });
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearching(true);
-    setTimeout(() => {
-      const params = new URLSearchParams();
-      if (searchData.category && searchData.category !== "All")
-        params.append("category", searchData.category);
-      if (searchData.checkIn) params.append("checkIn", searchData.checkIn);
-      if (searchData.checkOut) params.append("checkOut", searchData.checkOut);
-      if (searchData.guests) params.append("guests", searchData.guests);
-      navigate(`/rooms?${params.toString()}`);
-    }, 400);
+  const buildSearchParams = () => {
+    const params = new URLSearchParams();
+    if (searchData.category !== "All") params.set("category", searchData.category);
+    params.set("checkIn", searchData.checkIn);
+    params.set("checkOut", searchData.checkOut);
+    params.set("guests", searchData.guests);
+    return params;
   };
 
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newsletterEmail || !/\S+@\S+\.\S+/.test(newsletterEmail)) {
-      setEmailError("Valid email required.");
-      return;
-    }
-    setEmailError("");
-    setSubscribing(true);
-    setTimeout(() => {
+  const handleSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (searchData.checkIn < todayInputValue() || searchData.checkOut <= searchData.checkIn) {
       setModal({
         show: true,
-        title: "Subscription Successful",
-        message:
-          "Welcome to the Moore newsletter. You'll receive updates and offers at this email.",
-        type: "success",
+        title: "Check your dates",
+        message: "Check-in cannot be in the past, and check-out must be after check-in.",
+        type: "error",
       });
-      setSubscribing(false);
-      setNewsletterEmail("");
-    }, 1500);
+      return;
+    }
+    setSearching(true);
+    window.setTimeout(() => navigate(`/rooms?${buildSearchParams().toString()}`), 250);
   };
 
-  const getSearchQuery = () => {
-    const params = new URLSearchParams();
-    if (searchData.checkIn) params.append("checkIn", searchData.checkIn);
-    if (searchData.checkOut) params.append("checkOut", searchData.checkOut);
-    if (searchData.guests) params.append("guests", searchData.guests);
-    return params.toString();
+  const toggleVideo = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      await video.play();
+      setVideoPlaying(true);
+    } else {
+      video.pause();
+      setVideoPlaying(false);
+    }
   };
 
   if (error && featuredRooms.length === 0) {
     return (
-      <div className="min-h-screen bg-background-dark flex flex-col items-center justify-center p-6 text-center space-y-12">
-        <div className="w-24 h-24 bg-primary/10 border border-primary/30 rounded-full flex items-center justify-center text-primary animate-luxury-logo">
-          <span className="material-symbols-outlined text-5xl">cloud_off</span>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-background-dark p-6 text-center">
+        <span className="grid size-16 place-items-center rounded-full border border-primary/30 bg-primary/10 text-primary">
+          <span className="material-symbols-outlined text-3xl" aria-hidden="true">cloud_off</span>
+        </span>
+        <div>
+          <h1 className="ui-page-title italic text-white">We could not load the hotel</h1>
+          <p className="ui-copy mx-auto mt-4 max-w-md">Check your connection and try again. Your dates and guest details have not been changed.</p>
         </div>
-        <div className="space-y-4">
-          <h1 className="serif-font text-5xl md:text-7xl text-white italic">
-            Connection <span className="text-primary">Offline</span>
-          </h1>
-          <p className="text-gray-500 text-[10px] uppercase tracking-[0.5em] font-black max-w-sm mx-auto">
-            Unable to establish connection to the hotel database.
-          </p>
-        </div>
-        <button
-          onClick={() => refetch()}
-          className="bg-primary text-black px-12 py-5 text-[10px] font-black uppercase tracking-[0.4em] rounded-sm shadow-2xl active:scale-95 transition-all"
-        >
-          Reconnect
-        </button>
+        <button onClick={() => refetch()} className="ui-button ui-button-primary">Try again</button>
       </div>
     );
   }
 
   return (
-    <div className="bg-background-dark min-h-screen">
+    <div className="min-h-screen bg-background-dark">
       <NotificationModal
         isOpen={modal.show}
-        onClose={() => setModal({ ...modal, show: false })}
+        onClose={() => setModal((current) => ({ ...current, show: false }))}
         title={modal.title}
         message={modal.message}
         type={modal.type}
       />
 
-      {/* HERO SECTION */}
-      <header className="relative h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-black/50 z-10"></div>
-          <div className="w-full h-full bg-surface-dark overflow-hidden">
-            <img
-              alt="Moore Lobby"
-              className="w-full h-full object-cover opacity-70 scale-105 animate-[pulse_25s_ease-in-out_infinite]"
-              src="https://images.unsplash.com/photo-1445019980597-93fa8acb246c?q=80&w=2348&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              loading="lazy"
-            />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-background-dark z-20"></div>
+      <header className="relative flex min-h-[46rem] items-center overflow-hidden px-4 pb-16 pt-32 text-center sm:px-6 lg:min-h-[50rem]">
+        <div className="absolute inset-0">
+          <img
+            src="https://res.cloudinary.com/dxryndnhl/image/upload/v1779385270/Screenshot_2026-05-20_at_6.26.38_pm_r2vt5e.png"
+            alt="Moore Hotels & Suites exterior"
+            className="h-full w-full scale-[1.03] object-cover opacity-75 image-luxury"
+            fetchPriority="high"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/35 to-background-dark" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,.38)_78%)]" />
         </div>
 
-        <div className="relative z-30 space-y-8 max-w-7xl mx-auto w-full">
-          <div className="flex flex-wrap justify-center items-center gap-6 animate-in fade-in duration-1000">
-            <span className="h-[1px] w-12 bg-primary/60"></span>
-            <p className="text-[10px] md:text-[12px] lg:text-[14px] uppercase tracking-[1em] text-primary font-black">
-              4-Star Hospitality Excellence
+        <div className="ui-container relative z-10">
+          <div className="mx-auto max-w-4xl">
+            <p className="ui-eyebrow flex items-center justify-center gap-4 before:h-px before:w-8 before:bg-primary/60 after:h-px after:w-8 after:bg-primary/60">
+              Four-star hospitality in Sagamu
             </p>
-            <span className="h-[1px] w-12 bg-primary/60"></span>
+            <h1 className="ui-display mt-6 text-white">
+              The standard of <span className="italic text-primary">luxury</span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-[clamp(1rem,2vw,1.18rem)] leading-8 text-gray-200/85">
+              Rest well, dine beautifully, and experience thoughtful Nigerian hospitality along the Sagamu–Ikenne corridor.
+            </p>
           </div>
-          <h1 className="serif-font text-5xl md:text-8xl lg:text-[5rem] font-medium leading-[0.85] text-white animate-in slide-in-from-bottom-12 duration-1000">
-            The Standard of
-            <br />
-            <span className="italic text-primary">Luxury</span>
-          </h1>
 
-          <div className="pt-12 w-full max-w-5xl mx-auto">
-            <form onSubmit={handleSearch} className="w-full">
-              <div className="bg-black/40 backdrop-blur-3xl border border-white/10 p-1 rounded-sm flex flex-col md:flex-row items-stretch gap-1 shadow-2xl">
-                <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 divide-x divide-white/5">
-                  <div className="px-4 py-3 flex flex-col items-start gap-1">
-                    <label className="text-[8px] uppercase tracking-[0.2em] text-gray-500 font-black">
-                      Room Tier
-                    </label>
-                    <select
-                      value={searchData.category}
-                      onChange={(e) =>
-                        setSearchData({ ...searchData, category: e.target.value })
-                      }
-                      className="bg-transparent border-none p-0 text-xs focus:ring-0 cursor-pointer w-full text-white appearance-none font-bold italic"
-                    >
-                      <option className="bg-black" value="All">
-                        All Suites
-                      </option>
-                      {Object.values(RoomCategory).map((cat) => (
-                        <option key={cat} className="bg-black" value={cat}>
-                          {cat} Tier
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="px-4 py-3 flex flex-col items-start gap-1 bg-white/[0.07] border-x border-primary/40 group focus-within:ring-2 ring-primary/60 transition-all shadow-inner">
-                    <label className="text-[8px] uppercase tracking-[0.2em] text-primary font-black">
-                      Check-in
-                    </label>
-                    <input
-                      className="bg-transparent border-none p-0 text-xs focus:ring-0 w-full text-white font-bold cursor-pointer outline-none"
-                      type="date"
-                      value={searchData.checkIn}
-                      onChange={(e) =>
-                        setSearchData({ ...searchData, checkIn: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="px-4 py-3 flex flex-col items-start gap-1 bg-white/[0.07] border-primary/40 group focus-within:ring-2 ring-primary/60 transition-all shadow-inner">
-                    <label className="text-[8px] uppercase tracking-[0.2em] text-primary font-black">
-                      Check-out
-                    </label>
-                    <input
-                      className="bg-transparent border-none p-0 text-xs focus:ring-0 w-full text-white font-bold cursor-pointer outline-none"
-                      type="date"
-                      value={searchData.checkOut}
-                      onChange={(e) =>
-                        setSearchData({ ...searchData, checkOut: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="px-4 py-3 flex flex-col items-start gap-1">
-                    <label className="text-[8px] uppercase tracking-[0.2em] text-gray-500 font-black">
-                      Guests
-                    </label>
-                    <select
-                      value={searchData.guests}
-                      onChange={(e) =>
-                        setSearchData({ ...searchData, guests: e.target.value })
-                      }
-                      className="bg-transparent border-none p-0 text-xs focus:ring-0 cursor-pointer w-full text-white appearance-none font-bold italic"
-                    >
-                      {[1, 2, 3, 4].map((num) => (
-                        <option key={num} className="bg-black" value={num}>
-                          {num} {num > 1 ? "Guests" : "Guest"}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  disabled={searching}
-                  className="bg-primary text-black h-14 md:h-auto px-10 flex items-center justify-center rounded-sm hover:bg-[#B04110] transition-all font-black uppercase tracking-[0.3em] text-[10px] shadow-xl shadow-primary/20 active:scale-95 disabled:opacity-70 gap-3"
+          <form onSubmit={handleSearch} className="ui-card mx-auto mt-10 max-w-6xl overflow-hidden bg-black/55 p-2 text-left backdrop-blur-xl" aria-label="Search available rooms">
+            <div className="grid md:grid-cols-2 xl:grid-cols-[1.05fr_1fr_1fr_.75fr_auto]">
+              <label className="border-b border-white/10 px-4 py-3 md:border-r xl:border-b-0">
+                <span className="ui-label mb-1.5">Room type</span>
+                <select
+                  value={searchData.category}
+                  onChange={(event) => setSearchData({ ...searchData, category: event.target.value })}
+                  className="min-h-10 w-full cursor-pointer appearance-none bg-transparent text-sm font-semibold text-white outline-none"
                 >
-                  {searching && (
-                    <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                  )}
-                  {searching ? "Searching..." : "Book Now"}
-                </button>
-              </div>
-            </form>
-          </div>
+                  <option className="bg-black" value="All">All rooms</option>
+                  {Object.values(RoomCategory).map((category) => <option key={category} className="bg-black" value={category}>{category}</option>)}
+                </select>
+              </label>
+              <label className="border-b border-white/10 px-4 py-3 xl:border-b-0 xl:border-r">
+                <span className="ui-label mb-1.5">Check-in</span>
+                <input
+                  type="date"
+                  min={todayInputValue()}
+                  value={searchData.checkIn}
+                  onChange={(event) => {
+                    const checkIn = event.target.value;
+                    setSearchData((current) => ({
+                      ...current,
+                      checkIn,
+                      checkOut: current.checkOut <= checkIn ? addDaysToInput(checkIn, 1) : current.checkOut,
+                    }));
+                  }}
+                  className="min-h-10 w-full bg-transparent text-sm font-semibold text-white outline-none"
+                />
+              </label>
+              <label className="border-b border-white/10 px-4 py-3 md:border-r xl:border-b-0">
+                <span className="ui-label mb-1.5">Check-out</span>
+                <input
+                  type="date"
+                  min={searchData.checkIn || todayInputValue()}
+                  value={searchData.checkOut}
+                  onChange={(event) => setSearchData({ ...searchData, checkOut: event.target.value })}
+                  className="min-h-10 w-full bg-transparent text-sm font-semibold text-white outline-none"
+                />
+              </label>
+              <label className="border-b border-white/10 px-4 py-3 xl:border-b-0 xl:border-r">
+                <span className="ui-label mb-1.5">Guests</span>
+                <select
+                  value={searchData.guests}
+                  onChange={(event) => setSearchData({ ...searchData, guests: event.target.value })}
+                  className="min-h-10 w-full cursor-pointer appearance-none bg-transparent text-sm font-semibold text-white outline-none"
+                >
+                  {[1, 2, 3, 4].map((count) => <option key={count} className="bg-black" value={count}>{count} {count === 1 ? "guest" : "guests"}</option>)}
+                </select>
+              </label>
+              <button type="submit" disabled={searching} className="ui-button ui-button-primary m-2 min-h-14 px-7">
+                {searching && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}
+                {searching ? "Searching" : "Check rooms"}
+              </button>
+            </div>
+          </form>
         </div>
       </header>
 
-      {/* All sections below now fully fluid/responsive */}
-      <section className="py-14 md:py-20 px-6 overflow-hidden">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 md:gap-24">
-          <div className="flex-1 space-y-8 lg:space-y-10 order-2 lg:order-1">
-            <div className="space-y-4">
-              <p className="text-primary text-[10px] font-black uppercase tracking-[0.5em]">
-                Nigerian Professionalism
-              </p>
-              <h2 className="serif-font text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-white italic leading-tight">
-                Refined Hotel Service,
-                <br />
-                At Every Touchpoint.
-              </h2>
-            </div>
-            <p className="text-gray-400 text-base sm:text-lg md:text-xl lg:text-2xl font-light leading-relaxed">
-              At Moore Hotels & Suites, we redefine hospitality by blending modern
-              professionalism with the warmth of Nigerian culture. Every
-              detail is crafted to make your stay efficient, memorable, and
-              unquestionably high-end.
+      <section className="ui-section">
+        <div className="ui-container grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+          <div className="order-2 lg:order-1">
+            <p className="ui-eyebrow">Nigerian professionalism</p>
+            <h2 className="ui-section-title mt-4 italic text-white">Refined hotel service at every touchpoint.</h2>
+            <p className="ui-copy mt-6 max-w-xl">
+              Moore Hotels &amp; Suites blends modern standards with genuine local warmth. From arrival to departure, every detail is designed to make your stay calm, efficient, and memorable.
             </p>
-            <div className="pt-4 md:pt-6">
-              <Link
-                to="/about"
-                className="text-primary text-[10px] sm:text-[11px] font-black uppercase tracking-[0.4em] border-b border-primary/30 pb-2 hover:text-white hover:border-white transition-all inline-block"
-              >
-                Our 4-Star Legacy
-              </Link>
-            </div>
+            <Link to="/about" className="ui-button ui-button-secondary mt-8">Discover our story <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></Link>
           </div>
-          <div className="flex-1 relative order-1 lg:order-2 w-full max-w-lg lg:max-w-full mx-auto">
+          <div className="group order-1 overflow-hidden rounded-lg border border-white/10 shadow-2xl lg:order-2">
             <img
-              src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200"
-              className="relative z-10 rounded-sm grayscale hover:grayscale-0 transition-all duration-[2000ms] shadow-2xl w-full h-auto object-cover"
-              alt="Moore Hotel Lagos"
+              src="https://res.cloudinary.com/dxryndnhl/image/upload/v1779385271/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3.png"
+              alt="Exterior of Moore Hotels & Suites in Sagamu"
+              className="image-luxury aspect-[4/3] h-full w-full object-cover"
               loading="lazy"
             />
           </div>
         </div>
       </section>
 
-      {/* EXECUTIVE ROOM COLLECTION */}
-      <section className="py-4 md:py-10 px-6 bg-surface-dark/40">
-        <div className="max-w-[1800px] mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-12 md:mb-16 gap-6 md:gap-8">
-            <div className="space-y-2 md:space-y-4 text-left">
-              <p className="text-primary text-[10px] font-black uppercase tracking-[0.5em]">
-                Executive Room Collection
-              </p>
-              <h2 className="serif-font text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-white italic leading-none">
-                Our Rooms
-              </h2>
+      <section className="ui-section border-y border-white/5 bg-surface-dark/45">
+        <div className="ui-container-wide">
+          <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="ui-eyebrow">Stay your way</p>
+              <h2 className="ui-section-title mt-3 italic text-white">Featured rooms</h2>
             </div>
-            <Link
-              to="/rooms"
-              className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.4em] text-gray-500 hover:text-primary transition-all flex items-center gap-2 md:gap-4"
-            >
-              View All Rooms <span className="material-symbols-outlined text-lg">arrow_forward</span>
-            </Link>
+            <Link to="/rooms" className="ui-button ui-button-secondary">View all rooms <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 md:gap-12">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {isLoading
-              ? [1, 2, 3, 4].map((i) => (
-                  <div key={i} className="aspect-[3/4] bg-white/[0.02] animate-pulse rounded-sm" />
-                ))
-              : featuredRooms.map((room) => (
-                  <Link
+              ? [1, 2, 3, 4].map((item) => <div key={item} className="aspect-[4/5] animate-pulse rounded-lg bg-white/[0.04]" />)
+              : featuredRooms.map((room, index) => (
+                  <RoomCard
                     key={room.id}
-                    to={`/rooms/${room.id}?${getSearchQuery()}`}
-                    className="group block space-y-6 sm:space-y-8"
-                  >
-                    <div className="relative aspect-[3/4] overflow-hidden rounded-sm border border-white/5 shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-transform duration-700 group-hover:-translate-y-1 sm:group-hover:-translate-y-2">
-                      <img
-                        src={room.images?.[0]}
-                        alt={room.name}
-                        className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-transform duration-[2500ms] group-hover:scale-105"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90" />
-                      <div className="absolute bottom-6 left-6 right-6 flex flex-col gap-1 sm:gap-2">
-                        <p className="text-primary text-[8px] sm:text-[9px] font-black uppercase tracking-[0.4em]">
-                          {room.category} Tier
-                        </p>
-                        <h3 className="serif-font text-lg sm:text-2xl md:text-3xl text-white italic">
-                          {room.name}
-                        </h3>
-                      </div>
-                    </div>
-                  </Link>
+                    room={room}
+                    to={`/rooms/${room.id}?${buildSearchParams().toString()}`}
+                    variant="featured"
+                    eager={index === 0}
+                  />
                 ))}
           </div>
         </div>
       </section>
 
-      {/* HOTEL PERSPECTIVE */}
-      <section className="py-10 md:py-20 bg-black relative overflow-hidden px-6">
-        <div className="max-w-[1800px] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-            <div className="lg:col-span-5 space-y-8 md:space-y-10">
-              <div className="space-y-4 md:space-y-5">
-                <p className="text-primary text-[10px] font-black uppercase tracking-[0.5em]">
-                  Hotel Perspective
-                </p>
-                <h2 className="serif-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white italic leading-[1.1]">
-                  The Moore Experience
-                </h2>
-              </div>
-              <p className="text-gray-400 text-base sm:text-lg md:text-xl lg:text-xl font-light leading-relaxed max-w-full lg:max-w-xl">
-                Experience the transition from Lagos' energetic business streets to
-                the calm, professional luxury of Moore Hotels.
-              </p>
-              <button className="flex items-center gap-4 md:gap-6 group mt-4">
-                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border border-primary/30 flex items-center justify-center text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-black shadow-2xl shadow-primary/10">
-                  <span className="material-symbols-outlined text-2xl md:text-3xl">play_arrow</span>
+      <section className="ui-section">
+        <div className="ui-container-wide">
+          <div className="mb-10 grid gap-5 md:grid-cols-2 md:items-end">
+            <div>
+              <p className="ui-eyebrow">Beyond your room</p>
+              <h2 className="ui-section-title mt-4 italic text-white">More of Moore to discover.</h2>
+            </div>
+            <p className="ui-copy max-w-xl md:justify-self-end">Dining, leisure, and attentive service come together so your time with us feels complete—not simply accommodated.</p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            {discoverMore.map((item) => (
+              <Link key={item.title} to={item.to} className="group relative min-h-[30rem] overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-2xl sm:min-h-[34rem]">
+                <img src={item.image} alt={item.imageAlt} className="image-luxury absolute inset-0 h-full w-full object-cover" loading="lazy" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 lg:p-10">
+                  <p className="ui-eyebrow">{item.eyebrow}</p>
+                  <h3 className="ui-section-title mt-3 max-w-xl italic text-white">{item.title}</h3>
+                  <p className="mt-4 max-w-lg text-sm leading-7 text-gray-300">{item.description}</p>
+                  <span className="mt-6 inline-flex min-h-11 items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition-colors group-hover:text-primary">{item.action}<span className="material-symbols-outlined text-lg transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">arrow_forward</span></span>
                 </div>
-                <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] text-white">
-                  Watch Anthem
-                </span>
-              </button>
-            </div>
-            <div className="lg:col-span-7 relative mt-8 lg:mt-0">
-              <div className="relative aspect-video rounded-sm overflow-hidden group border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)]">
-                <video
-                  src="https://media.istockphoto.com/id/2164324479/video/calm-summer-evening-in-luxury-hotel-woman-lying-on-lounger-put-hands-back-silhouette-of-lady.mp4?s=mp4-640x640-is&k=20&c=mmsIo19OMUfPZ-wUsNdTNZXzVOCY524vS-3Ek9zLPGI="
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  className="w-full h-full object-cover grayscale-[0.35] transition-all duration-[1800ms] group-hover:grayscale-0 group-hover:scale-105"
-                />
-              </div>
-            </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* QUOTE */}
-      <section className="md:pb-12 bg-black text-center px-6 border-y border-white/5">
-        <div className="max-w-4xl mx-auto space-y-8 md:space-y-12">
-          <span className="material-symbols-outlined text-primary/30 text-6xl md:text-8xl">format_quote</span>
-          <h2 className="serif-font text-2xl sm:text-3xl md:text-5xl lg:text-6xl text-white italic leading-relaxed font-light">
-            At Moore Hotels, every guest experience is handled with professional precision and Nigerian warmth.
-          </h2>
-          <p className="text-[11px] uppercase tracking-[0.4em] text-primary font-black">Alase Moore</p>
+      <section className="border-y border-white/5 bg-black/50 py-16 sm:py-20" aria-labelledby="stay-assurances-title">
+        <div className="ui-container-wide">
+          <div className="max-w-2xl">
+            <p className="ui-eyebrow">Included in your stay</p>
+            <h2 id="stay-assurances-title" className="ui-section-title mt-4 italic text-white">The practical details are already considered.</h2>
+          </div>
+          <div className="mt-10 grid gap-px overflow-hidden rounded-lg border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+            {stayAssurances.map((item) => (
+              <article key={item.title} className="group bg-[#101010] p-6 transition-colors duration-300 hover:bg-[#151515] sm:p-7">
+                <span className="grid size-11 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary transition-transform duration-300 group-hover:-translate-y-1"><span className="material-symbols-outlined" aria-hidden="true">{item.icon}</span></span>
+                <h3 className="mt-5 text-base font-semibold text-white">{item.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-gray-500">{item.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="ui-section bg-black">
+        <div className="ui-container grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-4">
+            <p className="ui-eyebrow">The Moore experience</p>
+            <h2 className="ui-section-title mt-4 italic text-white">A calm retreat, made personal.</h2>
+            <p className="ui-copy mt-5">See the atmosphere, spaces, and service that shape every stay.</p>
+            <button type="button" onClick={toggleVideo} className="ui-button ui-button-secondary mt-8" aria-pressed={videoPlaying}>
+              <span className="material-symbols-outlined" aria-hidden="true">{videoPlaying ? "pause" : "play_arrow"}</span>
+              {videoPlaying ? "Pause film" : "Play film"}
+            </button>
+          </div>
+          <div className="group overflow-hidden rounded-lg border border-white/10 shadow-[0_35px_80px_rgba(0,0,0,.55)] lg:col-span-8">
+            <video
+              ref={videoRef}
+              src="https://media.istockphoto.com/id/2164324479/video/calm-summer-evening-in-luxury-hotel-woman-lying-on-lounger-put-hands-back-silhouette-of-lady.mp4?s=mp4-640x640-is&k=20&c=mmsIo19OMUfPZ-wUsNdTNZXzVOCY524vS-3Ek9zLPGI="
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              className="image-luxury aspect-video h-full w-full object-cover"
+              aria-label="Moore Hotels atmosphere film"
+              onPlay={() => setVideoPlaying(true)}
+              onPause={() => setVideoPlaying(false)}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-white/5 bg-black py-16 text-center sm:py-20">
+        <blockquote className="ui-container max-w-4xl">
+          <span className="material-symbols-outlined text-5xl text-primary/50" aria-hidden="true">format_quote</span>
+          <p className="font-display mt-4 text-[clamp(1.65rem,4vw,3.2rem)] italic leading-[1.3] text-white">Every guest experience is handled with professional precision and Nigerian warmth.</p>
+          <footer className="ui-eyebrow mt-6">Alase Moore</footer>
+        </blockquote>
+      </section>
+
+      <section className="ui-section">
+        <div className="ui-container-wide grid overflow-hidden rounded-lg border border-white/10 bg-surface-dark/70 shadow-2xl lg:grid-cols-12">
+          <div className="group relative min-h-[24rem] overflow-hidden lg:col-span-7 lg:min-h-[34rem]">
+            <img
+              src="https://res.cloudinary.com/dxryndnhl/image/upload/v1779385271/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3.png"
+              alt="Moore Hotels & Suites in Sagamu"
+              className="image-luxury absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+            <div className="absolute bottom-5 left-5 rounded border border-white/10 bg-black/70 px-4 py-3 text-sm text-white backdrop-blur-lg sm:bottom-7 sm:left-7">
+              <span className="material-symbols-outlined mr-2 text-primary" aria-hidden="true">location_on</span>
+              Sagamu, Ogun State
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-center p-6 sm:p-9 lg:col-span-5 lg:p-12">
+            <p className="ui-eyebrow">Location &amp; arrival</p>
+            <h2 className="ui-section-title mt-4 italic text-white">Well placed for an easy stay.</h2>
+            <p className="ui-copy mt-5">Find us on the Sagamu–Ikenne Road, beside the NYSC Camp—a practical base for business, events, family visits, and quiet weekends.</p>
+
+            <address className="mt-7 flex items-start gap-3 border-y border-white/10 py-5 text-sm not-italic leading-7 text-gray-300">
+              <span className="material-symbols-outlined mt-1 text-primary" aria-hidden="true">pin_drop</span>
+              <span>Harmony Estate, Sagamu–Ikenne Road, beside NYSC Camp, Sagamu, Ogun State</span>
+            </address>
+
+            <dl className="mt-6 grid grid-cols-2 gap-5 text-sm">
+              <div><dt className="ui-label">Check-in</dt><dd className="font-semibold text-white">From 2:00 pm</dd></div>
+              <div><dt className="ui-label">Check-out</dt><dd className="font-semibold text-white">By 12:00 pm</dd></div>
+            </dl>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+              <a href="https://maps.google.com/?q=Harmony+Estate+Sagamu+Ikenne+Road+Ogun+State+Nigeria" target="_blank" rel="noopener noreferrer" className="ui-button ui-button-primary">Get directions <span className="material-symbols-outlined text-lg" aria-hidden="true">near_me</span></a>
+              <a href="tel:+2348033774544" className="ui-button ui-button-secondary">Call the hotel <span className="material-symbols-outlined text-lg" aria-hidden="true">call</span></a>
+            </div>
+          </div>
         </div>
       </section>
 
       <FAQ />
 
-      {/* NEWSLETTER */}
-      <section className="py-20 md:py-28 px-6 text-center">
-        <div className="max-w-4xl mx-auto space-y-8 md:space-y-12">
-          <h2 className="serif-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-white italic leading-none">
-            Join Our Newsletter.
-          </h2>
-          <p className="text-gray-500 text-base sm:text-lg md:text-xl lg:text-2xl font-light">
-            Receive exclusive invitations, corporate rates, and priority guest services.
-          </p>
-          <div className="pt-8 max-w-md mx-auto">
-            <form onSubmit={handleSubscribe} className="flex flex-col gap-4">
-              <div className="space-y-2">
-                <input
-                  type="email"
-                  required
-                  placeholder="Business Email Address"
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value)}
-                  className={`w-full bg-white/[0.03] border ${
-                    emailError ? "border-red-500/50" : "border-white/10"
-                  } p-5 text-white outline-none focus:border-primary transition-all font-light italic`}
-                />
-                {emailError && (
-                  <p className="text-red-500 text-[8px] uppercase font-black tracking-widest text-left ml-1">
-                    {emailError}
-                  </p>
-                )}
-              </div>
-              <button
-                type="submit"
-                disabled={subscribing}
-                className="bg-primary text-black px-12 py-5 text-[11px] font-black uppercase tracking-[0.4em] rounded-sm hover:bg-[#B04110] transition-all shadow-2xl shadow-primary/40 flex items-center justify-center gap-3 disabled:opacity-70"
-              >
-                {subscribing && (
-                  <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                )}
-                {subscribing ? "SUBSCRIBING..." : "Subscribe Now"}
-              </button>
-            </form>
-          </div>
+      <section className="ui-section text-center">
+        <div className="ui-container max-w-3xl">
+          <p className="ui-eyebrow">Guest relations</p>
+          <h2 className="ui-section-title mt-4 italic text-white">Plan your next stay.</h2>
+          <p className="ui-copy mx-auto mt-5 max-w-2xl">Speak with our team about corporate rates, events, and tailored stays.</p>
+          <a href="mailto:info@moorehotelandsuites.com?subject=Stay%20Enquiry" className="ui-button ui-button-primary mt-8">Email guest relations</a>
         </div>
       </section>
     </div>

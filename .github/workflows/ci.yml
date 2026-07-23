@@ -1,0 +1,30 @@
+name: Guest website release gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+      - name: Install locked dependencies
+        run: yarn install --frozen-lockfile
+      - name: Validate environment profiles
+        run: yarn check:profiles
+      - name: Run deployment contract tests
+        run: yarn test
+      - name: Build Production
+        run: yarn build:production
+      - name: Audit dependencies
+        run: yarn audit:high

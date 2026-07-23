@@ -23,28 +23,31 @@ const FAQ: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="py-[clamp(3rem,8vh,8rem)] px-[clamp(1rem,4vw,3rem)] bg-black/40">
-      <div className="max-w-4xl mx-auto space-y-[clamp(2rem,5vw,4rem)]">
-        <div className="text-center space-y-6">
-          <p className="text-primary text-[clamp(0.65rem,0.6vw,0.75rem)] font-black uppercase tracking-[0.6em]">
+    <section className="ui-section bg-black/40">
+      <div className="ui-container max-w-4xl space-y-10 sm:space-y-14">
+        <div className="space-y-4 text-center">
+          <p className="ui-eyebrow">
             Guest Information
           </p>
-          <h2 className="serif-font text-[clamp(2rem,6vw,5rem)] text-white italic">
+          <h2 className="ui-section-title italic text-white">
             Frequently Asked Questions
           </h2>
         </div>
 
         <div className="space-y-4">
           {FAQ_DATA.map((item, index) => (
-            <div 
+            <div
               key={index} 
-              className="border-b border-white/5 overflow-hidden"
+              className="overflow-hidden border-b border-white/10"
             >
-              <button 
+              <button
+                type="button"
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full py-[clamp(1.5rem,3vw,2.5rem)] flex justify-between items-center text-left group"
+                className="group flex min-h-16 w-full items-center justify-between gap-5 py-5 text-left sm:py-6"
+                aria-expanded={openIndex === index}
+                aria-controls={`faq-answer-${index}`}
               >
-                <span className={`serif-font text-[clamp(1.1rem,2vw,1.5rem)] italic transition-colors ${openIndex === index ? 'text-primary' : 'text-white hover:text-primary/80'}`}>
+                <span className={`font-display text-[clamp(1.15rem,2vw,1.4rem)] italic transition-colors ${openIndex === index ? 'text-primary' : 'text-white group-hover:text-primary/80'}`}>
                   {item.question}
                 </span>
                 <span className={`material-symbols-outlined text-primary transition-transform duration-500 ${openIndex === index ? 'rotate-180' : ''}`}>
@@ -52,10 +55,12 @@ const FAQ: React.FC = () => {
                 </span>
               </button>
 
-              <div 
+              <div
+                id={`faq-answer-${index}`}
+                aria-hidden={openIndex !== index}
                 className={`transition-all duration-500 ease-in-out ${openIndex === index ? 'max-h-96 pb-8 opacity-100' : 'max-h-0 opacity-0'}`}
               >
-                <p className="text-gray-400 text-[clamp(0.95rem,1.1vw,1.125rem)] font-light leading-relaxed px-1">
+                <p className="ui-copy max-w-3xl px-1">
                   {item.answer}
                 </p>
               </div>

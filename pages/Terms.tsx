@@ -2,21 +2,21 @@ import React from 'react';
 
 const Terms: React.FC = () => {
   return (
-    <div className="bg-background-dark pt-32 pb-20 min-h-screen px-6">
-      <div className="max-w-4xl mx-auto space-y-20 md:space-y-28">
+    <div className="min-h-screen bg-background-dark px-4 pb-20 pt-32 sm:px-6">
+      <div className="ui-container max-w-4xl">
         {/* Header */}
-        <header className="space-y-4 border-b border-white/5 pb-12">
-          <p className="text-primary text-[10px] md:text-[11px] font-black uppercase tracking-[0.5em]">Rules of Engagement</p>
-          <h1 className="serif-font text-4xl md:text-5xl lg:text-7xl text-white leading-tight">
+        <header className="border-b border-white/10 pb-9">
+          <p className="ui-eyebrow">Guest terms</p>
+          <h1 className="ui-page-title mt-3 text-white">
             Terms of <span className="italic">Use</span>
           </h1>
-          <p className="text-gray-500 text-xs md:text-sm uppercase tracking-widest font-medium">
+          <p className="mt-4 text-sm text-gray-500">
             Effective Date: January 1, 2024
           </p>
         </header>
 
         {/* Terms Sections */}
-        <div className="space-y-12 text-gray-400 font-light leading-relaxed md:leading-loose">
+        <div className="mt-10 space-y-10 text-[0.96rem] leading-8 text-gray-400">
           {[
             {
               title: "Acceptance of Terms",
@@ -43,20 +43,20 @@ const Terms: React.FC = () => {
               content: "These terms are governed by the laws of the jurisdiction in which the property is located. For global digital disputes, the laws of Nigeria shall apply, with exclusive jurisdiction in the courts of Lagos."
             }
           ].map((section, idx) => (
-            <section key={idx} className="space-y-4 md:space-y-6">
-              <h2 className="serif-font text-2xl md:text-3xl text-white italic">{`${idx + 1}. ${section.title}`}</h2>
-              <p className="text-gray-400 text-sm md:text-base">{section.content}</p>
+            <section key={idx}>
+              <h2 className="ui-card-title mb-4 italic text-white">{`${idx + 1}. ${section.title}`}</h2>
+              <p>{section.content}</p>
             </section>
           ))}
         </div>
 
         {/* Footer */}
-        <footer className="pt-12 border-t border-white/5 flex justify-center">
+        <footer className="mt-12 flex justify-center border-t border-white/10 pt-8">
           <button 
             onClick={() => window.print()} 
-            className="flex items-center gap-3 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-primary hover:text-white transition-all"
+            className="ui-button ui-button-secondary"
           >
-            <span className="material-symbols-outlined">print</span> Download PDF
+            <span className="material-symbols-outlined" aria-hidden="true">print</span> Print terms
           </button>
         </footer>
       </div>
