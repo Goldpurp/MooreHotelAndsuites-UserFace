@@ -1,230 +1,202 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ApplicationUser, UserRole } from "../types";
+import Dialog from "./ui/Dialog";
 
 interface NavbarProps {
   user: ApplicationUser | null;
   onLogout: () => void;
 }
 
+const navLinks = [
+  { name: "Rooms", path: "/rooms" },
+  { name: "Dining", path: "/dining" },
+  { name: "Services", path: "/services" },
+  { name: "Our story", path: "/about" },
+];
+
 const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const logoutCancelRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 16);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    document.body.style.overflow = mobileMenuOpen ? "hidden" : "unset";
-  }, [mobileMenuOpen]);
-
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location]);
+  useEffect(() => setMobileMenuOpen(false), [location.pathname]);
 
   const handleLogoClick = () => {
-    if (location.pathname === "/") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    if (location.pathname === "/") window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const handleLogout = async () => {
+
+  const handleLogout = () => {
+    setMobileMenuOpen(false);
+    setLogoutConfirmOpen(true);
+  };
+
+  const confirmLogout = () => {
     setLogoutLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate loading, or call your async logout logic here
+    setLogoutConfirmOpen(false);
     onLogout();
-    setLogoutLoading(false);
   };
 
-  const navLinks = [
-    { name: "ROOMS", path: "/rooms" },
-    { name: "DINING", path: "/dining" },
-    { name: "SERVICES", path: "/services" },
-    { name: "HISTORY", path: "/about" },
-  ];
-
-  const isAdmin =
-    user && (user.role === UserRole.Admin || user.role === UserRole.Manager);
-  const getDisplayName = () => {
-    if (!user || !user.name) return "GUEST LOGIN";
-    const nameParts = user.name.trim().split(/\s+/);
-    const lastName = nameParts[nameParts.length - 1];
-    return lastName.toUpperCase();
-  };
+  const isAdmin = user && (user.role === UserRole.Admin || user.role === UserRole.Manager);
+  const displayName = user?.name?.trim().split(/\s+/).at(-1) || "Guest login";
+  const isActive = (path: string) => location.pathname === path || (path === "/rooms" && location.pathname.startsWith("/rooms/"));
 
   return (
     <>
+      <a
+        href="#main-content"
+        className="fixed left-4 top-3 z-[120] -translate-y-20 rounded bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wider text-black transition-transform focus:translate-y-0"
+      >
+        Skip to content
+      </a>
+
       <nav
-        className={`fixed w-full z-[70] transition-all duration-500 ease-out ${
+        aria-label="Primary navigation"
+        className={`fixed inset-x-0 top-0 z-[70] border-b transition-all duration-500 ${
           isScrolled
-            ? "bg-black/90 backdrop-blur-xl py-[clamp(0.75rem,1vw,1.25rem)] border-b border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
-            : "bg-transparent py-[clamp(1.25rem,2vw,2.5rem)]"
+            ? "border-white/10 bg-black/90 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl"
+            : "border-transparent bg-gradient-to-b from-black/65 to-transparent py-5"
         }`}
       >
-        <div className="container-luxury flex justify-between items-center">
-          <Link
-            to="/"
-            onClick={handleLogoClick}
-            className="flex items-center gap-[clamp(0.5rem,1vw,1rem)] group"
-          >
-            <div className="logo-box relative">
-              <div className="w-[clamp(2.7rem,3vw,3rem)] h-[clamp(2.7rem,3vw,3rem)] bg-[#dee2e6] rounded-sm flex items-center justify-center text-black font-black text-[clamp(1.1rem,1vw+0.8rem,1.6rem)] shadow-2xl shadow-primary/20 transition-all duration-500 animate-luxury-logo group-hover:scale-105">
-                <img
-                  src="https://res.cloudinary.com/dxryndnhl/image/upload/v1772008038/MooreHotels/website-assets/y3jgkzcainnzo3apmvkp.png"
-                  alt="Moore Hotels & Suites"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="tracking-[0.5em] text-[clamp(0.9rem,0.8vw+0.6rem,1.25rem)] font-bold text-whitetransition-colors">
-                MOORE
-              </span>
-              <span className="tracking-[0.3em] text-gray-500 uppercase font-black -mt-1 block text-[clamp(0.50rem,0.3vw+0.35rem,0.7rem)]">
-                Hotels & Suites
-              </span>
-            </div>
+        <div className="ui-container-wide flex items-center justify-between gap-5">
+          <Link to="/" onClick={handleLogoClick} className="group flex min-h-11 items-center gap-3" aria-label="Moore Hotels & Suites home">
+            <span className="grid size-11 place-items-center overflow-hidden rounded-[4px] bg-[#e4e6e8] shadow-[0_8px_28px_rgba(201,74,17,0.16)] transition-transform duration-300 group-hover:-translate-y-0.5">
+              <img
+                src="https://res.cloudinary.com/dxryndnhl/image/upload/v1777386017/slazzer-preview-w1yad_jizukz.png"
+                alt=""
+                className="h-full w-full object-contain"
+              />
+            </span>
+            <span className="flex flex-col">
+              <span className="text-[0.92rem] font-bold leading-none tracking-[0.26em] text-white">MOORE</span>
+              <span className="mt-1.5 text-[0.62rem] font-semibold uppercase leading-none tracking-[0.14em] text-gray-400">Hotels &amp; Suites</span>
+            </span>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-[clamp(2rem,4vw,4rem)]">
-            <div className="flex gap-[clamp(1.5rem,3vw,3rem)] uppercase font-black tracking-[0.45em] text-[clamp(0.55rem,0.4vw+0.4rem,0.75rem)]">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className={`hover:text-primary transition-all relative py-2 ${
-                    location.pathname === link.path
-                      ? "text-primary"
-                      : "text-gray-400"
-                  }`}
-                >
-                  {link.name}
-                  <span
-                    className={`absolute bottom-0 left-0 h-px bg-primary transition-all duration-500 ease-out ${
-                      location.pathname === link.path
-                        ? "w-full opacity-100"
-                        : "w-0 opacity-0"
-                    }`}
-                  />
-                </Link>
-              ))}
-
-              {isAdmin && (
-                <Link
-                  to="/admin"
-                  className={`hover:text-primary transition-all relative py-2 ${
-                    location.pathname === "/admin"
-                      ? "text-primary font-black"
-                      : "text-primary/60 font-black"
-                  }`}
-                >
-                  ADMIN
-                </Link>
-              )}
-            </div>
+          <div className="hidden items-center gap-8 lg:flex">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                aria-current={isActive(link.path) ? "page" : undefined}
+                className={`relative flex min-h-11 items-center text-[0.72rem] font-semibold uppercase tracking-[0.13em] transition-colors ${
+                  isActive(link.path) ? "text-primary" : "text-gray-300 hover:text-white"
+                }`}
+              >
+                {link.name}
+                <span className={`absolute inset-x-0 bottom-1 h-px origin-left bg-primary transition-transform duration-300 ${isActive(link.path) ? "scale-x-100" : "scale-x-0"}`} />
+              </Link>
+            ))}
+            {isAdmin && (
+              <a
+                href="https://admin.moorehotelandsuites.com"
+                rel="noopener noreferrer"
+                className="flex min-h-11 items-center text-[0.72rem] font-semibold uppercase tracking-[0.13em] text-primary/80 transition-colors hover:text-primary"
+              >
+                Admin
+              </a>
+            )}
           </div>
 
-          <div className="flex items-center gap-[clamp(1rem,2vw,2.5rem)]">
-            <div className="hidden lg:flex items-center gap-[clamp(1.5rem,2vw,2.5rem)]">
-              <Link
-                to={user ? "/profile" : "/auth"}
-                className="text-[clamp(0.55rem,0.4vw+0.4rem,0.7rem)] font-black tracking-[0.5em] uppercase text-gray-400 hover:text-white transition-all flex items-center gap-3 bg-white/5 px-[clamp(1rem,1.5vw,1.5rem)] py-[clamp(0.5rem,0.7vw,0.8rem)] rounded-sm border border-white/5 hover:border-white/10"
-              >
-                <span className="material-symbols-outlined text-sm">
-                  lock_open
-                </span>
-                {getDisplayName()}
-              </Link>
-
-              {user && (
-                <button
-                  onClick={handleLogout}
-                  disabled={logoutLoading}
-                  className="text-[clamp(0.55rem,0.4vw+0.4rem,0.7rem)] font-black tracking-[0.4em] uppercase text-red-500/60 hover:text-red-500 transition-colors flex items-center gap-2"
-                >
-                  {logoutLoading ? (
-                    <span className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></span>
-                  ) : null}
-                  LOGOUT
-                </button>
-              )}
-            </div>
-
-            <div className="flex lg:hidden items-center gap-4">
-              <Link
-                to="/rooms"
-                className="bg-primary text-black px-[clamp(1rem,3vw,1.5rem)] py-[clamp(0.5rem,1vw,0.75rem)] rounded-sm text-[clamp(0.6rem,0.4vw+0.45rem,0.75rem)] font-black tracking-[0.2em] uppercase shadow-xl active:scale-95 transition-all"
-              >
-                Reserve
-              </Link>
-
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                className="flex flex-col gap-1.5 p-3 group bg-white/5 rounded-sm active:scale-90 transition-all border border-white/5"
-              >
-                <div className="w-5 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></div>
-                <div className="w-5 h-[1.5px] bg-white group-hover:bg-primary transition-colors"></div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link to="/rooms" className="ui-button ui-button-primary hidden sm:inline-flex lg:hidden">Reserve</Link>
+            <Link
+              to={user ? "/profile" : "/auth"}
+              className="ui-button ui-button-secondary hidden lg:inline-flex"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">person</span>
+              <span className="max-w-28 truncate">{displayName}</span>
+            </Link>
+            {user && (
+              <button onClick={handleLogout} disabled={logoutLoading} className="ui-icon-button hidden lg:inline-grid" aria-label="Sign out">
+                <span className={`material-symbols-outlined ${logoutLoading ? "animate-spin" : ""}`} aria-hidden="true">{logoutLoading ? "progress_activity" : "logout"}</span>
               </button>
-            </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="ui-icon-button lg:hidden"
+              aria-label="Open navigation menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">menu</span>
+            </button>
           </div>
         </div>
       </nav>
 
-      <div
-        className={`fixed inset-0 z-[100] transition-all duration-700 ease-in-out ${mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+      <Dialog
+        id="mobile-navigation"
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        ariaLabel="Navigation menu"
+        variant="drawer"
+        initialFocusRef={closeButtonRef}
+        panelClassName="flex w-full max-w-md flex-col border-l border-white/10 bg-[#0d0d0d] p-6 shadow-2xl sm:p-10"
       >
-        <div
-          className={`absolute inset-0 bg-black/98 backdrop-blur-3xl transform transition-transform duration-700 ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
-        >
-          <div className="h-full flex flex-col p-[clamp(1.5rem,5vw,4rem)] pt-[clamp(6rem,10vh,10rem)] relative z-10">
-            <button
-              onClick={() => setMobileMenuOpen(false)}
-              className="absolute top-10 right-10 text-primary active:scale-90 transition-all"
-            >
-              <span className="material-symbols-outlined text-5xl">close</span>
+          <div className="flex items-center justify-between border-b border-white/10 pb-6">
+            <span className="ui-eyebrow">Navigation</span>
+            <button ref={closeButtonRef} type="button" onClick={() => setMobileMenuOpen(false)} className="ui-icon-button" aria-label="Close navigation menu">
+              <span className="material-symbols-outlined" aria-hidden="true">close</span>
             </button>
-
-            <div className="flex flex-col gap-[clamp(1.5rem,4vh,3rem)] mt-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className="serif-font text-[clamp(2.5rem,5vw,4rem)] text-white italic hover:text-primary transition-all leading-tight"
-                >
-                  {link.name.toLowerCase()}
-                </Link>
-              ))}
-
-              <div className="h-px w-24 bg-primary/20 my-10"></div>
-
-              <div className="space-y-8">
-                <Link
-                  to={user ? "/profile" : "/auth"}
-                  className="block text-[clamp(1.2rem,2vw,1.6rem)] font-light text-gray-400 hover:text-white transition-all"
-                >
-                  {user ? "Guest Dashboard" : "Guest Login"}
-                </Link>
-
-                {user && (
-                  <button
-                    onClick={handleLogout}
-                    disabled={logoutLoading}
-                    className="text-left text-red-500/60 text-[clamp(0.9rem,1vw,1.1rem)] uppercase tracking-widest font-black pt-4 flex items-center gap-2"
-                  >
-                    {logoutLoading ? (
-                      <span className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></span>
-                    ) : null}
-                    Secure Exit
-                  </button>
-                )}
-              </div>
-            </div>
           </div>
+
+          <div className="flex flex-1 flex-col justify-center gap-2 py-8">
+            {navLinks.map((link, index) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                tabIndex={mobileMenuOpen ? 0 : -1}
+                className={`font-display flex min-h-14 items-center border-b border-white/[0.07] text-[clamp(1.9rem,9vw,2.75rem)] italic transition-colors ${isActive(link.path) ? "text-primary" : "text-white hover:text-primary"}`}
+                style={{ transitionDelay: mobileMenuOpen ? `${80 + index * 45}ms` : "0ms" }}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+
+          <div className="grid gap-3 border-t border-white/10 pt-6">
+            <Link to={user ? "/profile" : "/auth"} tabIndex={mobileMenuOpen ? 0 : -1} className="ui-button ui-button-secondary w-full">
+              <span className="material-symbols-outlined" aria-hidden="true">person</span>
+              {user ? "Guest dashboard" : "Guest login"}
+            </Link>
+            <Link to="/rooms" tabIndex={mobileMenuOpen ? 0 : -1} className="ui-button ui-button-primary w-full">Reserve a room</Link>
+            {user && <button onClick={handleLogout} disabled={logoutLoading} tabIndex={mobileMenuOpen ? 0 : -1} className="min-h-11 text-sm font-semibold text-red-400 hover:text-red-300">Sign out securely</button>}
+          </div>
+      </Dialog>
+
+      <Dialog
+        isOpen={logoutConfirmOpen}
+        onClose={() => !logoutLoading && setLogoutConfirmOpen(false)}
+        labelledBy="guest-logout-title"
+        describedBy="guest-logout-description"
+        role="alertdialog"
+        initialFocusRef={logoutCancelRef}
+        closeOnBackdrop={!logoutLoading}
+        closeOnEscape={!logoutLoading}
+        panelClassName="ui-card w-full max-w-md p-6 shadow-2xl sm:p-8"
+        zIndex={320}
+      >
+        <p className="ui-eyebrow text-red-300">Account security</p>
+        <h2 id="guest-logout-title" className="ui-card-title mt-2 italic text-white">Sign out of your guest account?</h2>
+        <p id="guest-logout-description" className="ui-copy mt-4 text-sm">You will need to enter your email and password again to view personal details and booking history.</p>
+        <div className="mt-7 grid gap-3 sm:grid-cols-2">
+          <button ref={logoutCancelRef} type="button" onClick={() => setLogoutConfirmOpen(false)} disabled={logoutLoading} className="ui-button ui-button-secondary">Stay signed in</button>
+          <button type="button" onClick={confirmLogout} disabled={logoutLoading} className="ui-button border-red-500/30 bg-red-600 text-white hover:bg-red-500">{logoutLoading ? "Signing out" : "Sign out"}</button>
         </div>
-      </div>
+      </Dialog>
     </>
   );
 };

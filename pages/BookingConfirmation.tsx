@@ -1,242 +1,318 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
-import { api } from "../services/api";
+import { api, getTrustedPaymentUrl } from "../services/api";
 import { Booking, Room, BookingStatus } from "../types";
 import AestheticLoader from "../components/AestheticLoader";
-import jsPDF from "jspdf";
+
+const formatStatus = (value: string | null | undefined) =>
+  value ? value.replace(/([a-z])([A-Z])/g, "$1 $2") : "Not selected";
 
 const BookingConfirmation: React.FC = () => {
-  const { code } = useParams();
+  const { code: routeCode } = useParams();
+  const code = routeCode?.trim().toUpperCase() || "";
   const location = useLocation();
   const stateBooking = location.state?.booking as Booking | null;
+  const rememberedEmail = code ? api.getRememberedBookingEmail(code) : "";
 
-  const [booking, setBooking] = useState<Booking | null>(stateBooking);
+  const [booking, setBooking] = useState<Booking | null>(
+    stateBooking?.bookingCode?.toUpperCase() === code ? stateBooking : null,
+  );
   const [room, setRoom] = useState<Room | null>(null);
+  const [lookupEmail, setLookupEmail] = useState(rememberedEmail);
   const [loading, setLoading] = useState(true);
+  const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const refreshBooking = async () => {
-    if (!code) return;
-    try {
-      const updatedBooking = await api.getBookingByCode(code);
-      setBooking(updatedBooking);
-      return updatedBooking;
-    } catch (err) {
-      console.error("Booking sync failed", err);
-    }
-  };
-
   useEffect(() => {
-    const init = async () => {
-      let currentBooking = booking;
+    let active = true;
 
-      if (!currentBooking && code) {
-        try {
-          currentBooking = await api.getBookingByCode(code);
-          setBooking(currentBooking);
-        } catch {
-          setError("Booking not found.");
+    const initialize = async () => {
+      if (!code) {
+        if (active) {
+          setError("A booking reference is required.");
           setLoading(false);
-          return;
         }
-      }
-
-      if (!currentBooking) {
-        setError("No active booking detected.");
-        setLoading(false);
         return;
       }
 
-      try {
-        const roomData = await api.getRoomById(currentBooking.roomId);
-        setRoom(roomData);
-      } catch {
-        setError("Unable to retrieve room details.");
+      let currentBooking =
+        stateBooking?.bookingCode?.toUpperCase() === code ? stateBooking : null;
+
+      if (!currentBooking && rememberedEmail) {
+        try {
+          currentBooking = await api.lookupBooking(code, rememberedEmail);
+          if (active) setBooking(currentBooking);
+        } catch {
+          if (active) {
+            setError("Enter the booking email to securely retrieve this reservation.");
+          }
+        }
       }
 
-      setLoading(false);
+      if (currentBooking) {
+        try {
+          const roomData = await api.getRoomById(currentBooking.roomId);
+          if (active) setRoom(roomData);
+        } catch {
+          if (active) setError("The booking was found, but its room details are unavailable.");
+        }
+      } else if (!rememberedEmail && active) {
+        setError("Enter the booking email to securely retrieve this reservation.");
+      }
+
+      if (active) setLoading(false);
     };
 
-    init();
-
-    const interval = setInterval(() => {
-      if (booking?.status === BookingStatus.Pending) refreshBooking();
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [code, booking?.status]);
-
-  const downloadPDF = () => {
-    if (!booking || !room) return;
-
-    const pdf = new jsPDF({ unit: "pt", format: "a4" });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-
-    // Header
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(24);
-    pdf.setTextColor("#EAB308");
-    pdf.text("Booking Confirmation", pageWidth / 2, 50, { align: "center" });
-
-    pdf.setFontSize(10);
-    pdf.setFont("helvetica", "normal");
-    pdf.setTextColor("#666");
-    pdf.text("Moore Hotels & Suites • Guest Record", pageWidth / 2, 70, { align: "center" });
-
-    pdf.setDrawColor(234, 179, 8);
-    pdf.setLineWidth(1);
-    pdf.line(50, 80, pageWidth - 50, 80);
-
-    let y = 110;
-
-    const addField = (label: string, value: string) => {
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(10);
-      pdf.setTextColor("#666");
-      pdf.text(label, 60, y);
-
-      pdf.setFont("helvetica", "normal");
-      pdf.setTextColor("#000");
-      pdf.text(value, 200, y);
-      y += 20;
+    initialize();
+    return () => {
+      active = false;
     };
+  }, [code]);
 
-    addField("Reference Code:", booking.bookingCode);
-    addField("Guest Name:", `${booking.guestFirstName} ${booking.guestLastName}`);
-    addField("Email:", booking.guestEmail);
-    addField("Phone:", booking.guestPhone);
-    addField("Room:", `${room.roomNumber} (${room.category})`);
+  useEffect(() => {
+    if (!booking || booking.status !== BookingStatus.Pending || !code) return;
 
-    const nights = booking.checkIn && booking.checkOut
-      ? Math.max(1, Math.ceil((new Date(booking.checkOut).getTime() - new Date(booking.checkIn).getTime()) / 86400000))
-      : 1;
+    const email = booking.guestEmail || api.getRememberedBookingEmail(code);
+    if (!email) return;
 
-    addField("Stay Duration:", `${nights} night(s)`);
-    addField("Check-In:", booking.checkIn ? `${new Date(booking.checkIn).toLocaleDateString()} (2:00pm)` : "—");
-    addField("Check-Out:", booking.checkOut ? `${new Date(booking.checkOut).toLocaleDateString()} (12:00pm)` : "—");
-    addField("Amount Paid:", `₦${booking.amount?.toLocaleString() || '—'}`);
+    const interval = window.setInterval(async () => {
+      if (document.visibilityState !== "visible") return;
+      try {
+        const updatedBooking = await api.lookupBooking(code, email);
+        setBooking(updatedBooking);
+      } catch {
+        // Keep the last verified record and retry while the payment is pending.
+      }
+    }, 10_000);
 
-    y += 20;
-    pdf.setFontSize(8);
-    pdf.setTextColor("#999");
-    pdf.text(
-      "Thank you for booking with Moore Hotels & Suites. We look forward to hosting you!",
-      pageWidth / 2,
-      y,
-      { align: "center" }
-    );
+    return () => window.clearInterval(interval);
+  }, [booking?.status, booking?.guestEmail, code]);
 
-    pdf.save(`Booking-${booking.bookingCode}.pdf`);
+  const handleLookup = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!code || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lookupEmail.trim())) {
+      setError("Enter the valid email address used for this booking.");
+      return;
+    }
+
+    setVerifying(true);
+    setError(null);
+    try {
+      const verifiedBooking = await api.lookupBooking(code, lookupEmail);
+      const roomData = await api.getRoomById(verifiedBooking.roomId);
+      api.rememberBookingLookup(code, lookupEmail);
+      setBooking(verifiedBooking);
+      setRoom(roomData);
+    } catch (lookupError) {
+      setError(
+        lookupError instanceof Error
+          ? lookupError.message
+          : "The booking could not be verified.",
+      );
+    } finally {
+      setVerifying(false);
+    }
   };
 
-  if (loading) return <AestheticLoader message="Loading Booking..." subtext="Verifying details..." />;
+  const printBooking = () => window.print();
 
-  if (error)
+  if (loading) {
+    return <AestheticLoader message="Retrieving your booking" subtext="Verifying details" />;
+  }
+
+  if (!booking || !room) {
     return (
-      <div className="min-h-screen bg-background-dark flex flex-col items-center justify-center px-6 text-center">
-        <span className="material-symbols-outlined text-red-500 text-6xl">error_outline</span>
-        <h1 className="serif-font text-2xl md:text-3xl text-white italic mt-4">Access Denied</h1>
-        <p className="text-gray-400 text-sm mt-2">{error}</p>
-        <Link
-          to="/"
-          className="mt-6 px-6 py-3 text-xs uppercase font-black tracking-widest bg-primary text-black rounded shadow hover:bg-[#B04110] transition-all"
+      <div className="flex min-h-screen items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
+        <form
+          onSubmit={handleLookup}
+          className="ui-card w-full max-w-md p-7 text-center shadow-2xl sm:p-9"
         >
-          Return Home
-        </Link>
+          <span className="mx-auto grid size-14 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined text-3xl" aria-hidden="true">shield_lock</span></span>
+          <div className="mt-6">
+            <p className="ui-eyebrow">Secure lookup</p>
+            <h1 className="ui-card-title mt-2 italic text-white">Verify your booking</h1>
+            <p className="mt-3 text-sm text-gray-400">
+              Reference <span className="font-mono text-white">{code || "—"}</span>
+            </p>
+          </div>
+          <label className="mt-7 block text-left">
+            <span className="ui-label">Booking email</span>
+            <input
+              type="email"
+              required
+              autoComplete="email"
+              maxLength={254}
+              value={lookupEmail}
+              onChange={(event) => setLookupEmail(event.target.value)}
+              className="ui-input"
+              placeholder="email@example.com"
+            />
+          </label>
+          {error && <p className="mt-4 text-sm text-red-400" role="alert">{error}</p>}
+          <button
+            type="submit"
+            disabled={verifying || !code}
+            className="ui-button ui-button-primary mt-6 w-full"
+          >
+            {verifying && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}
+            {verifying ? "Verifying" : "Retrieve booking"}
+          </button>
+          <Link to="/manage-booking" className="mt-3 inline-flex min-h-11 items-center text-sm text-gray-500 hover:text-white">
+            Use another reference
+          </Link>
+        </form>
       </div>
     );
+  }
 
-  const isPending = booking?.status === BookingStatus.Pending;
+  const isPending = booking.status === BookingStatus.Pending;
+  const isCancelled = [BookingStatus.Cancelled, BookingStatus.NoShow].includes(
+    booking.status,
+  );
+  const statusLabel =
+    booking.status === BookingStatus.CheckedOut
+      ? "Completed"
+      : booking.status === BookingStatus.CheckedIn
+        ? "Checked In"
+        : booking.status;
+  const statusColor = isPending
+    ? "border-primary bg-primary/10 text-primary"
+    : isCancelled
+      ? "border-red-500 bg-red-500/10 text-red-500"
+      : "border-green-500 bg-green-500/10 text-green-500";
+  const trustedPaymentUrl = isPending
+    ? getTrustedPaymentUrl(booking.paymentUrl)
+    : null;
 
   return (
-    <div className="min-h-screen bg-background-dark flex items-center justify-center p-4">
-      <div className="bg-surface-dark w-full max-w-sm rounded-lg shadow-2xl p-6 md:p-8 space-y-6">
-        
-        {/* Status Header */}
-        <div className="flex flex-col items-center space-y-2">
-          <div
-            className={`w-14 h-14 flex items-center justify-center rounded-full border-2 ${
-              isPending ? 'border-primary bg-primary/10 text-primary animate-pulse' : 'border-green-500 bg-green-500/10 text-green-500'
-            }`}
-          >
-            <span className="material-symbols-outlined text-2xl">
-              {isPending ? 'hourglass_top' : 'check_circle'}
+    <div className="booking-print-page flex min-h-screen items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
+      <div className="booking-print-card ui-card w-full max-w-2xl p-6 shadow-2xl sm:p-10">
+        <div className="flex flex-col items-center text-center">
+          <div className={`grid size-14 place-items-center rounded-full border ${statusColor}`}>
+            <span className="material-symbols-outlined text-2xl" aria-hidden="true">
+              {isPending ? "hourglass_top" : isCancelled ? "cancel" : "check_circle"}
             </span>
           </div>
-          <h2 className="serif-font text-2xl md:text-3xl text-white italic">
-            {isPending ? 'Pending' : 'Confirmed'}
-          </h2>
-          <p className="text-gray-400 text-[10px] uppercase tracking-widest">Guest Record</p>
+          <p className="ui-eyebrow mt-5">Verified booking record</p>
+          <h1 className="ui-card-title mt-2 italic text-white">{statusLabel}</h1>
+          <p className="mt-3 text-sm text-gray-400">{booking.guestFirstName} {booking.guestLastName}</p>
         </div>
 
-        {/* Booking Summary */}
-        <div className="bg-black/30 p-4 rounded space-y-4">
+        <div className="mt-7 rounded border border-white/10 bg-black/25 p-5 sm:p-6">
           <div className="text-center">
-            <p className="text-gray-400 text-[8px] uppercase tracking-[0.2em]">Reference Code</p>
-            <p className="text-xl md:text-2xl text-white font-mono font-bold tracking-[0.2em]">{booking?.bookingCode}</p>
+            <p className="ui-label">Reference code</p>
+            <p className="break-all font-mono text-xl font-bold tracking-[0.08em] text-white sm:text-2xl">
+              {booking.bookingCode}
+            </p>
           </div>
-
-          <div className="grid grid-cols-2 gap-4 text-[10px] text-gray-400">
-            <div className="space-y-1">
-              <p className="uppercase font-black tracking-widest">Room</p>
-              <p className="text-white font-bold">{room?.roomNumber || '—'}</p>
-              <p className="text-primary text-[9px] opacity-80">{room?.category}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="uppercase font-black tracking-widest">Nights</p>
-              <p className="text-white font-bold">
-                {booking?.checkIn && booking?.checkOut
-                  ? `${Math.max(1, Math.ceil((new Date(booking.checkOut).getTime() - new Date(booking.checkIn).getTime()) / 86400000))}`
-                  : '—'}
-              </p>
-            </div>
-            <div className="space-y-1">
-              <p className="uppercase font-black tracking-widest">Check-In</p>
-              <p className="text-white">{booking?.checkIn ? `${new Date(booking.checkIn).toLocaleDateString()} @ 2:00pm` : '—'}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="uppercase font-black tracking-widest">Check-Out</p>
-              <p className="text-white">{booking?.checkOut ? `${new Date(booking.checkOut).toLocaleDateString()} @ 12:00pm` : '—'}</p>
-            </div>
+          <div className="mt-6 grid grid-cols-2 gap-5 border-t border-white/10 pt-6 text-sm sm:grid-cols-4">
+            <BookingField label="Room" value={room.name} detail={room.category} />
+            <BookingField
+              label="Nights"
+              value={String(
+                Math.max(
+                  1,
+                  Math.ceil(
+                    (new Date(booking.checkOut).getTime() -
+                      new Date(booking.checkIn).getTime()) /
+                      86_400_000,
+                  ),
+                ),
+              )}
+            />
+            <BookingField label="Check-In" value={new Date(booking.checkIn).toLocaleDateString()} />
+            <BookingField label="Check-Out" value={new Date(booking.checkOut).toLocaleDateString()} />
           </div>
-
-          <div className="text-center mt-2">
-            <p className="uppercase text-gray-400 text-[9px] tracking-widest font-black">Amount</p>
-            <p className="text-primary text-2xl md:text-3xl font-bold serif-font">₦{booking?.amount?.toLocaleString()}</p>
+          <div className="mt-6 border-t border-white/10 pt-6 text-center">
+            <p className="ui-label">Amount</p>
+            <p className="font-display text-3xl font-semibold text-primary sm:text-4xl">
+              ₦{booking.amount.toLocaleString()}
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              Payment: {formatStatus(booking.paymentStatus)}
+              {booking.paymentMethod ? ` · ${formatStatus(booking.paymentMethod)}` : ""}
+            </p>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-3">
-          <button
-            onClick={downloadPDF}
-            className="w-full bg-primary text-black py-3 rounded font-black text-xs uppercase tracking-widest hover:bg-[#B04110] transition-all"
+        {booking.notificationMessage && (
+          <p className="mt-5 rounded border border-primary/20 bg-primary/5 p-4 text-center text-sm leading-6 text-gray-300">
+            {booking.notificationMessage}
+          </p>
+        )}
+
+        {booking.status === BookingStatus.Pending && booking.paymentExpiresAtUtc && (
+          <p className="mt-5 rounded border border-amber-400/30 bg-amber-400/10 p-4 text-center text-sm leading-6 text-amber-100">
+            Payment must be confirmed by{' '}
+            <strong>{new Date(booking.paymentExpiresAtUtc).toLocaleString()}</strong>.
+            {' '}If it is not confirmed within one hour, this booking is cancelled automatically so the room becomes available again.
+          </p>
+        )}
+
+        {booking.paymentInstruction && (
+          <section className="mt-5 rounded border border-white/10 bg-black/20 p-5" aria-labelledby="transfer-instructions-title">
+            <p className="ui-label">Direct transfer</p>
+            <h2 id="transfer-instructions-title" className="text-base font-semibold text-white">Payment instructions</h2>
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-gray-300">{booking.paymentInstruction}</p>
+          </section>
+        )}
+
+        {trustedPaymentUrl && (
+          <a
+            href={trustedPaymentUrl}
+            rel="noopener noreferrer"
+            className="print-hidden ui-button ui-button-primary mt-7 w-full"
           >
-            Download PDF
+            <span className="material-symbols-outlined" aria-hidden="true">payments</span>
+            Continue secure Monnify payment
+          </a>
+        )}
+
+        <div className={`print-hidden grid gap-3 sm:grid-cols-3 ${trustedPaymentUrl ? "mt-3" : "mt-7"}`}>
+          <button
+            onClick={printBooking}
+            className="ui-button ui-button-primary w-full"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">print</span> Print or save PDF
           </button>
           <Link
-            to="/profile"
-            className="w-full bg-primary text-black py-3 rounded font-black text-xs uppercase tracking-widest hover:bg-[#B04110] transition-all text-center"
+            to="/manage-booking"
+            className="ui-button ui-button-secondary w-full"
           >
-            View My Bookings
+            Another booking
           </Link>
           <Link
             to="/"
-            className="w-full border border-white/10 text-gray-400 py-3 rounded font-black text-xs uppercase tracking-widest hover:text-white hover:bg-white/5 transition-all text-center"
+            className="ui-button ui-button-secondary w-full"
           >
             Return Home
           </Link>
         </div>
 
-        {/* Pending Notice */}
         {isPending && (
-          <p className="text-[9px] text-gray-500 italic text-center mt-2">
-            * Your room is held temporarily. Updates occur automatically once payment is confirmed.
+          <p className="mt-5 text-center text-sm italic text-gray-500">
+            Your room is held temporarily while payment is verified.
           </p>
         )}
       </div>
     </div>
   );
 };
+
+const BookingField = ({
+  label,
+  value,
+  detail,
+}: {
+  label: string;
+  value: string;
+  detail?: string;
+}) => (
+  <div>
+    <p className="ui-label">{label}</p>
+    <p className="font-semibold text-white">{value}</p>
+    {detail && <p className="mt-1 text-xs text-primary">{detail}</p>}
+  </div>
+);
 
 export default BookingConfirmation;

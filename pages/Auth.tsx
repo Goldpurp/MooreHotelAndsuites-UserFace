@@ -1,121 +1,112 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { ApplicationUser } from "../types";
 import NotificationModal from "../components/NotificationModal";
+import FormField from "../components/ui/FormField";
 
 interface AuthProps {
   onLogin: (user: ApplicationUser, token: string) => void;
 }
 
-type AuthMode = "login" | "register" | "forgot";
+type AuthMode = "login" | "register" | "forgot" | "verify";
+type FormData = { email: string; password: string; firstName: string; lastName: string; phone: string };
+type FormField = keyof FormData;
 
-type FormData = {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-};
+const blankForm: FormData = { email: "", password: "", firstName: "", lastName: "", phone: "" };
 
 const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   const [mode, setMode] = useState<AuthMode>("login");
-  const [formData, setFormData] = useState<FormData>({
-    email: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
-  });
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [formData, setFormData] = useState<FormData>(blankForm);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<FormField, string>>>({});
   const [loading, setLoading] = useState(false);
-  const [modal, setModal] = useState<{
-    show: boolean;
-    title: string;
-    message: string;
-    type: "success" | "error" | "info";
-  }>({
-    show: false,
-    title: "",
-    message: "",
-    type: "info",
-  });
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [modal, setModal] = useState<{ show: boolean; title: string; message: string; type: "success" | "error" | "info" }>({ show: false, title: "", message: "", type: "info" });
   const navigate = useNavigate();
   const location = useLocation();
 
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get("verified") === "1") {
+      setModal({ show: true, title: "Email verified", message: "Your account is ready. Sign in to continue.", type: "success" });
+      navigate("/auth", { replace: true });
+    }
+  }, [location.search, navigate]);
+
+  const changeMode = (nextMode: AuthMode) => {
+    setMode(nextMode);
+    setFieldErrors({});
+    setShowPassword(false);
+  };
+
+  const updateField = (field: FormField, value: string) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+    if (fieldErrors[field]) setFieldErrors((current) => ({ ...current, [field]: undefined }));
+  };
+
   const validate = () => {
-    const errors: Partial<Record<keyof FormData, string>> = {};
+    const errors: Partial<Record<FormField, string>> = {};
+    const email = formData.email.trim();
+    if (!email) errors.email = "Email is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Enter a valid email address.";
 
-    if (!formData.email) errors.email = "Email is required.";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      errors.email = "Enter a valid email.";
-
-    if (mode !== "forgot") {
-      if (!formData.password) errors.password = "Password is required.";
-      else if (formData.password.length < 6)
-        errors.password = "Password must be at least 6 characters.";
+    if ((mode === "login" || mode === "register") && !formData.password) {
+      errors.password = "Password is required.";
     }
-
     if (mode === "register") {
-      if (!formData.firstName) errors.firstName = "First name is required.";
-      if (!formData.lastName) errors.lastName = "Last name is required.";
-      if (!formData.phone) errors.phone = "Phone number is required.";
+      if (!formData.firstName.trim()) errors.firstName = "First name is required.";
+      else if (formData.firstName.trim().length > 80) errors.firstName = "First name is too long.";
+      if (!formData.lastName.trim()) errors.lastName = "Last name is required.";
+      else if (formData.lastName.trim().length > 80) errors.lastName = "Last name is too long.";
+      if (!/^\+?[0-9 ()-]{7,20}$/.test(formData.phone.trim())) errors.phone = "Enter a valid phone number.";
+      if (formData.password.length < 8 || !/[a-z]/.test(formData.password) || !/[A-Z]/.test(formData.password) || !/\d/.test(formData.password) || !/[^A-Za-z0-9]/.test(formData.password)) {
+        errors.password = "Use 8+ characters with upper and lowercase, a number, and a symbol.";
+      }
     }
-
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (loading) return;
-    if (!validate()) return;
-
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (loading || !validate()) return;
     setLoading(true);
-
     try {
       if (mode === "forgot") {
-        await api.resetPasswordRequest(formData.email);
-        setModal({
-          show: true,
-          title: "Password Reset Sent",
-          message: "Instructions to reset your password have been sent to your email.",
-          type: "success",
-        });
+        await api.resetPasswordRequest(formData.email.trim().toLowerCase());
+        setModal({ show: true, title: "Check your email", message: "If an account matches that address, reset instructions are on the way.", type: "success" });
         return;
       }
-
+      if (mode === "verify") {
+        await api.resendVerification(formData.email.trim().toLowerCase());
+        setModal({ show: true, title: "Verification email requested", message: "If the account still needs verification, a fresh activation link is on the way.", type: "success" });
+        return;
+      }
       if (mode === "register") {
-        await api.register(formData);
-        setModal({
-          show: true,
-          title: "Verification Required",
-          message:
-            "A confirmation link has been sent to your email. Please verify before signing in.",
-          type: "info",
+        const response = await api.register({
+          ...formData,
+          firstName: formData.firstName.trim(),
+          lastName: formData.lastName.trim(),
+          email: formData.email.trim().toLowerCase(),
+          phone: formData.phone.trim(),
         });
+        setModal({ show: true, title: "Account created", message: response.message, type: "success" });
         setMode("login");
-        setFormData({ ...formData, password: "" });
+        setFormData((current) => ({ ...current, password: "" }));
         return;
       }
-
-      // login
-      const res = await api.login({
-        email: formData.email,
-        password: formData.password,
-      });
-      if (res?.token) {
-        api.setToken(res.token);
+      const response = await api.login({ email: formData.email.trim().toLowerCase(), password: formData.password });
+      if (response?.token) {
+        api.setToken(response.token);
         const user = await api.getMe();
-        onLogin(user, res.token);
+        onLogin(user, response.token);
         navigate("/profile");
       }
-    } catch (err: any) {
+    } catch (error: unknown) {
+      if (mode === "login") api.setToken(null);
       setModal({
         show: true,
-        title: "Login Failed",
-        message: err.message || "Invalid credentials provided.",
+        title: mode === "register" ? "Account not created" : mode === "forgot" || mode === "verify" ? "Request not completed" : "Sign-in failed",
+        message: error instanceof Error ? error.message : "The request could not be completed. Please try again.",
         type: "error",
       });
     } finally {
@@ -123,228 +114,98 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     }
   };
 
-  const getButtonText = () => {
-    if (loading) {
-      if (mode === "register") return "CREATING ACCOUNT...";
-      if (mode === "forgot") return "RESETTING PASSWORD...";
-      return "SIGNING IN...";
-    }
-    if (mode === "register") return "CREATE ACCOUNT";
-    if (mode === "forgot") return "RESET PASSWORD";
-    return "SIGN IN";
-  };
+  const heading =
+    mode === "register"
+      ? "Create your account"
+      : mode === "forgot"
+        ? "Reset your password"
+        : mode === "verify"
+          ? "Verify your email"
+          : "Welcome back";
+  const intro =
+    mode === "register"
+      ? "Save your details and keep track of your stays."
+      : mode === "forgot"
+        ? "Enter your account email and we’ll send reset instructions."
+        : mode === "verify"
+          ? "Request a fresh activation link for an account that is not yet verified."
+          : "Sign in to view and manage your bookings.";
+  const submitLabel = loading
+    ? mode === "register"
+      ? "Creating account"
+      : mode === "forgot" || mode === "verify"
+        ? "Sending link"
+        : "Signing in"
+    : mode === "register"
+      ? "Create account"
+      : mode === "forgot"
+        ? "Send reset link"
+        : mode === "verify"
+          ? "Send verification link"
+          : "Sign in";
 
   return (
-    <div className="min-h-screen flex relative overflow-hidden bg-background-dark">
-      <NotificationModal
-        isOpen={modal.show}
-        onClose={() => setModal({ ...modal, show: false })}
-        title={modal.title}
-        message={modal.message}
-        type={modal.type}
-      />
+    <div className="grid min-h-screen bg-background-dark pt-24 lg:grid-cols-2 lg:pt-0">
+      <NotificationModal isOpen={modal.show} onClose={() => setModal((current) => ({ ...current, show: false }))} title={modal.title} message={modal.message} type={modal.type} />
 
-      {/* Cinematic Image Panel */}
-      <div className="hidden lg:block w-1/2 relative">
-        <div className="absolute inset-0 bg-black/60 z-10" />
-        <img
-          src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=1920"
-          className="w-full h-full object-cover grayscale brightness-50"
-          alt="Luxury Interior"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-[clamp(2rem,5vw,6rem)] text-center space-y-[clamp(1.5rem,3vw,3rem)] animate-reveal">
-          <div className="w-16 h-16 md:w-20 md:h-20 ">
-            <img
-              src="https://res.cloudinary.com/dxryndnhl/image/upload/v1772007930/MooreHotels/website-assets/zda9mbs2f3wrke1f2mtd.jpg"
-              alt="Moore Hotels & Suites"
-              loading="lazy"
-            />
-          </div>
-          <div className="space-y-[clamp(0.5rem,1vw,1.5rem)]">
-            <h2 className="serif-font text-[clamp(2rem,4vw,5rem)] text-white italic">
-              Welcome to Moore
-            </h2>
-            <p className="text-gray-400 text-[clamp(0.6rem,1vw,0.9rem)] uppercase tracking-[0.4em] font-light max-w-sm mx-auto leading-loose">
-              Experience the finest collection of suites and professional services in Lagos.
-            </p>
-          </div>
+      <div className="relative hidden min-h-screen overflow-hidden lg:block">
+        <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=82&w=1920" alt="A serene Moore guest suite" className="absolute inset-0 h-full w-full object-cover opacity-60 image-luxury" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/30 to-background-dark" />
+        <div className="absolute inset-0 flex items-end p-12 xl:p-16">
+          <div className="max-w-xl"><p className="ui-eyebrow">Guest account</p><h2 className="ui-section-title mt-4 italic text-white">Your stay, kept close.</h2><p className="ui-copy mt-5 text-gray-300">Review bookings, manage your profile, and keep important stay information in one place.</p></div>
         </div>
       </div>
 
-      {/* Auth Form Container */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-[clamp(1rem,4vw,3rem)] lg:p-[clamp(3rem,6vw,6rem)] relative z-30">
-        <div className="w-full max-w-md space-y-[clamp(2rem,5vw,3rem)] animate-reveal">
-          {/* Mobile Branding */}
-          <div className="lg:hidden flex flex-col items-center space-y-[clamp(1rem,2vw,2rem)] mb-[clamp(2rem,4vw,3rem)]">
-             <div className="w-16 h-16 md:w-20 md:h-20 ">
-            <img
-              src="https://res.cloudinary.com/dxryndnhl/image/upload/v1772007930/MooreHotels/website-assets/zda9mbs2f3wrke1f2mtd.jpg"
-              alt="Moore Hotels & Suites"
-              loading="lazy"
-            />
-          </div>
-            <h1 className="serif-font text-[clamp(2rem,5vw,3rem)] text-white italic">
-              {mode === "register"
-                ? "Sign Up"
-                : mode === "forgot"
-                  ? "Reset Password"
-                  : "Sign In"}
-            </h1>
-          </div>
+      <section className="flex items-center justify-center px-4 py-14 sm:px-8 lg:min-h-screen lg:px-12 lg:pb-16 lg:pt-32">
+        <div className="w-full max-w-md">
+          <div className="mb-8"><p className="ui-eyebrow">Secure guest access</p><h1 className="ui-page-title mt-3 italic text-white">{heading}</h1><p className="ui-copy mt-4">{intro}</p></div>
 
-          <div className="space-y-4">
-            <h2 className="serif-font text-[clamp(2rem,5vw,3rem)] text-white italic hidden lg:block">
-              {mode === "register"
-                ? "Join Our Hotel"
-                : mode === "forgot"
-                  ? "Reset Password"
-                  : "Welcome Back"}
-            </h2>
-            <p className="text-gray-500 text-[clamp(0.6rem,1vw,0.8rem)] uppercase tracking-[0.5em] font-black italic">
-              {mode === "register"
-                ? "Enter your details to create an account"
-                : mode === "forgot"
-                  ? "Enter your email to receive reset instructions"
-                  : "Enter your credentials to access your account"}
-            </p>
-          </div>
-
-          {/* Form */}
-          <form className="space-y-[clamp(1rem,2vw,2rem)]" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
             {mode === "register" && (
-              <>
-                {(["firstName", "lastName"] as (keyof FormData)[]).map((key) => (
-                  <div key={key} className="space-y-2">
-                    <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
-                      {key === "firstName" ? "First Name" : "Last Name"}
-                    </label>
-                    <input
-                      required
-                      disabled={loading}
-                      placeholder={key === "firstName" ? "First" : "Last"}
-                      className={`w-full bg-white/[0.03] border ${
-                        fieldErrors[key] ? "border-red-500/50" : "border-white/10"
-                      } rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
-                      type="text"
-                      value={formData[key]}
-                      onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                    />
-                    {fieldErrors[key] && (
-                      <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">
-                        {fieldErrors[key]}
-                      </p>
-                    )}
-                  </div>
-                ))}
-
-                <div className="space-y-2">
-                  <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
-                    Phone
-                  </label>
-                  <input
-                    required
-                    disabled={loading}
-                    placeholder="+234 ..."
-                    className={`w-full bg-white/[0.03] border ${
-                      fieldErrors.phone ? "border-red-500/50" : "border-white/10"
-                    } rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                  {fieldErrors.phone && (
-                    <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">
-                      {fieldErrors.phone}
-                    </p>
-                  )}
-                </div>
-              </>
-            )}
-
-            <div className="space-y-2">
-              <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
-                Email
-              </label>
-              <input
-                required
-                disabled={loading}
-                placeholder="concierge@moore.com"
-                className={`w-full bg-white/[0.03] border ${
-                  fieldErrors.email ? "border-red-500/50" : "border-white/10"
-                } rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-              {fieldErrors.email && (
-                <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">
-                  {fieldErrors.email}
-                </p>
-              )}
-            </div>
-
-            {mode !== "forgot" && (
-              <div className="space-y-2">
-                <label className="text-[clamp(0.6rem,0.9vw,0.7rem)] uppercase tracking-[0.3em] font-black text-gray-600 ml-1">
-                  Password
-                </label>
-                <input
-                  required
-                  disabled={loading}
-                  placeholder="••••••••"
-                  className={`w-full bg-white/[0.03] border ${
-                    fieldErrors.password ? "border-red-500/50" : "border-white/10"
-                  } rounded-sm px-5 py-4 text-sm text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 font-light italic disabled:opacity-50`}
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                />
-                {fieldErrors.password && (
-                  <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">
-                    {fieldErrors.password}
-                  </p>
-                )}
+              <div className="grid gap-5 sm:grid-cols-2">
+                <FormField htmlFor="firstName" label="First name" error={fieldErrors.firstName}><input id="firstName" type="text" autoComplete="given-name" maxLength={80} disabled={loading} value={formData.firstName} onChange={(event) => updateField("firstName", event.target.value)} className="ui-input" aria-invalid={Boolean(fieldErrors.firstName)} /></FormField>
+                <FormField htmlFor="lastName" label="Last name" error={fieldErrors.lastName}><input id="lastName" type="text" autoComplete="family-name" maxLength={80} disabled={loading} value={formData.lastName} onChange={(event) => updateField("lastName", event.target.value)} className="ui-input" aria-invalid={Boolean(fieldErrors.lastName)} /></FormField>
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary hover:bg-[#B04110] text-black font-black py-4.5 rounded-sm transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-4 group disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 h-[clamp(3.5rem,6vw,4rem)] mt-4"
-            >
-              {loading && <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>}
-              <span className="text-[clamp(0.7rem,1vw,0.8rem)] uppercase tracking-[0.4em]">{getButtonText()}</span>
-              {!loading && <span className="material-symbols-outlined text-xl transition-transform group-hover:translate-x-2">arrow_right_alt</span>}
+            {mode === "register" && <FormField htmlFor="phone" label="Phone number" error={fieldErrors.phone}><input id="phone" type="tel" autoComplete="tel" maxLength={20} placeholder="+234 …" disabled={loading} value={formData.phone} onChange={(event) => updateField("phone", event.target.value)} className="ui-input" aria-invalid={Boolean(fieldErrors.phone)} /></FormField>}
+
+            <FormField htmlFor="email" label="Email address" error={fieldErrors.email}><input id="email" type="email" autoComplete="email" maxLength={254} placeholder="you@example.com" disabled={loading} value={formData.email} onChange={(event) => updateField("email", event.target.value)} className="ui-input" aria-invalid={Boolean(fieldErrors.email)} /></FormField>
+
+            {(mode === "login" || mode === "register") && (
+              <FormField htmlFor="password" label="Password" error={fieldErrors.password} hint={mode === "register" ? "8+ characters with upper/lowercase, a number, and a symbol." : undefined}>
+                <div className="relative">
+                  <input id="password" type={showPassword ? "text" : "password"} autoComplete={mode === "register" ? "new-password" : "current-password"} disabled={loading} value={formData.password} onChange={(event) => updateField("password", event.target.value)} className="ui-input pr-14" aria-invalid={Boolean(fieldErrors.password)} />
+                  <button type="button" onClick={() => setShowPassword((current) => !current)} className="absolute inset-y-0 right-1 grid w-12 place-items-center text-gray-500 hover:text-white" aria-label={showPassword ? "Hide password" : "Show password"}>
+                    <span className="material-symbols-outlined" aria-hidden="true">{showPassword ? "visibility_off" : "visibility"}</span>
+                  </button>
+                </div>
+              </FormField>
+            )}
+
+            {mode === "login" && (
+              <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1">
+                <button type="button" disabled={loading} onClick={() => changeMode("verify")} className="min-h-11 text-sm font-semibold text-gray-400 hover:text-white">Resend verification</button>
+                <button type="button" disabled={loading} onClick={() => changeMode("forgot")} className="min-h-11 text-sm font-semibold text-primary hover:text-white">Forgot password?</button>
+              </div>
+            )}
+
+            <button type="submit" disabled={loading} className="ui-button ui-button-primary w-full">
+              {loading && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}
+              {submitLabel}
+              {!loading && <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>}
             </button>
           </form>
 
-          {/* Footer */}
-          <div className="pt-6 text-center text-[clamp(0.6rem,1vw,0.7rem)] uppercase tracking-[0.2em] font-black border-t border-white/5 space-y-4">
-            <div>
-              <span className="text-gray-700">{mode === "register" ? "ALREADY HAVE AN ACCOUNT?" : "NEW TO MOORE?"}</span>
-              <button
-                disabled={loading}
-                onClick={() => setMode(mode === "register" ? "login" : "register")}
-                className="text-primary hover:text-white ml-3 transition-colors border-b border-primary/20 pb-0.5 italic disabled:opacity-50"
-              >
-                {mode === "register" ? "SIGN IN" : "SIGN UP"}
-              </button>
-            </div>
-            {mode === "forgot" && (
-              <div>
-                <button
-                  disabled={loading}
-                  onClick={() => setMode("login")}
-                  className="text-gray-500 hover:text-white transition-colors border-b border-white/10 pb-0.5 italic disabled:opacity-50"
-                >
-                  RETURN TO SIGN IN
-                </button>
-              </div>
+          <div className="mt-8 border-t border-white/10 pt-6 text-center text-sm text-gray-500">
+            {mode === "forgot" || mode === "verify" ? (
+              <button type="button" disabled={loading} onClick={() => changeMode("login")} className="min-h-11 font-semibold text-primary hover:text-white">Back to sign in</button>
+            ) : (
+              <p>{mode === "register" ? "Already have an account?" : "New to Moore?"} <button type="button" disabled={loading} onClick={() => changeMode(mode === "register" ? "login" : "register")} className="min-h-11 font-semibold text-primary hover:text-white">{mode === "register" ? "Sign in" : "Create an account"}</button></p>
             )}
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

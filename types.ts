@@ -9,6 +9,7 @@ export enum PropertyFloor {
   GroundFloor = "GroundFloor",
   FirstFloor = "FirstFloor",
   SecondFloor = "SecondFloor",
+  Bungalow = "Bungalow",
 }
 
 export enum RoomStatus {
@@ -25,6 +26,7 @@ export enum BookingStatus {
   CheckedIn = "CheckedIn",
   CheckedOut = "CheckedOut",
   Cancelled = "Cancelled",
+  NoShow = "NoShow",
 }
 
 export enum PaymentStatus
@@ -37,7 +39,7 @@ export enum PaymentStatus
 }
 
 export enum PaymentMethod {
-  Paystack = "Paystack",
+  Monnify = "Monnify",
   DirectTransfer = "DirectTransfer",
 }
 
@@ -57,8 +59,8 @@ export interface ApplicationUser {
   id: string;
   email: string;
   role: UserRole;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   phone?: string;
   status: ProfileStatus;
   name: string;
@@ -66,45 +68,44 @@ export interface ApplicationUser {
   emailVerified?: boolean;
   createdAt?: string;
   emailConfirmed?: boolean;
+  guestId?: string | null;
+  department?: string | null;
 }
 
 export interface Room {
   id: string;
-  roomNumber: string;
   name: string;
   category: RoomCategory;
   pricePerNight: number;
-  status: RoomStatus;
   amenities: string[];
   images: string[];
-  isOnline: boolean;
-  floor?: PropertyFloor;
-  capacity?: number;
-  size?: string;
-  description?: string;
+  capacity: number;
+  size: string;
+  description: string;
 }
 
 export interface Booking {
   id: string;
   bookingCode: string;
   roomId: string;
-  guestId: string;
+  guestId?: string;
   guestFirstName: string;
   guestLastName: string;
   guestEmail: string;
-  guestPhone: string;
+  guestPhone?: string;
   checkIn: string;
   checkOut: string;
   amount: number;
   status: BookingStatus;
   paymentStatus: PaymentStatus;
-  paymentMethod: PaymentMethod;
+  paymentMethod: PaymentMethod | null;
   transactionReference?: string | null;
   notes?: string;
   createdAt: string;
   paymentUrl?: string | null;
   paymentInstruction?: string | null;
   notificationMessage?: string | null;
+  paymentExpiresAtUtc?: string | null;
 }
 
 export interface AuthResponse {

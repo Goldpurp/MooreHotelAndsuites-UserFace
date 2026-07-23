@@ -1,393 +1,294 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
-import { Room, RoomCategory, RoomStatus } from "../types";
+import { Room, RoomCategory } from "../types";
+import Dialog from "../components/ui/Dialog";
+import { addDaysToInput, todayInputValue } from "../utils/dates";
+import RoomCard from "../components/RoomCard";
 
 const CLIENT_LIMIT = 10;
 
+type SortKey = "recommended" | "price-low" | "price-high" | "capacity" | "name";
+
+const sortOptions: Array<{ value: SortKey; label: string }> = [
+  { value: "recommended", label: "Recommended" },
+  { value: "price-low", label: "Price: low to high" },
+  { value: "price-high", label: "Price: high to low" },
+  { value: "capacity", label: "Guest capacity" },
+  { value: "name", label: "Name: A to Z" },
+];
+
+const formatLabel = (value: string) => value.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ");
+const normalizeAmenity = (value: string) => value.trim().toLowerCase().replace(/[_-]+/g, " ");
+const readPrice = (value: string | null) => {
+  const parsed = Number(value);
+  return value && Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+};
+
 const Rooms: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-
   const activeCategory = searchParams.get("category") || "All";
   const checkIn = searchParams.get("checkIn") || "";
   const checkOut = searchParams.get("checkOut") || "";
   const guests = searchParams.get("guests") || "2";
+  const searchQuery = searchParams.get("q") || "";
+  const minPrice = readPrice(searchParams.get("minPrice"));
+  const maxPrice = readPrice(searchParams.get("maxPrice"));
+  const selectedAmenities = useMemo(
+    () => (searchParams.get("amenities") || "").split("|").map((item) => item.trim()).filter(Boolean),
+    [searchParams],
+  );
+  const requestedSort = searchParams.get("sort") as SortKey | null;
+  const sort = sortOptions.some((option) => option.value === requestedSort) ? requestedSort! : "recommended";
+  const hasValidDates = Boolean(checkIn && checkOut && checkOut > checkIn);
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [budget, setBudget] = useState(3000000);
   const [filtersOpen, setFiltersOpen] = useState(false);
-
-  // Infinite scroll state
   const [visibleCount, setVisibleCount] = useState(CLIENT_LIMIT);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [suggestions, setSuggestions] = useState<Room[]>([]);
+  const [knownAmenities, setKnownAmenities] = useState<string[]>([]);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Fetch rooms using React Query
-  const {
-    data: rooms = [],
-    isLoading,
-    error,
-    refetch,
-  } = useQuery<Room[], Error>({
-    queryKey: ["rooms", activeCategory, checkIn, checkOut],
-    queryFn: async () => {
-      const isDateFiltering = checkIn !== "" && checkOut !== "";
-      let data: Room[];
-      if (isDateFiltering || activeCategory !== "All") {
-        data = await api.searchRooms({
-          checkIn: isDateFiltering ? checkIn : undefined as any,
-          checkOut: isDateFiltering ? checkOut : undefined as any,
-          category: activeCategory === "All" ? undefined : activeCategory,
-        });
-      } else {
-        data = await api.getRooms("");
-      }
-      return data.filter((r) => r.isOnline && r.status !== RoomStatus.Maintenance);
-    },
+  const { data: rooms = [], isLoading, error, refetch } = useQuery<Room[], Error>({
+    queryKey: ["rooms", activeCategory, checkIn, checkOut, guests, selectedAmenities[0] || ""],
+    queryFn: () => api.searchRooms({
+      checkIn: hasValidDates ? checkIn : undefined,
+      checkOut: hasValidDates ? checkOut : undefined,
+      category: activeCategory === "All" ? undefined : activeCategory,
+      guest: Math.max(1, Number(guests) || 1),
+      amenity: selectedAmenities[0] || undefined,
+    }),
     staleTime: 1000 * 60 * 5,
-    retry: 1,
+    retry: 0,
   });
 
-  // Suggestions if no rooms available
-  const [suggestions, setSuggestions] = useState<Room[]>([]);
-  React.useEffect(() => {
-    if (!isLoading && rooms.length === 0 && (checkIn && checkOut)) {
-      api.getRooms("").then(allRooms => {
-        setSuggestions(allRooms.filter(r => r.isOnline).slice(0, 3));
-      });
+  useEffect(() => {
+    const amenities = rooms.flatMap((room) => room.amenities || []).filter(Boolean);
+    if (!amenities.length) return;
+    setKnownAmenities((current) => Array.from(new Set([...current, ...amenities])).sort((a, b) => a.localeCompare(b)));
+  }, [rooms]);
+
+  useEffect(() => {
+    if (!isLoading && rooms.length === 0 && hasValidDates) {
+      api.getRooms()
+        .then((allRooms) => setSuggestions(allRooms.filter((room) => room.capacity >= Math.max(1, Number(guests) || 1)).slice(0, 3)))
+        .catch(() => setSuggestions([]));
     } else {
       setSuggestions([]);
     }
-  }, [isLoading, rooms, checkIn, checkOut]);
+  }, [isLoading, rooms.length, hasValidDates, guests]);
+
+  useEffect(() => {
+    setVisibleCount(CLIENT_LIMIT);
+  }, [rooms, searchQuery, minPrice, maxPrice, selectedAmenities, sort, activeCategory, checkIn, checkOut]);
 
   const filteredRooms = useMemo(() => {
-    return rooms.filter((room) => {
-      const matchesSearch =
-        room.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        room.roomNumber.includes(searchQuery);
-      return matchesSearch && room.pricePerNight <= budget;
+    const query = searchQuery.trim().toLowerCase();
+    const result = rooms.filter((room) => {
+      const searchable = [room.name, room.category, room.description, room.size].join(" ").toLowerCase();
+      const matchesSearch = !query || searchable.includes(query);
+      const matchesMin = minPrice === null || room.pricePerNight >= minPrice;
+      const matchesMax = maxPrice === null || room.pricePerNight <= maxPrice;
+      const normalizedRoomAmenities = room.amenities.map(normalizeAmenity);
+      const matchesAmenities = selectedAmenities.every((selected) =>
+        normalizedRoomAmenities.some((amenity) => amenity.includes(normalizeAmenity(selected))),
+      );
+      return matchesSearch && matchesMin && matchesMax && matchesAmenities;
     });
-  }, [rooms, searchQuery, budget]);
 
-  // Infinite scroll effect
-  useEffect(() => {
-    setVisibleCount(CLIENT_LIMIT); // Reset on filter change
-  }, [rooms, searchQuery, budget, activeCategory, checkIn, checkOut]);
+    if (sort === "price-low") result.sort((a, b) => a.pricePerNight - b.pricePerNight);
+    if (sort === "price-high") result.sort((a, b) => b.pricePerNight - a.pricePerNight);
+    if (sort === "capacity") result.sort((a, b) => b.capacity - a.capacity || a.pricePerNight - b.pricePerNight);
+    if (sort === "name") result.sort((a, b) => a.name.localeCompare(b.name));
+    return result;
+  }, [rooms, searchQuery, minPrice, maxPrice, selectedAmenities, sort]);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (!scrollRef.current) return;
-      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-      if (scrollTop + clientHeight >= scrollHeight - 200) {
-        setVisibleCount((prev) =>
-          prev + CLIENT_LIMIT > filteredRooms.length ? filteredRooms.length : prev + CLIENT_LIMIT
-        );
+      if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 240) {
+        setVisibleCount((current) => Math.min(current + CLIENT_LIMIT, filteredRooms.length));
       }
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [filteredRooms.length]);
 
-  const handleReset = () => {
-    setSearchParams({});
-    setSearchQuery("");
-    setBudget(3000000);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    refetch();
+  const updateParam = (key: string, value: string) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (!value || value === "All" || (key === "sort" && value === "recommended")) nextParams.delete(key);
+    else nextParams.set(key, value);
+    if (key === "checkIn" && value && (nextParams.get("checkOut") || "") <= value) {
+      nextParams.set("checkOut", addDaysToInput(value, 1));
+    }
+    setSearchParams(nextParams, { replace: true });
   };
 
-  const updateParam = (key: string, value: string) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (value === "All" || !value) newParams.delete(key);
-    else newParams.set(key, value);
-    setSearchParams(newParams);
+  const toggleAmenity = (amenity: string) => {
+    const next = selectedAmenities.includes(amenity)
+      ? selectedAmenities.filter((item) => item !== amenity)
+      : [...selectedAmenities, amenity];
+    updateParam("amenities", next.join("|"));
   };
 
   const clearDates = () => {
-    const newParams = new URLSearchParams(searchParams);
-    newParams.delete("checkIn");
-    newParams.delete("checkOut");
-    setSearchParams(newParams);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("checkIn");
+    nextParams.delete("checkOut");
+    setSearchParams(nextParams, { replace: true });
   };
+
+  const handleReset = () => {
+    setSearchParams({}, { replace: true });
+    setFiltersOpen(false);
+  };
+
+  const activeFilterCount = [
+    Boolean(checkIn || checkOut),
+    guests !== "2",
+    Boolean(searchQuery),
+    minPrice !== null,
+    maxPrice !== null,
+    selectedAmenities.length > 0,
+  ].filter(Boolean).length;
+  const alternativeRooms = rooms.length > 0 ? rooms.slice(0, 3) : suggestions;
 
   if (error && rooms.length === 0) {
     return (
-      <div className="min-h-screen bg-background-dark flex flex-col items-center justify-center p-6 text-center space-y-12">
-        <div className="w-24 h-24 bg-primary/10 border border-primary/30 rounded-full flex items-center justify-center text-primary animate-luxury-logo">
-          <span className="material-symbols-outlined text-5xl">cloud_off</span>
-        </div>
-        <div className="space-y-4">
-          <h1 className="serif-font text-5xl md:text-7xl text-white italic">
-            Connection <span className="text-primary">Offline</span>
-          </h1>
-          <p className="text-gray-500 text-[10px] uppercase tracking-[0.5em] font-black max-w-sm mx-auto">
-            Unable to establish connection to the hotel database.
-          </p>
-        </div>
-        <button
-          onClick={() => refetch()}
-          className="bg-primary text-black px-12 py-5 text-[10px] font-black uppercase tracking-[0.4em] rounded-sm shadow-2xl active:scale-95 transition-all"
-        >
-          Reconnect
-        </button>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-background-dark p-6 text-center">
+        <span className="grid size-16 place-items-center rounded-full border border-primary/30 bg-primary/10 text-primary"><span className="material-symbols-outlined text-3xl" aria-hidden="true">cloud_off</span></span>
+        <div><h1 className="ui-page-title italic text-white">Rooms are temporarily unavailable</h1><p className="ui-copy mx-auto mt-4 max-w-md">We could not reach the hotel inventory. Please try again in a moment.</p></div>
+        <button onClick={() => refetch()} className="ui-button ui-button-primary">Try again</button>
       </div>
     );
   }
 
   return (
-    <div className="pt-28 min-h-screen bg-background-dark pb-24" ref={scrollRef}>
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 md:px-10">
-
-        {/* Header Section */}
-        <header className="mb-12 space-y-8 sm:space-y-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8">
-            <div className="space-y-3 sm:space-y-4">
-              <p className="text-primary text-[9px] sm:text-[10px] font-black uppercase tracking-[0.5em]">Room List</p>
-              <h1 className="serif-font text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white italic leading-tight">Our Rooms</h1>
+    <div className="min-h-screen bg-background-dark pb-24 pt-32">
+      <div className="ui-container-wide">
+        <header className="mb-9">
+          <div className="flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="ui-eyebrow">Rooms &amp; suites</p>
+              <h1 className="ui-page-title mt-3 italic text-white">Find your room</h1>
+              <p className="ui-copy mt-4 max-w-2xl">Search live room availability, match guest capacity, and compare the details that matter to your stay.</p>
             </div>
-            <button
-              onClick={() => setFiltersOpen(true)}
-              className="flex items-center gap-3 sm:gap-4 bg-white/5 border border-white/10 px-6 sm:px-8 py-3 sm:py-4 rounded-sm hover:bg-white/10 transition-all group"
-            >
-              <span className="material-symbols-outlined text-primary text-lg sm:text-xl">tune</span>
-              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.35em] text-white">Refine Search</span>
+            <button type="button" onClick={() => setFiltersOpen(true)} className="ui-button ui-button-secondary self-start md:self-auto">
+              <span className="material-symbols-outlined text-primary" aria-hidden="true">tune</span>
+              Filters {activeFilterCount > 0 && <span className="rounded-full bg-primary px-2 py-0.5 text-[0.65rem] text-black">{activeFilterCount}</span>}
             </button>
           </div>
 
-          {/* Category Navigation & Dates */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 lg:gap-8 py-4 lg:py-6 border-y border-white/5">
-            <div className="flex overflow-x-auto scrollbar-hide gap-3 sm:gap-6 md:gap-10">
-              <button
-                onClick={() => updateParam("category", "All")}
-                className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.35em] whitespace-nowrap relative pb-2 transition-colors ${
-                  activeCategory === "All" ? "text-primary" : "text-gray-600 hover:text-gray-300"
-                }`}
-              >
-                All Tiers
-                {activeCategory === "All" && <span className="absolute bottom-0 left-0 w-full h-px bg-primary" />}
-              </button>
-              {Object.values(RoomCategory).map((cat) => (
+          <div className="mt-8 border-y border-white/10 py-4">
+            <div className="flex gap-1 overflow-x-auto scrollbar-hide" role="group" aria-label="Filter by room category">
+              {["All", ...Object.values(RoomCategory)].map((category) => (
                 <button
-                  key={cat}
-                  onClick={() => updateParam("category", cat)}
-                  className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.35em] whitespace-nowrap relative pb-2 transition-colors ${
-                    activeCategory === cat ? "text-primary" : "text-gray-600 hover:text-gray-300"
-                  }`}
+                  key={category}
+                  type="button"
+                  onClick={() => updateParam("category", category)}
+                  aria-pressed={activeCategory === category}
+                  className={`min-h-11 whitespace-nowrap rounded px-4 text-xs font-semibold uppercase tracking-[0.1em] transition-colors ${activeCategory === category ? "bg-primary/12 text-primary" : "text-gray-500 hover:bg-white/5 hover:text-white"}`}
                 >
-                  {cat}
-                  {activeCategory === cat && <span className="absolute bottom-0 left-0 w-full h-px bg-primary" />}
+                  {category === "All" ? "All rooms" : formatLabel(category)}
                 </button>
               ))}
             </div>
-
-            {checkIn && checkOut && (
-              <div className="flex items-center gap-3 sm:gap-6 bg-primary/5 border border-primary/20 px-4 sm:px-6 py-2 sm:py-3 rounded-sm animate-in fade-in slide-in-from-right duration-500">
-                <span className="material-symbols-outlined text-primary text-xs sm:text-sm">calendar_month</span>
-                <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-white/80">
-                  Showing available for: <span className="text-primary italic">{checkIn} — {checkOut}</span>
-                </p>
-                <button onClick={clearDates} className="text-gray-500 hover:text-white transition-colors">
-                  <span className="material-symbols-outlined text-xs sm:text-sm">close</span>
-                </button>
-              </div>
-            )}
           </div>
+
+          <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div aria-live="polite">
+              <p className="text-sm font-medium text-white">{filteredRooms.length} {filteredRooms.length === 1 ? "room" : "rooms"}</p>
+              <p className="mt-1 text-xs text-gray-500">Fitting {guests} {guests === "1" ? "guest" : "guests"}{hasValidDates ? " for your selected dates" : ""}</p>
+            </div>
+            <label className="w-full sm:w-56">
+              <span className="ui-label">Sort results</span>
+              <select value={sort} onChange={(event) => updateParam("sort", event.target.value)} className="ui-input">
+                {sortOptions.map((option) => <option key={option.value} className="bg-black" value={option.value}>{option.label}</option>)}
+              </select>
+            </label>
+          </div>
+
+          {(checkIn && checkOut) && (
+            <div className="mt-4 inline-flex max-w-full items-center gap-3 rounded border border-primary/20 bg-primary/5 px-4 py-2 text-sm text-gray-300">
+              <span className="material-symbols-outlined text-primary" aria-hidden="true">calendar_month</span>
+              <span className="truncate">{checkIn} — {checkOut}</span>
+              <button type="button" onClick={clearDates} className="ui-icon-button size-9 flex-none" aria-label="Clear selected dates"><span className="material-symbols-outlined text-lg" aria-hidden="true">close</span></button>
+            </div>
+          )}
         </header>
 
-        {/* Room Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
-            {[1,2,3,4,5,6].map(i => (
-              <div key={i} className="aspect-[4/5] bg-white/[0.02] animate-pulse rounded-sm border border-white/5" />
-            ))}
+          <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading rooms">
+            {[1, 2, 3, 4, 5, 6].map((item) => <div key={item} className="aspect-[4/5] animate-pulse rounded-lg border border-white/5 bg-white/[0.03]" />)}
           </div>
         ) : filteredRooms.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10 lg:gap-x-10 lg:gap-y-20">
-              {filteredRooms.slice(0, visibleCount).map(room => (
-                <Link
-                  key={room.id}
-                  to={`/rooms/${room.id}?${searchParams.toString()}`}
-                  className="group flex flex-col gap-6 sm:gap-8"
-                >
-                  <div className="relative w-full aspect-[4/5] sm:aspect-[4/5] overflow-hidden rounded-sm bg-surface-dark border border-white/5 shadow-2xl transition-all duration-700 hover:shadow-primary/5">
-                    <img
-                      src={room.images?.[0]}
-                      alt={room.name}
-                      className="w-full h-full object-cover grayscale-[0.6] group-hover:grayscale-0 transition-all duration-[4000ms] group-hover:scale-110"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90" />
-                    <div className="absolute bottom-4 sm:bottom-10 left-4 sm:left-10 right-4 sm:right-10 space-y-2 sm:space-y-3 translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
-                      <p className="text-primary text-[8px] sm:text-[9px] uppercase tracking-[0.35em] font-black">{room.category} Tier</p>
-                      <h3 className="serif-font text-2xl sm:text-3xl md:text-4xl text-white italic leading-tight group-hover:text-primary transition-colors">{room.name}</h3>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-end border-t border-white/5 px-1 pt-4 sm:pt-6">
-                    <div className="space-y-1">
-                      <p className="text-[8px] sm:text-[9px] text-gray-700 font-black uppercase tracking-[0.35em]">NIGHTLY RATE</p>
-                      <p className="text-2xl sm:text-3xl text-white font-bold tracking-tighter italic">₦{room.pricePerNight.toLocaleString()}</p>
-                    </div>
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all duration-500">
-                      <span className="material-symbols-outlined text-xl sm:text-2xl">east</span>
-                    </div>
-                  </div>
-                </Link>
+            <div className="grid gap-x-7 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredRooms.slice(0, visibleCount).map((room, index) => (
+                <RoomCard key={room.id} room={room} to={`/rooms/${room.id}?${searchParams.toString()}`} eager={index < 2} />
               ))}
             </div>
-            {visibleCount >= filteredRooms.length && (
-              <div className="text-center text-primary text-xs mt-10">
-                Showing all {filteredRooms.length} rooms. No more rooms to load.
-              </div>
-            )}
+            {visibleCount < filteredRooms.length && <div className="mt-12 text-center"><button type="button" onClick={() => setVisibleCount((current) => Math.min(current + CLIENT_LIMIT, filteredRooms.length))} className="ui-button ui-button-secondary">Show more rooms</button></div>}
           </>
         ) : (
-          /* Suggestions */
-          <div className="py-16 sm:py-24 md:py-32 text-center space-y-10 sm:space-y-12 md:space-y-16 max-w-6xl mx-auto animate-in fade-in duration-1000">
-            <div className="space-y-4 sm:space-y-6">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center text-primary mx-auto mb-2 sm:mb-4 md:mb-8">
-                <span className="material-symbols-outlined text-2xl sm:text-3xl md:text-4xl">event_busy</span>
+          <div className="py-16 text-center sm:py-24">
+            <span className="mx-auto grid size-16 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined text-3xl" aria-hidden="true">event_busy</span></span>
+            <h2 className="ui-section-title mt-6 italic text-white">No exact match found</h2>
+            <p className="ui-copy mx-auto mt-4 max-w-xl">Adjust your dates, guest count, price, or amenities to see more options.</p>
+            {alternativeRooms.length > 0 && (
+              <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {alternativeRooms.map((room) => <RoomCard key={room.id} room={room} to={`/rooms/${room.id}?${searchParams.toString()}`} variant="compact" />)}
               </div>
-              <h2 className="serif-font text-2xl sm:text-3xl md:text-6xl text-white italic">At Full Capacity.</h2>
-              <p className="text-gray-500 text-[9px] sm:text-[10px] md:text-sm uppercase tracking-[0.35em] font-black max-w-md mx-auto leading-relaxed px-4">
-                The requested dates are currently fully booked. Explore these alternative masterpieces or adjust your calendar.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-10 px-4">
-              {suggestions.map(room => (
-                <Link
-                  key={room.id}
-                  to={`/rooms/${room.id}?${searchParams.toString()}`}
-                  className="group flex flex-col gap-4 sm:gap-6 p-4 md:p-6 border border-white/5 rounded-sm hover:border-primary/20 transition-all bg-surface-dark/40 shadow-xl"
-                >
-                  <div className="relative w-full aspect-[16/10] overflow-hidden rounded-sm bg-black">
-                    <img
-                      src={room.images?.[0]}
-                      alt={room.name}
-                      className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-110"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
-                  </div>
-                  <div className="space-y-1 sm:space-y-2">
-                    <h4 className="serif-font text-lg sm:text-xl md:text-2xl text-white italic group-hover:text-primary transition-colors">{room.name}</h4>
-                    <p className="text-primary text-[9px] sm:text-[10px] font-black uppercase tracking-widest flex items-center justify-between">
-                      <span>₦{room.pricePerNight.toLocaleString()} / NIGHT</span>
-                      <span className="material-symbols-outlined text-xs sm:text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            <button
-              onClick={handleReset}
-              className="bg-primary text-black px-8 sm:px-10 md:px-12 py-3 sm:py-4 md:py-5 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.35em] rounded-sm hover:bg-[#B04110] transition-all shadow-2xl shadow-primary/40 active:scale-95 mx-auto"
-            >
-              Reset Filters
-            </button>
-          </div>
-        )}
-
-        {/* Filter Drawer */}
-        {filtersOpen && (
-          <div className="fixed inset-0 z-[100] flex justify-end">
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in" onClick={() => setFiltersOpen(false)} />
-            <div className="relative w-full sm:max-w-sm md:max-w-md bg-background-dark border-l border-white/10 h-full p-6 sm:p-8 md:p-10 flex flex-col animate-in slide-in-from-right duration-500 shadow-2xl">
-              <div className="flex justify-between items-center mb-12 sm:mb-16">
-                <div className="space-y-1">
-                  <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.45em] font-black text-primary">Filters</p>
-                  <p className="text-[7px] sm:text-[8px] text-gray-500 uppercase tracking-widest font-black italic">Search for rooms</p>
-                </div>
-                <button onClick={() => setFiltersOpen(false)} className="text-white hover:text-primary transition-colors">
-                  <span className="material-symbols-outlined">close</span>
-                </button>
-              </div>
-
-              <div className="space-y-8 sm:space-y-10 flex-1 overflow-y-auto pr-2 sm:pr-4 custom-scrollbar">
-                {/* Search */}
-                <div className="space-y-3 sm:space-y-4">
-                  <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.3em] text-gray-600 font-black">Search Rooms</p>
-                  <input
-                    placeholder="Room Name, Number or Tier"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/10 px-4 sm:px-5 py-3 sm:py-4 text-white focus:border-primary outline-none transition-all placeholder:text-gray-800 italic"
-                  />
-                </div>
-
-                {/* Dates & Guests */}
-                <div className="space-y-6 bg-white/[0.02] p-4 sm:p-6 border border-white/5">
-                  <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.3em] text-primary font-black">Check Availability</p>
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                    <div className="space-y-1 sm:space-y-2">
-                      <label className="text-[7px] sm:text-[8px] uppercase tracking-widest text-gray-600 font-black">Check-in</label>
-                      <input
-                        type="date"
-                        value={checkIn}
-                        onChange={(e) => updateParam("checkIn", e.target.value)}
-                        className="w-full bg-black border border-white/10 p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-primary transition-all"
-                      />
-                    </div>
-                    <div className="space-y-1 sm:space-y-2">
-                      <label className="text-[7px] sm:text-[8px] uppercase tracking-widest text-gray-600 font-black">Check-out</label>
-                      <input
-                        type="date"
-                        value={checkOut}
-                        onChange={(e) => updateParam("checkOut", e.target.value)}
-                        className="w-full bg-black border border-white/10 p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-primary transition-all"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1 sm:space-y-2">
-                    <label className="text-[7px] sm:text-[8px] uppercase tracking-widest text-gray-600 font-black">Guests</label>
-                    <select
-                      value={guests}
-                      onChange={(e) => updateParam("guests", e.target.value)}
-                      className="w-full bg-black border border-white/10 p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-primary transition-all appearance-none italic font-bold"
-                    >
-                      {[1,2,3,4].map(n => <option key={n} value={n}>{n} {n>1 ? "Guests" : "Guest"}</option>)}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Budget */}
-                <div className="space-y-4 sm:space-y-6">
-                  <div className="flex justify-between items-end">
-                    <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.3em] text-gray-600 font-black">Max Price per Night</p>
-                    <p className="serif-font text-xl sm:text-2xl text-primary italic">₦{budget.toLocaleString()}</p>
-                  </div>
-                  <input
-                    type="range"
-                    min={50000}
-                    max={3000000}
-                    step={50000}
-                    value={budget}
-                    onChange={(e) => setBudget(Number(e.target.value))}
-                    className="w-full accent-primary bg-white/5 h-1 rounded-full appearance-none cursor-pointer"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-6 sm:pt-10 border-t border-white/5 flex gap-2 sm:gap-4">
-                <button
-                  onClick={handleReset}
-                  className="flex-1 py-4 sm:py-5 text-[9px] sm:text-[10px] uppercase tracking-widest font-black text-gray-600 border border-white/5 hover:border-white/20 transition-all"
-                >
-                  Clear All
-                </button>
-                <button
-                  onClick={() => setFiltersOpen(false)}
-                  className="flex-1 bg-primary text-black py-4 sm:py-5 text-[9px] sm:text-[10px] uppercase tracking-widest font-black shadow-xl shadow-primary/20 hover:bg-[#B04110] transition-all"
-                >
-                  Apply Filters
-                </button>
-              </div>
-            </div>
+            )}
+            <button type="button" onClick={handleReset} className="ui-button ui-button-primary mt-9">Reset filters</button>
           </div>
         )}
       </div>
+
+      <Dialog
+        isOpen={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        labelledBy="filters-title"
+        variant="drawer"
+        initialFocusRef={closeButtonRef}
+        panelClassName="flex w-full max-w-lg flex-col border-l border-white/10 bg-background-dark p-6 shadow-2xl sm:p-8"
+      >
+        <div className="flex items-center justify-between border-b border-white/10 pb-5">
+          <div><p className="ui-eyebrow">Room search</p><h2 id="filters-title" className="ui-card-title mt-2 italic text-white">Refine results</h2></div>
+          <button ref={closeButtonRef} type="button" onClick={() => setFiltersOpen(false)} className="ui-icon-button" aria-label="Close room filters"><span className="material-symbols-outlined" aria-hidden="true">close</span></button>
+        </div>
+
+        <div className="custom-scrollbar flex-1 space-y-7 overflow-y-auto py-7 pr-1">
+          <label><span className="ui-label">Search room name or description</span><input value={searchQuery} onChange={(event) => updateParam("q", event.target.value)} className="ui-input" placeholder="e.g. quiet workspace" /></label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label><span className="ui-label">Check-in</span><input type="date" min={todayInputValue()} value={checkIn} onChange={(event) => updateParam("checkIn", event.target.value)} className="ui-input" /></label>
+            <label><span className="ui-label">Check-out</span><input type="date" min={checkIn || todayInputValue()} value={checkOut} onChange={(event) => updateParam("checkOut", event.target.value)} className="ui-input" /></label>
+          </div>
+          <label><span className="ui-label">Guests</span><select value={guests} onChange={(event) => updateParam("guests", event.target.value)} className="ui-input">{[1, 2, 3, 4, 5, 6, 7, 8].map((count) => <option key={count} className="bg-black" value={count}>{count} {count === 1 ? "guest" : "guests"}</option>)}</select><span className="mt-2 block text-xs leading-5 text-gray-500">Only rooms with enough guest capacity are returned.</span></label>
+          <fieldset>
+            <legend className="ui-label">Nightly price range</legend>
+            <div className="grid grid-cols-2 gap-4">
+              <label><span className="mb-2 block text-xs text-gray-500">Minimum</span><div className="relative"><span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">₦</span><input type="number" min="0" step="5000" inputMode="numeric" value={minPrice ?? ""} onChange={(event) => updateParam("minPrice", event.target.value)} className="ui-input pl-8" placeholder="Any" /></div></label>
+              <label><span className="mb-2 block text-xs text-gray-500">Maximum</span><div className="relative"><span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">₦</span><input type="number" min="0" step="5000" inputMode="numeric" value={maxPrice ?? ""} onChange={(event) => updateParam("maxPrice", event.target.value)} className="ui-input pl-8" placeholder="Any" /></div></label>
+            </div>
+          </fieldset>
+          {knownAmenities.length > 0 && (
+            <fieldset>
+              <legend className="ui-label">Amenities</legend>
+              <div className="flex flex-wrap gap-2">
+                {knownAmenities.map((amenity) => {
+                  const selected = selectedAmenities.includes(amenity);
+                  return <button key={amenity} type="button" onClick={() => toggleAmenity(amenity)} aria-pressed={selected} className={`min-h-10 rounded-full border px-4 text-xs font-medium transition-colors ${selected ? "border-primary bg-primary/10 text-primary" : "border-white/10 bg-white/[0.025] text-gray-400 hover:border-white/25 hover:text-white"}`}>{formatLabel(amenity)}</button>;
+                })}
+              </div>
+            </fieldset>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 border-t border-white/10 pt-5">
+          <button type="button" onClick={handleReset} className="ui-button ui-button-secondary">Clear all</button>
+          <button type="button" onClick={() => setFiltersOpen(false)} className="ui-button ui-button-primary">View {filteredRooms.length}</button>
+        </div>
+      </Dialog>
     </div>
   );
 };

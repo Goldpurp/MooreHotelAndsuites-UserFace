@@ -1,661 +1,319 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { api } from "../services/api";
-import { ApplicationUser, Room, PaymentMethod } from "../types";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { api, getTrustedPaymentUrl } from "../services/api";
+import { ApplicationUser, Booking, PaymentMethod, Room } from "../types";
 import NotificationModal from "../components/NotificationModal";
 import AestheticLoader from "../components/AestheticLoader";
+import Dialog from "../components/ui/Dialog";
+import { addDaysToInput, differenceInNights, todayInputValue } from "../utils/dates";
+import FormField from "../components/ui/FormField";
+import { appConfig } from "../config/environment";
 
 interface CheckoutProps {
   user: ApplicationUser | null;
 }
 
+type GuestInfo = { firstName: string; lastName: string; email: string; phone: string };
+type CheckoutStep = 2 | 3;
+
 const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const { roomId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [toast, setToast] = useState(false);
-
-  // Refs for auto-scrolling on validation error
-  const formRef = useRef<HTMLDivElement>(null);
-
+  const formRef = useRef<HTMLElement>(null);
+  const transferCloseRef = useRef<HTMLButtonElement>(null);
   const [room, setRoom] = useState<Room | null>(null);
   const [fetchingRoom, setFetchingRoom] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(
-    null,
-  );
+  const [currentStep, setCurrentStep] = useState<CheckoutStep>(2);
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [processing, setProcessing] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [directTransferBooking, setDirectTransferBooking] = useState<Booking | null>(null);
   const [copied, setCopied] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
-  const [notification, setNotification] = useState<{
-    show: boolean;
-    title: string;
-    message: string;
-    type: "success" | "error" | "info";
-  }>({
-    show: false,
-    title: "",
-    message: "",
-    type: "info",
-  });
-
-  // Guest Information state
-  const [guestInfo, setGuestInfo] = useState({
-    firstName: user?.firstName || (user?.name ? user.name.split(" ")[0] : ""),
-    lastName:
-      user?.lastName ||
-      (user?.name ? user.name.split(" ").slice(1).join(" ") : ""),
+  const [isAvailable, setIsAvailable] = useState(false);
+  const [availabilityLoading, setAvailabilityLoading] = useState(true);
+  const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{ show: boolean; title: string; message: string; type: "success" | "error" | "info" }>({ show: false, title: "", message: "", type: "info" });
+  const [guestInfo, setGuestInfo] = useState<GuestInfo>({
+    firstName: user?.firstName || user?.name?.split(" ")[0] || "",
+    lastName: user?.lastName || user?.name?.split(" ").slice(1).join(" ") || "",
     email: user?.email || "",
     phone: user?.phone || "",
   });
 
-  // Sync guest info if user logs in/out while on page
+  const checkIn = searchParams.get("checkIn") || todayInputValue();
+  const checkOut = searchParams.get("checkOut") || addDaysToInput(checkIn, 1);
+
   useEffect(() => {
-    if (user) {
-      setGuestInfo({
-        firstName: user.firstName || (user.name ? user.name.split(" ")[0] : ""),
-        lastName:
-          user.lastName ||
-          (user.name ? user.name.split(" ").slice(1).join(" ") : ""),
-        email: user.email,
-        phone: user.phone || "",
-      });
-    }
+    if (!user) return;
+    setGuestInfo({
+      firstName: user.firstName || user.name?.split(" ")[0] || "",
+      lastName: user.lastName || user.name?.split(" ").slice(1).join(" ") || "",
+      email: user.email,
+      phone: user.phone || "",
+    });
   }, [user]);
-
-  // Availability state
-  const [isAvailable, setIsAvailable] = useState(true);
-  const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(
-    null,
-  );
-
-  const checkIn =
-    searchParams.get("checkIn") || new Date().toISOString().split("T")[0];
-  const checkOut =
-    searchParams.get("checkOut") ||
-    new Date(Date.now() + 86400000).toISOString().split("T")[0];
 
   useEffect(() => {
     const fetchRoom = async () => {
-      setFetchingRoom(true);
+      if (!roomId) {
+        navigate("/rooms", { replace: true });
+        return;
+      }
       try {
-        const data = await api.getRoomById(roomId!);
-        setRoom(data);
-      } catch (err) {
-        navigate("/rooms");
+        setRoom(await api.getRoomById(roomId));
+      } catch {
+        navigate("/rooms", { replace: true });
       } finally {
-        setTimeout(() => setFetchingRoom(false), 500);
+        setFetchingRoom(false);
       }
     };
     fetchRoom();
   }, [roomId, navigate]);
 
-  const nights = Math.max(
-    1,
-    Math.ceil(
-      (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
-        (1000 * 3600 * 24),
-    ),
-  );
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(bankDetails.accountNumber);
-    setToast(true);
-    setTimeout(() => setToast(false), 2000);
-  };
-
-  const totalAmount = room ? room.pricePerNight * nights : 0;
-
-  const bankDetails = {
-    bankName: "Moniepoint",
-    accountName: "Yakubu Omobolanle Or Moore Hotel",
-    accountNumber: "5452508008",
-    note: "Booking will be confirmed immediately after payment is confirmed",
-  };
-
   useEffect(() => {
     const verify = async () => {
-      if (!roomId) return;
-
+      if (!roomId || !checkIn || !checkOut || checkOut <= checkIn) {
+        setIsAvailable(false);
+        setAvailabilityMessage("Check-out must be after check-in.");
+        setAvailabilityLoading(false);
+        return;
+      }
+      setAvailabilityLoading(true);
       try {
-        const res = await api.checkAvailability(roomId, checkIn, checkOut);
-        setIsAvailable(res.available);
-        setAvailabilityMessage(
-          res.available
-            ? null
-            : res.message || "Room is unavailable for the selected dates.",
-        );
-      } catch (err) {
-        setIsAvailable(true);
-        setAvailabilityMessage(null);
+        const result = await api.checkAvailability(roomId, checkIn, checkOut);
+        setIsAvailable(result.available);
+        setAvailabilityMessage(result.available ? null : result.message || "This room is unavailable for the selected dates.");
+      } catch {
+        setIsAvailable(false);
+        setAvailabilityMessage("Availability could not be verified. Please try again.");
+      } finally {
+        setAvailabilityLoading(false);
       }
     };
-
     verify();
   }, [roomId, checkIn, checkOut]);
 
+  const nights = Math.max(1, differenceInNights(checkIn, checkOut));
+  const totalAmount = room ? room.pricePerNight * nights : 0;
+
+  const updateGuestField = (field: keyof GuestInfo, value: string) => {
+    setGuestInfo((current) => ({ ...current, [field]: value }));
+    if (fieldErrors[field]) setFieldErrors((current) => ({ ...current, [field]: "" }));
+  };
+
   const validateGuestInfo = () => {
     const errors: Record<string, string> = {};
-    const { firstName, lastName, email, phone } = guestInfo;
-
-    if (!firstName) errors.firstName = "First name is required.";
-    if (!lastName) errors.lastName = "Last name is required.";
-    if (!email) errors.email = "Email is required.";
-    else if (!/\S+@\S+\.\S+/.test(email))
-      errors.email = "Invalid email format.";
-    if (!phone) errors.phone = "Phone number is required.";
-
+    if (!guestInfo.firstName.trim()) errors.firstName = "First name is required.";
+    else if (guestInfo.firstName.trim().length > 80) errors.firstName = "First name is too long.";
+    if (!guestInfo.lastName.trim()) errors.lastName = "Last name is required.";
+    else if (guestInfo.lastName.trim().length > 80) errors.lastName = "Last name is too long.";
+    if (!guestInfo.email.trim()) errors.email = "Email is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestInfo.email.trim())) errors.email = "Enter a valid email address.";
+    if (!/^\+?[0-9 ()-]{7,30}$/.test(guestInfo.phone.trim())) errors.phone = "Enter a valid phone number.";
     setFieldErrors(errors);
+    if (Object.keys(errors).length) formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    return Object.keys(errors).length === 0;
+  };
 
-    const isValid = Object.keys(errors).length === 0;
-    if (!isValid) {
-      formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  const handleCopy = async () => {
+    const instructions = directTransferBooking?.paymentInstruction;
+    if (!instructions) {
+      setNotification({ show: true, title: "Instructions unavailable", message: "Contact Guest Relations and quote your booking reference.", type: "info" });
+      return;
     }
+    try {
+      await navigator.clipboard.writeText(instructions);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setNotification({ show: true, title: "Could not copy", message: "Select and copy the transfer details manually.", type: "info" });
+    }
+  };
 
-    return isValid;
+  const createBooking = (paymentMethod: PaymentMethod) => api.createBooking({
+    roomId: roomId!,
+    guestFirstName: guestInfo.firstName.trim(),
+    guestLastName: guestInfo.lastName.trim(),
+    guestEmail: guestInfo.email.trim().toLowerCase(),
+    guestPhone: guestInfo.phone.trim(),
+    checkIn,
+    checkOut,
+    paymentMethod,
+    notes: user ? `Member selected ${paymentMethod}.` : `Guest selected ${paymentMethod}.`,
+  });
+
+  const returnToRoom = () => {
+    const suffix = searchParams.toString();
+    navigate(`/rooms/${roomId}${suffix ? `?${suffix}` : ""}`);
+  };
+
+  const continueToPayment = () => {
+    if (!validateGuestInfo()) return;
+    if (availabilityLoading || !isAvailable) {
+      setNotification({ show: true, title: "Room unavailable", message: availabilityMessage || "This room is unavailable for the selected dates.", type: "error" });
+      return;
+    }
+    setCurrentStep(3);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const goBack = () => {
+    if (processing || directTransferBooking) return;
+    if (currentStep === 3) {
+      setCurrentStep(2);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    returnToRoom();
   };
 
   const handleBooking = async () => {
-    if (loading || processing) return;
-    if (!validateGuestInfo()) return;
-
+    if (processing || !validateGuestInfo()) return;
     if (!selectedMethod) {
-      setNotification({
-        show: true,
-        title: "Payment Method",
-        message:
-          "Please select a payment method to proceed with your booking.",
-        type: "info",
-      });
-      document
-        .getElementById("payment-section")
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setNotification({ show: true, title: "Choose a payment method", message: "Select online payment or direct bank transfer to continue.", type: "info" });
+      document.getElementById("payment-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-
-    if (!isAvailable) {
-      setNotification({
-        show: true,
-        title: "Hotel Unavailable",
-        message:
-          availabilityMessage || "Room is unavailable for the selected dates.",
-        type: "error",
-      });
+    if (availabilityLoading || !isAvailable) {
+      setNotification({ show: true, title: "Room unavailable", message: availabilityMessage || "This room is unavailable for the selected dates.", type: "error" });
       return;
     }
-
-    if (selectedMethod === PaymentMethod.DirectTransfer) {
-      setShowModal(true);
+    if (selectedMethod === PaymentMethod.DirectTransfer && directTransferBooking) {
+      setShowTransferModal(true);
       return;
     }
 
     setProcessing(true);
-    setLoading(true);
-
     try {
-      const booking = await api.createBooking({
-        roomId: roomId!,
-        guestFirstName: guestInfo.firstName,
-        guestLastName: guestInfo.lastName,
-        guestEmail: guestInfo.email,
-        guestPhone: guestInfo.phone,
-        checkIn,
-        checkOut,
-        paymentMethod: PaymentMethod.Paystack,
-        notes: user ? "Member Booking" : "Guest Booking",
-      });
-
-      if (booking.paymentUrl) {
-        const returnUrl = `${window.location.origin}/#/booking-confirmation/${booking.bookingCode}`;
-        const paymentUrl =
-          booking.paymentUrl + `&returnUrl=${encodeURIComponent(returnUrl)}`;
-        window.location.href = paymentUrl;
+      const booking = await createBooking(selectedMethod);
+      api.rememberBookingLookup(booking.bookingCode, guestInfo.email);
+      if (selectedMethod === PaymentMethod.DirectTransfer) {
+        setDirectTransferBooking(booking);
+        setShowTransferModal(true);
         return;
       }
-
-      navigate(`/booking-confirmation/${booking.bookingCode}`, {
-        state: { booking },
-      });
-    } catch (err: any) {
-      setNotification({
-        show: true,
-        title: "Booking Failed",
-        message:
-          err.message ||
-          "We encountered an error while processing your booking.",
-        type: "error",
-      });
+      if (booking.paymentUrl) {
+        const trustedPaymentUrl = getTrustedPaymentUrl(booking.paymentUrl);
+        if (!trustedPaymentUrl) throw new Error("The payment provider returned an invalid checkout address.");
+        window.location.assign(trustedPaymentUrl);
+        return;
+      }
+      navigate(`/booking-confirmation/${booking.bookingCode}`, { state: { booking } });
+    } catch (error: unknown) {
+      setNotification({ show: true, title: "Booking not completed", message: error instanceof Error ? error.message : "We could not process your booking. Please try again.", type: "error" });
+    } finally {
       setProcessing(false);
-      setLoading(false);
     }
   };
 
-  const handleDirectPaymentSent = async () => {
-    if (loading || processing) return;
-    if (!validateGuestInfo()) return;
-
-    if (!isAvailable) {
-      setNotification({
-        show: true,
-        title: "Availability Conflict",
-        message:
-          availabilityMessage || "Room is unavailable for the selected dates.",
-        type: "error",
-      });
-      return;
-    }
-
-    setProcessing(true);
-    setLoading(true);
-
-    try {
-      const booking = await api.createBooking({
-        roomId: roomId!,
-        guestFirstName: guestInfo.firstName,
-        guestLastName: guestInfo.lastName,
-        guestEmail: guestInfo.email,
-        guestPhone: guestInfo.phone,
-        checkIn,
-        checkOut,
-        paymentMethod: PaymentMethod.DirectTransfer,
-        notes: user
-          ? "Member claims payment sent."
-          : "Guest claims payment sent.",
-      });
-
-      setShowModal(false);
-      navigate(`/booking-confirmation/${booking.bookingCode}`, {
-        state: { booking },
-      });
-    } catch (err: any) {
-      setNotification({
-        show: true,
-        title: "Payment Error",
-        message: err.message || "Failed to record your payment.",
-        type: "error",
-      });
-      setProcessing(false);
-      setLoading(false);
-    }
+  const viewTransferBooking = () => {
+    if (!directTransferBooking) return;
+    setShowTransferModal(false);
+    navigate(`/booking-confirmation/${directTransferBooking.bookingCode}`, { state: { booking: directTransferBooking } });
   };
 
-  if (fetchingRoom || !room) {
-    return (
-      <AestheticLoader
-        message="Loading Booking"
-        subtext="Fetching Room details..."
-      />
-    );
-  }
+  if (fetchingRoom || !room) return <AestheticLoader message="Preparing your booking" subtext="Loading stay details" />;
 
   return (
-    <div className="pt-28 min-h-screen bg-background-dark pb-24 px-4 md:px-10">
-      <NotificationModal
-        isOpen={notification.show}
-        onClose={() => setNotification({ ...notification, show: false })}
-        title={notification.title}
-        message={notification.message}
-        type={notification.type}
-      />
+    <div className="min-h-screen bg-background-dark px-4 pb-24 pt-32 sm:px-6">
+      <NotificationModal isOpen={notification.show} onClose={() => setNotification((current) => ({ ...current, show: false }))} title={notification.title} message={notification.message} type={notification.type} />
+      {processing && <AestheticLoader message="Securing your booking" subtext="Please keep this page open" />}
 
-      <div className="max-w-[1400px] mx-auto">
-        {(processing || loading) && (
-          <AestheticLoader
-            message="Processing Booking"
-            subtext="Securing your payment..."
-          />
-        )}
-
-        {showModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-md bg-black/80 animate-in fade-in duration-300">
-            <div className="bg-surface-dark border border-white/10 rounded-lg w-full max-w-md shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-in zoom-in-95 duration-500">
-              {/* Modal Header */}
-              <div className="bg-gradient-to-r from-primary/30 via-primary/60 to-primary/30 p-6 text-center">
-                <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="material-symbols-outlined text-primary text-3xl">
-                    account_balance
-                  </span>
-                </div>
-                <h2 className="serif-font text-2xl text-white italic">
-                  Bank <span className="text-primary">Transfer</span>
-                </h2>
-                <p className="text-[9px] uppercase tracking-widest text-gray-400 font-black mt-1">
-                  Secure Payment Protocol
-                </p>
-              </div>
-
-              {/* Bank Details */}
-              <div className="p-6 space-y-6">
-                <div className="space-y-2">
-                  <p className="text-[8px] uppercase tracking-widest text-gray-500 font-black">
-                    Bank Name
-                  </p>
-                  <p className="text-white font-bold text-lg italic">
-                    {bankDetails.bankName}
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-[8px] uppercase tracking-widest text-gray-500 font-black">
-                    Account Name
-                  </p>
-                  <p className="text-white font-bold text-lg italic">
-                    {bankDetails.accountName}
-                  </p>
-                </div>
-
-                <div className="relative">
-                  <div className="flex justify-between items-center mb-1">
-                    <p className="text-[8px] uppercase tracking-widest text-gray-500 font-black">
-                      Account Number
-                    </p>
-                    {toast && (
-                      <span className="absolute top-0 right-0 text-green-500 text-[7px] font-black uppercase animate-in fade-in px-2 py-1 bg-black/50 rounded">
-                        COPIED
-                      </span>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={handleCopy}
-                    className="flex items-center justify-between w-full text-left bg-white/5 border border-white/10 p-3 rounded transition hover:bg-primary/10"
-                  >
-                    <p className="font-mono font-bold text-white tracking-widest">
-                      {bankDetails.accountNumber}
-                    </p>
-                    <span className="material-symbols-outlined text-gray-400 hover:text-primary transition-all">
-                      content_copy
-                    </span>
-                  </button>
-                </div>
-
-                <div className="flex items-start gap-3 bg-primary/5 border border-primary/20 p-3 rounded">
-                  <span className="material-symbols-outlined text-primary text-lg">
-                    info
-                  </span>
-                  <p className="text-[9px] text-gray-400 font-light leading-relaxed">
-                    Confirming your transfer initiates verification. Access will
-                    be granted once funds are confirmed.
-                  </p>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 p-6 border-t border-white/10">
-                <button
-                  disabled={loading}
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 text-[10px] uppercase font-black tracking-widest text-gray-400 border border-white/10 rounded hover:text-white hover:bg-white/5 transition disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  disabled={loading}
-                  onClick={handleDirectPaymentSent}
-                  className="flex-1 py-3 text-[10px] uppercase font-black tracking-widest text-black bg-primary rounded hover:bg-[#B04110] transition shadow-md shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  {loading ? (
-                    <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                  ) : (
-                    "Confirm Payment"
-                  )}
-                </button>
-              </div>
-
-              {/* Footer */}
-              <p className="text-[7px] text-center text-white uppercase tracking-widest font-black italic py-2">
-                End-to-End Encryption Enabled
-              </p>
+      <Dialog
+        isOpen={showTransferModal}
+        onClose={viewTransferBooking}
+        labelledBy="transfer-title"
+        initialFocusRef={transferCloseRef}
+        closeOnBackdrop={false}
+        closeOnEscape={false}
+        panelClassName="ui-card w-full max-w-lg p-6 shadow-[0_30px_100px_rgba(0,0,0,.75)] sm:p-8"
+      >
+            <div className="flex items-start justify-between gap-5">
+              <div><span className="grid size-12 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined" aria-hidden="true">account_balance</span></span><p className="ui-eyebrow mt-5">Direct transfer</p><h2 id="transfer-title" className="ui-card-title mt-2 italic text-white">Payment instructions</h2></div>
+              <button ref={transferCloseRef} type="button" onClick={viewTransferBooking} className="ui-icon-button" aria-label="Continue to booking status"><span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button>
             </div>
-          </div>
-        )}
+            <dl className="mt-6 grid grid-cols-2 gap-4 rounded border border-white/10 bg-black/25 p-4">
+              <div><dt className="ui-label">Booking reference</dt><dd className="break-all font-mono text-base font-bold text-primary">{directTransferBooking?.bookingCode}</dd></div>
+              <div><dt className="ui-label">Amount due</dt><dd className="text-lg font-semibold text-white">₦{directTransferBooking?.amount.toLocaleString()}</dd></div>
+            </dl>
+            <div className="mt-6">
+              <div className="flex items-center justify-between"><span className="ui-label">Transfer details</span><span className="text-xs text-emerald-400" aria-live="polite">{copied ? "Copied" : ""}</span></div>
+              <button type="button" onClick={handleCopy} className="mt-2 flex w-full items-start justify-between gap-4 rounded border border-white/10 bg-white/[0.035] p-4 text-left transition-colors hover:border-primary/30 hover:bg-primary/5">
+                <span className="whitespace-pre-wrap text-sm leading-7 text-gray-200">{directTransferBooking?.paymentInstruction || "Transfer instructions are temporarily unavailable. Contact Guest Relations and quote the booking reference above."}</span>
+                <span className="material-symbols-outlined text-primary" aria-hidden="true">content_copy</span>
+              </button>
+            </div>
+            <p className="mt-5 flex items-start gap-3 rounded border border-primary/20 bg-primary/5 p-4 text-sm leading-6 text-gray-400"><span className="material-symbols-outlined mt-0.5 text-primary" aria-hidden="true">info</span><span>Use the booking reference above. Your reservation is confirmed after the hotel verifies receipt of funds.</span></p>
+            {directTransferBooking?.notificationMessage && <p className="mt-4 text-sm leading-6 text-gray-400">{directTransferBooking.notificationMessage}</p>}
+            <div className="mt-6 grid gap-3 sm:grid-cols-2"><button type="button" onClick={handleCopy} className="ui-button ui-button-secondary">Copy details</button><button type="button" onClick={viewTransferBooking} className="ui-button ui-button-primary">View booking status</button></div>
+      </Dialog>
 
-        <div className="grid lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-8 space-y-12">
-            <header className="space-y-4">
-              <h1 className="serif-font text-5xl md:text-7xl text-white italic">
-                Confirm <span className="text-primary">Booking</span>
-              </h1>
-              <div className="flex items-center gap-4 text-white">
-                <span className="w-8 h-px bg-gray-600"></span>
-                <p className="text-[10px] uppercase tracking-[0.5em] font-black">
-                  Step 02: Details & Payment
+      <div className="ui-container-wide">
+        <header className="mb-10">
+          <p className="ui-eyebrow">Step {currentStep} of 3</p>
+          <h1 className="ui-page-title mt-3 italic text-white">Complete your <span className="text-primary">booking.</span></h1>
+          <p className="ui-copy mt-4 max-w-2xl">Your room and dates stay intact while you review guest details and payment.</p>
+          <CheckoutProgress currentStep={currentStep} onStay={returnToRoom} onGuest={() => currentStep === 3 && setCurrentStep(2)} />
+        </header>
+        <div className="grid gap-10 lg:grid-cols-12">
+          <div className="space-y-8 lg:col-span-8">
+            {currentStep === 2 ? (
+              <section ref={formRef} className="ui-card scroll-mt-32 p-6 sm:p-8">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><p className="ui-eyebrow">Lead guest</p><h2 className="ui-card-title mt-2 italic text-white">Contact information</h2></div>{!user && <p className="text-sm text-gray-500">Booking as a guest</p>}</div>
+                <p className="mt-3 text-sm leading-6 text-gray-500">We use these details for your reservation confirmation and important stay updates.</p>
+                <div className="mt-7 grid gap-5 md:grid-cols-2">
+                  <FormField label="First name" error={fieldErrors.firstName}><input type="text" autoComplete="given-name" maxLength={80} disabled={processing} value={guestInfo.firstName} onChange={(event) => updateGuestField("firstName", event.target.value)} className={`ui-input ${fieldErrors.firstName ? "border-red-500/50" : ""}`} aria-invalid={Boolean(fieldErrors.firstName)} /></FormField>
+                  <FormField label="Last name" error={fieldErrors.lastName}><input type="text" autoComplete="family-name" maxLength={80} disabled={processing} value={guestInfo.lastName} onChange={(event) => updateGuestField("lastName", event.target.value)} className={`ui-input ${fieldErrors.lastName ? "border-red-500/50" : ""}`} aria-invalid={Boolean(fieldErrors.lastName)} /></FormField>
+                  <FormField label="Email address" error={fieldErrors.email}><input type="email" autoComplete="email" maxLength={254} disabled={processing} value={guestInfo.email} onChange={(event) => updateGuestField("email", event.target.value)} className={`ui-input ${fieldErrors.email ? "border-red-500/50" : ""}`} aria-invalid={Boolean(fieldErrors.email)} /></FormField>
+                  <FormField label="Contact phone" error={fieldErrors.phone}><input type="tel" autoComplete="tel" maxLength={30} placeholder="+234 …" disabled={processing} value={guestInfo.phone} onChange={(event) => updateGuestField("phone", event.target.value)} className={`ui-input ${fieldErrors.phone ? "border-red-500/50" : ""}`} aria-invalid={Boolean(fieldErrors.phone)} /></FormField>
+                </div>
+                {!user && <p className="mt-6 text-sm leading-6 text-gray-500">You can create an account later to keep future bookings together.</p>}
+                <button type="button" onClick={goBack} className="mt-7 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-white"><span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span> Back to room and dates</button>
+              </section>
+            ) : (
+              <section id="payment-section" className="ui-card scroll-mt-32 p-6 sm:p-8">
+                <p className="ui-eyebrow">Payment</p><h2 className="ui-card-title mt-2 italic text-white">Choose how to pay</h2>
+                <p className="mt-3 text-sm leading-6 text-gray-500">
+                  {appConfig.monnifyEnabled
+                    ? "No card details are collected by Moore Hotels. Online payments continue through Monnify’s secure checkout."
+                    : "Direct bank transfer is currently available. Your reservation is confirmed only after the hotel verifies receipt."}
                 </p>
-              </div>
-            </header>
-
-            {/* GUEST INFO FORM */}
-            <section
-              ref={formRef}
-              className="bg-surface-dark border border-white/5 p-8 md:p-12 space-y-10 scroll-mt-32"
-            >
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <h3 className="serif-font text-2xl text-white italic">
-                  Contact Information
-                </h3>
-                {!user && (
-                  <p className="text-[9px] uppercase tracking-widest text-primary font-black animate-pulse">
-                    Booking as Guest
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-white ml-1">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    disabled={loading}
-                    placeholder="Guest First Name"
-                    value={guestInfo.firstName}
-                    onChange={(e) =>
-                      setGuestInfo({ ...guestInfo, firstName: e.target.value })
-                    }
-                    className={`w-full bg-white/[0.03] border ${fieldErrors.firstName ? "border-red-500/50" : "border-white/10"} p-5 text-white outline-none focus:border-primary transition-all font-light italic placeholder:text-gray-800 disabled:opacity-50`}
-                  />
-                  {fieldErrors.firstName && (
-                    <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">
-                      {fieldErrors.firstName}
-                    </p>
+                <div className={`mt-7 grid gap-4 ${appConfig.monnifyEnabled ? "md:grid-cols-2" : ""}`}>
+                  {appConfig.monnifyEnabled && (
+                    <PaymentChoice icon="credit_card" title="Pay online with Monnify" description="Use card, bank transfer, or USSD on the secure provider page." selected={selectedMethod === PaymentMethod.Monnify} disabled={processing} onClick={() => setSelectedMethod(PaymentMethod.Monnify)} />
                   )}
+                  <PaymentChoice icon="account_balance" title="Direct bank transfer" description="Receive hotel transfer instructions, then await verification." selected={selectedMethod === PaymentMethod.DirectTransfer} disabled={processing} onClick={() => setSelectedMethod(PaymentMethod.DirectTransfer)} />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-white ml-1">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    disabled={loading}
-                    placeholder="Guest Last Name"
-                    value={guestInfo.lastName}
-                    onChange={(e) =>
-                      setGuestInfo({ ...guestInfo, lastName: e.target.value })
-                    }
-                    className={`w-full bg-white/[0.03] border ${fieldErrors.lastName ? "border-red-500/50" : "border-white/10"} p-5 text-white outline-none focus:border-primary transition-all font-light italic placeholder:text-gray-800 disabled:opacity-50`}
-                  />
-                  {fieldErrors.lastName && (
-                    <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">
-                      {fieldErrors.lastName}
-                    </p>
-                  )}
+                <div className="mt-7 rounded border border-white/10 bg-black/20 p-4 text-sm">
+                  <p className="ui-label">Booking contact</p>
+                  <p className="font-medium text-white">{guestInfo.firstName} {guestInfo.lastName}</p>
+                  <p className="mt-1 break-all text-gray-500">{guestInfo.email}</p>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-white ml-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    disabled={loading}
-                    placeholder="email@example.com"
-                    value={guestInfo.email}
-                    onChange={(e) =>
-                      setGuestInfo({ ...guestInfo, email: e.target.value })
-                    }
-                    className={`w-full bg-white/[0.03] border ${fieldErrors.email ? "border-red-500/50" : "border-white/10"} p-5 text-white outline-none focus:border-primary transition-all font-light italic placeholder:text-gray-800 disabled:opacity-50`}
-                  />
-                  {fieldErrors.email && (
-                    <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">
-                      {fieldErrors.email}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[9px] uppercase tracking-[0.3em] font-black text-white ml-1">
-                    Contact Phone
-                  </label>
-                  <input
-                    type="tel"
-                    disabled={loading}
-                    placeholder="+234 ..."
-                    value={guestInfo.phone}
-                    onChange={(e) =>
-                      setGuestInfo({ ...guestInfo, phone: e.target.value })
-                    }
-                    className={`w-full bg-white/[0.03] border ${fieldErrors.phone ? "border-red-500/50" : "border-white/10"} p-5 text-white outline-none focus:border-primary transition-all font-light italic placeholder:text-gray-800 disabled:opacity-50`}
-                  />
-                  {fieldErrors.phone && (
-                    <p className="text-red-500 text-[8px] uppercase font-black tracking-widest ml-1">
-                      {fieldErrors.phone}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {!user && (
-                <p className="text-[9px] text-white uppercase tracking-widest italic pt-4">
-                  * Note: Creating an account later will allow you to track your
-                  bookings in your profile.
-                </p>
-              )}
-            </section>
-
-            <section
-              id="payment-section"
-              className="bg-surface-dark border border-white/5 p-8 md:p-12 space-y-10 scroll-mt-32"
-            >
-              <h3 className="serif-font text-2xl text-white italic">
-                Payment Method
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button
-                  disabled={loading}
-                  onClick={() => setSelectedMethod(PaymentMethod.Paystack)}
-                  className={`p-8 border transition text-left space-y-4 rounded-sm group ${
-                    selectedMethod === PaymentMethod.Paystack
-                      ? "bg-primary/5 border-primary shadow-[0_0_20px_rgba(234,179,8,0.1)]"
-                      : "bg-white/5 border-white/5 hover:border-white/20"
-                  } disabled:opacity-50`}
-                >
-                  <span
-                    className={`material-symbols-outlined text-3xl ${selectedMethod === PaymentMethod.Paystack ? "text-primary" : "text-gray-500 group-hover:text-primary transition-colors"}`}
-                  >
-                    credit_card
-                  </span>
-                  <div>
-                    <h4 className="font-bold text-white text-lg">
-                      Paystack Flow (Test)
-                    </h4>
-                    <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest">
-                      Instant Activation • Secure Link
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  disabled={loading}
-                  onClick={() =>
-                    setSelectedMethod(PaymentMethod.DirectTransfer)
-                  }
-                  className={`p-8 border transition text-left space-y-4 rounded-sm group ${
-                    selectedMethod === PaymentMethod.DirectTransfer
-                      ? "bg-primary/5 border-primary shadow-[0_0_20px_rgba(234,179,8,0.1)]"
-                      : "bg-white/5 border-white/5 hover:border-white/20"
-                  } disabled:opacity-50`}
-                >
-                  <span
-                    className={`material-symbols-outlined text-3xl ${selectedMethod === PaymentMethod.DirectTransfer ? "text-primary" : "text-gray-500 group-hover:text-primary transition-colors"}`}
-                  >
-                    account_balance
-                  </span>
-                  <div>
-                    <h4 className="font-bold text-white text-lg">
-                      Direct Transfer
-                    </h4>
-                    <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest">
-                      Manual Verification • Bank Details
-                    </p>
-                  </div>
-                </button>
-              </div>
-            </section>
+                <button type="button" onClick={goBack} className="mt-7 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-white"><span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span> Back to guest details</button>
+              </section>
+            )}
           </div>
 
           <aside className="lg:col-span-4">
-            <div className="bg-surface-dark border border-white/10 rounded-sm overflow-hidden shadow-2xl sticky top-32">
-              <div className="h-40 bg-gray-800 relative">
-                <img
-                  src={room.images?.[0]}
-                  className="w-full h-full object-cover grayscale-[0.5]"
-                  alt=""
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black p-6 flex flex-col justify-end">
-                  <p className="text-primary text-[8px] uppercase font-black tracking-widest">
-                    {room.category}
-                  </p>
-                  <h4 className="serif-font text-2xl text-white italic">
-                    Suite {room.roomNumber}
-                  </h4>
-                </div>
-              </div>
-
-              <div className="p-8 space-y-8">
-                <div className="space-y-4">
-                  <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest font-black">
-                    <span>Stay Duration</span>
-                    <span className="text-white">{nights} Nights</span>
-                  </div>
-                  <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest font-black">
-                    <span>Check-in</span>
-                    <span className="text-primary italic">
-                      {new Date(checkIn).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest font-black">
-                    <span>Check-out</span>
-                    <span className="text-primary italic">
-                      {new Date(checkOut).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-6 border-t border-white/10 text-right space-y-1">
-                  <p className="text-[9px] uppercase font-black text-white tracking-widest">
-                    Total Price
-                  </p>
-                  <p className="serif-font text-4xl text-primary font-bold italic drop-shadow-lg">
-                    ₦{totalAmount.toLocaleString()}
-                  </p>
-                </div>
-
+            <div className="ui-card sticky top-28 overflow-hidden shadow-2xl">
+              <div className="relative h-48 bg-gray-800"><img src={room.images?.[0]} className="image-luxury h-full w-full object-cover" alt={room.name} loading="lazy" /><div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-black/20 to-transparent p-6"><p className="ui-eyebrow">{room.category}</p><h2 className="ui-card-title mt-2 italic text-white">{room.name}</h2></div></div>
+              <div className="space-y-6 p-6 sm:p-8">
+                <dl className="space-y-4 text-sm"><SummaryRow label="Stay duration" value={`${nights} ${nights === 1 ? "night" : "nights"}`} /><SummaryRow label="Check-in" value={new Date(checkIn).toLocaleDateString()} /><SummaryRow label="Check-out" value={new Date(checkOut).toLocaleDateString()} /><SummaryRow label="Room capacity" value={`Up to ${room.capacity} ${room.capacity === 1 ? "guest" : "guests"}`} /></dl>
+                <div className="border-t border-white/10 pt-5"><span className="ui-label">Stay total</span><p className="font-display text-3xl font-semibold italic text-primary">₦{totalAmount.toLocaleString()}</p><p className="mt-1 text-xs text-gray-500">{nights} × ₦{room.pricePerNight.toLocaleString()}</p></div>
                 <button
-                  onClick={handleBooking}
-                  disabled={loading || !selectedMethod || !isAvailable}
-                  className="w-full bg-primary hover:bg-[#B04110] text-black py-5 uppercase text-[10px] font-black tracking-[0.4em] transition active:scale-95 disabled:opacity-50 shadow-2xl shadow-primary/20 flex items-center justify-center gap-3"
+                  type="button"
+                  onClick={currentStep === 2 ? continueToPayment : handleBooking}
+                  disabled={processing || availabilityLoading || !isAvailable || (currentStep === 3 && !selectedMethod)}
+                  className="ui-button ui-button-primary w-full"
                 >
-                  {loading && (
-                    <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                  )}
-                  {loading ? "PROCESSING..." : "Confirm Booking"}
+                  {(processing || availabilityLoading) && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}
+                  {availabilityLoading ? "Verifying" : processing ? "Processing" : currentStep === 2 ? "Continue to payment" : "Confirm & continue"}
+                  {!processing && !availabilityLoading && <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>}
                 </button>
-
-                <p className="text-[8px] text-center text-gray-700 uppercase tracking-[0.3em] font-black italic">
-                  Secure Payment Active
-                </p>
+                {availabilityMessage && <p className="rounded border border-red-500/20 bg-red-500/5 p-3 text-center text-sm text-red-300" aria-live="polite">{availabilityMessage}</p>}
+                <p className="flex items-center justify-center gap-2 text-center text-xs text-gray-500"><span className="material-symbols-outlined text-base" aria-hidden="true">lock</span> Secure booking and payment handoff</p>
               </div>
             </div>
           </aside>
@@ -664,5 +322,41 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     </div>
   );
 };
+
+const CheckoutProgress = ({ currentStep, onStay, onGuest }: { currentStep: CheckoutStep; onStay: () => void; onGuest: () => void }) => {
+  const steps = [
+    { number: 1, label: "Stay", action: onStay },
+    { number: 2, label: "Guest", action: onGuest },
+    { number: 3, label: "Payment", action: undefined },
+  ];
+
+  return (
+    <nav className="mt-8 max-w-xl" aria-label="Booking progress">
+      <ol className="grid grid-cols-3">
+        {steps.map((step, index) => {
+          const complete = step.number < currentStep;
+          const active = step.number === currentStep;
+          const enabled = complete && Boolean(step.action);
+          return (
+            <li key={step.number} className="relative">
+              {index > 0 && <span className={`absolute left-0 right-1/2 top-4 h-px ${complete || active ? "bg-primary/70" : "bg-white/10"}`} aria-hidden="true" />}
+              {index < steps.length - 1 && <span className={`absolute left-1/2 right-0 top-4 h-px ${complete ? "bg-primary/70" : "bg-white/10"}`} aria-hidden="true" />}
+              <button type="button" onClick={step.action} disabled={!enabled} aria-current={active ? "step" : undefined} className={`relative z-10 flex w-full flex-col items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] ${active ? "text-white" : complete ? "text-primary" : "text-gray-600"}`}>
+                <span className={`grid size-8 place-items-center rounded-full border text-xs transition-colors ${active ? "border-primary bg-primary text-black" : complete ? "border-primary bg-background-dark text-primary" : "border-white/10 bg-background-dark text-gray-600"}`}>{complete ? <span className="material-symbols-outlined text-base" aria-hidden="true">check</span> : step.number}</span>
+                {step.label}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+};
+
+const PaymentChoice = ({ icon, title, description, selected, disabled, onClick }: { icon: string; title: string; description: string; selected: boolean; disabled: boolean; onClick: () => void }) => (
+  <button type="button" disabled={disabled} onClick={onClick} aria-pressed={selected} className={`group min-h-36 rounded border p-5 text-left transition duration-200 ${selected ? "border-primary bg-primary/10 shadow-[0_12px_30px_rgba(201,74,17,.08)]" : "border-white/10 bg-white/[0.025] hover:-translate-y-0.5 hover:border-white/25"}`}><span className={`material-symbols-outlined text-2xl ${selected ? "text-primary" : "text-gray-500 group-hover:text-primary"}`} aria-hidden="true">{icon}</span><h3 className="mt-3 text-base font-semibold text-white">{title}</h3><p className="mt-2 text-sm leading-6 text-gray-500">{description}</p></button>
+);
+
+const SummaryRow = ({ label, value }: { label: string; value: string }) => <div className="flex justify-between gap-4"><dt className="text-gray-500">{label}</dt><dd className="font-semibold text-white">{value}</dd></div>;
 
 export default Checkout;

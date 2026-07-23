@@ -1,353 +1,194 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
 import { Room } from "../types";
 import AestheticLoader from "../components/AestheticLoader";
+import { addDaysToInput, differenceInNights, todayInputValue } from "../utils/dates";
 
-import {
-  IconWifi,
-  IconAirConditioningDisabled,
-  IconBath,
-  IconPhone,
-  IconGlassFullFilled,
-  IconIroning,
-  IconDesk,
-  IconFridge,
-  IconLockFilled,
-  IconHanger2Filled,
-  IconDeviceTv,
-  IconTeapot,
-  IconBedFilled,
-  IconRosetteDiscountCheckFilled,
-} from "@tabler/icons-react";
-import { JSX } from "react/jsx-runtime";
-
-/* ---------------- ICON MAP ---------------- */
-const AMENITY_ICON_MAP: Record<string, JSX.Element> = {
-  wifi: <IconWifi size={18} />,
-  ac: <IconAirConditioningDisabled size={18} />,
-  workspace: <IconDesk size={18} />,
-  telephone: <IconPhone size={18} />,
-  bathtub: <IconBath size={18} />,
-  mini_bar: <IconGlassFullFilled size={18} />,
-  iron: <IconIroning size={18} />,
-  tv: <IconDeviceTv size={18} />,
-  safe: <IconLockFilled size={18} />,
-  wardrobe: <IconHanger2Filled size={18} />,
-  kettle: <IconTeapot size={18} />,
-  fridge: <IconFridge size={18} />,
-  king_bed: <IconBedFilled size={18} />,
+const amenityIcons: Record<string, string> = {
+  wifi: "wifi",
+  ac: "ac_unit",
+  air_conditioning: "ac_unit",
+  workspace: "desk",
+  telephone: "call",
+  bathtub: "bathtub",
+  mini_bar: "local_bar",
+  iron: "iron",
+  tv: "tv",
+  safe: "lock",
+  wardrobe: "checkroom",
+  kettle: "coffee_maker",
+  fridge: "kitchen",
+  king_bed: "bed",
 };
 
 const RoomDetail: React.FC = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
   const [activeImage, setActiveImage] = useState(0);
-
-  // Availability state
-  const [isAvailable, setIsAvailable] = useState(true);
+  const [isAvailable, setIsAvailable] = useState(false);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
+  const [selectedCheckIn, setSelectedCheckIn] = useState(searchParams.get("checkIn") ?? todayInputValue());
+  const [selectedCheckOut, setSelectedCheckOut] = useState(searchParams.get("checkOut") ?? addDaysToInput(todayInputValue(), 1));
 
-  const [selectedCheckIn, setSelectedCheckIn] = useState(
-    searchParams.get("checkIn") ?? new Date().toISOString().split("T")[0]
-  );
-  const [selectedCheckOut, setSelectedCheckOut] = useState(
-    searchParams.get("checkOut") ?? new Date(Date.now() + 86400000).toISOString().split("T")[0]
-  );
-
-  // Fetch room using React Query
-  const {
-    data: room,
-    isLoading,
-    error,
-  } = useQuery<Room, Error>({
+  const { data: room, isLoading, error } = useQuery<Room, Error>({
     queryKey: ["roomDetail", id],
-    queryFn: async () => {
-      const data = await api.getRoomById(id!);
-      return data;
-    },
+    queryFn: () => api.getRoomById(id!),
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });
 
-  // Redirect if error
   useEffect(() => {
-    if (error) {
-      navigate("/rooms");
-    }
+    if (error) navigate("/rooms", { replace: true });
   }, [error, navigate]);
 
-  /* ---------------- AVAILABILITY CHECK ---------------- */
   useEffect(() => {
     const verifyDates = async () => {
       if (!id || !selectedCheckIn || !selectedCheckOut) return;
-
-      const checkInDate = new Date(selectedCheckIn);
-      const checkOutDate = new Date(selectedCheckOut);
-
-      if (checkOutDate <= checkInDate) {
+      if (selectedCheckOut <= selectedCheckIn) {
         setIsAvailable(false);
         setAvailabilityMessage("Check-out must be after check-in.");
         return;
       }
+      if (selectedCheckIn < todayInputValue()) {
+        setIsAvailable(false);
+        setAvailabilityMessage("Check-in cannot be in the past.");
+        return;
+      }
 
       setAvailabilityLoading(true);
-
+      setAvailabilityMessage(null);
       try {
-        const res = await api.checkAvailability(
-          id,
-          selectedCheckIn,
-          selectedCheckOut,
-        );
-        setIsAvailable(res.available);
-        setAvailabilityMessage(
-          res.available
-            ? null
-            : res.message || "Room is not available for these dates.",
-        );
+        const result = await api.checkAvailability(id, selectedCheckIn, selectedCheckOut);
+        setIsAvailable(result.available);
+        setAvailabilityMessage(result.available ? null : result.message || "This room is not available for those dates.");
       } catch {
-        setIsAvailable(true);
-        setAvailabilityMessage(null);
+        setIsAvailable(false);
+        setAvailabilityMessage("Availability could not be verified. Please try again.");
       } finally {
         setAvailabilityLoading(false);
       }
     };
-
-    const timer = setTimeout(verifyDates, 500);
-    return () => clearTimeout(timer);
+    const timer = window.setTimeout(verifyDates, 450);
+    return () => window.clearTimeout(timer);
   }, [id, selectedCheckIn, selectedCheckOut]);
 
-  /* ---------------- STAY CALCULATION ---------------- */
-  const stayCalculations = useMemo(() => {
+  const stay = useMemo(() => {
     if (!room) return { nights: 0, total: 0 };
-
-    const checkInDate = new Date(selectedCheckIn);
-    const checkOutDate = new Date(selectedCheckOut);
-    const nights = Math.max(
-      1,
-      Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / 86400000),
-    );
-
-    return {
-      nights,
-      total: room.pricePerNight * nights,
-    };
+    const nights = differenceInNights(selectedCheckIn, selectedCheckOut);
+    return { nights, total: room.pricePerNight * nights };
   }, [room, selectedCheckIn, selectedCheckOut]);
 
-  if (isLoading) {
-    return <AestheticLoader message="Loading Details" subtext="Fetching Room information..." />;
-  }
-
+  if (isLoading) return <AestheticLoader message="Preparing room details" subtext="Checking availability" />;
   if (!room) return null;
 
-  const images = room.images?.length ? room.images : [];
-
-  const handleAuthoriseStay = () => {
-    if (!isAvailable) return;
-    navigate(
-      `/checkout/${room.id}?checkIn=${selectedCheckIn}&checkOut=${selectedCheckOut}`,
-    );
+  const images = room.images?.filter(Boolean) ?? [];
+  const buildRoomSearchUrl = () => {
+    const params = new URLSearchParams(searchParams);
+    params.set("checkIn", selectedCheckIn);
+    params.set("checkOut", selectedCheckOut);
+    return `/rooms?${params.toString()}`;
+  };
+  const bookRoom = () => {
+    if (!isAvailable || availabilityLoading) return;
+    const params = new URLSearchParams(searchParams);
+    params.set("checkIn", selectedCheckIn);
+    params.set("checkOut", selectedCheckOut);
+    navigate(`/checkout/${room.id}?${params.toString()}`);
   };
 
   return (
-    <div className="bg-background-dark min-h-screen pb-12">
-      {/* HERO */}
-      <section className="relative">
-        <div className="absolute top-24 left-6 z-50">
-          <button
-            onClick={() => navigate("/rooms")}
-            className="flex items-center gap-2 px-3 py-2 bg-black/50 border border-white/10 rounded-sm text-white hover:text-primary transition"
-          >
-            <span className="material-symbols-outlined text-sm">
-              arrow_left_alt
-            </span>
-            <span className="text-[9px] uppercase tracking-[0.35em] font-black">
-              Back
-            </span>
+    <div className="min-h-screen bg-background-dark pb-20">
+      <header className="relative min-h-[38rem] overflow-hidden bg-black pt-24 sm:min-h-[44rem]">
+        {images[activeImage] ? (
+          <img src={images[activeImage]} alt={`${room.name} — view ${activeImage + 1}`} className="absolute inset-0 h-full w-full object-cover image-luxury" fetchPriority="high" />
+        ) : <div className="absolute inset-0 bg-surface-dark" />}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/10 to-background-dark" />
+
+        <div className="ui-container-wide relative z-10 flex min-h-[38rem] flex-col justify-between pb-20 pt-4 sm:min-h-[44rem]">
+          <button type="button" onClick={() => navigate(buildRoomSearchUrl())} className="ui-button ui-button-secondary self-start bg-black/45 backdrop-blur-lg">
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span> Back to rooms
           </button>
-        </div>
-
-        <div className="relative h-[70vh] bg-black overflow-hidden">
-          {images[activeImage] && (
-            <img
-              src={images[activeImage]}
-              alt={room.name}
-              className="absolute inset-0 w-full h-full object-cover"
-              loading="lazy"
-            />
-          )}
-
-          <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-black/30" />
-
-          <div className="absolute bottom-10 left-6 space-y-4 z-20">
-            <p className="text-primary text-[9px] uppercase tracking-[0.6em] font-black">
-              Room {room.roomNumber}
-            </p>
-            <h1 className="serif-font text-3xl md:text-5xl italic text-white">
-              {room.name}
-            </h1>
+          <div className="flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
+            <div><p className="ui-eyebrow">{room.category.replace(/([a-z])([A-Z])/g, "$1 $2")}</p><h1 className="ui-page-title mt-3 italic text-white">{room.name}</h1></div>
+            {images.length > 1 && (
+              <div className="flex max-w-full gap-2 overflow-x-auto rounded-lg border border-white/10 bg-black/45 p-2 backdrop-blur-lg scrollbar-hide" role="group" aria-label="Room gallery">
+                {images.map((image, index) => (
+                  <button key={`${image}-${index}`} type="button" onClick={() => setActiveImage(index)} aria-label={`Show room image ${index + 1}`} aria-pressed={activeImage === index} className={`h-14 w-20 flex-none overflow-hidden rounded border-2 transition-all ${activeImage === index ? "border-primary" : "border-transparent opacity-65 hover:opacity-100"}`}>
+                    <img src={image} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-
-          {images.length > 1 && (
-            <div className="absolute bottom-16 right-6 flex gap-3 z-30">
-              {images.map((img, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveImage(index)}
-                  className={`w-20 h-14 overflow-hidden border ${
-                    activeImage === index
-                      ? "border-primary scale-105"
-                      : "border-white/20 opacity-70"
-                  }`}
-                >
-                  <img
-                    src={img}
-                    alt=""
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
         </div>
-      </section>
+      </header>
 
-      {/* CONTENT */}
-      <div className="max-w-[1600px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
-        <div className="lg:col-span-8 space-y-12 md:space-y-16">
-          <section className="my-[-110px]">
-            <h2 className="serif-font text-l md:text-2xl text-white leading-tight">
-              {room.description || "A refined room crafted for comfort."}
-            </h2>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 py-10 border-y border-white/5 mt-10">
-              <Detail label="Category" value={room.category} />
-              <Detail label="Floor" value={room.floor ?? "N/A"} highlight />
-              <Detail label="Guests" value={`${room.capacity} Guests`} />
-              <Detail label="Size" value={room.size ?? "N/A"} />
-            </div>
+      <div className="ui-container-wide relative z-20 -mt-10 grid gap-9 lg:grid-cols-12 lg:items-start">
+        <div className="space-y-12 lg:col-span-8">
+          <section className="ui-card p-6 sm:p-8">
+            <p className="font-display text-[clamp(1.35rem,2.5vw,2rem)] italic leading-8 text-white">{room.description || "A refined room designed for a comfortable and restorative stay."}</p>
+            <dl className="mt-8 grid grid-cols-2 gap-6 border-t border-white/10 pt-7 sm:grid-cols-4">
+              <RoomDetailItem label="Category" value={room.category.replace(/([a-z])([A-Z])/g, "$1 $2")} />
+              <RoomDetailItem label="Location" value="Assigned at check-in" />
+              <RoomDetailItem label="Guests" value={room.capacity ? `${room.capacity} guests` : "Ask hotel"} />
+              <RoomDetailItem label="Size" value={room.size ?? "Not specified"} />
+            </dl>
           </section>
 
           <section>
-            <p className="text-primary text-[10px] uppercase tracking-[0.5em] font-black mb-6">
-              Amenities
-            </p>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {room.amenities.map((a) => (
-                <div
-                  key={a}
-                  className="p-6 bg-white/[0.03] border border-white/5 flex items-center gap-4 hover:border-primary/20 transition-all"
-                >
-                  {/* Icon */}
-                  <span className="text-primary">
-                    {AMENITY_ICON_MAP[a.toLowerCase().replace(/\s+/g, "_")] || (
-                      <IconRosetteDiscountCheckFilled size={18} />
-                    )}
-                  </span>
-
-                  <span className="text-[11px] uppercase tracking-[0.2em] text-white font-black">
-                    {a}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <p className="ui-eyebrow">In-room amenities</p>
+            <h2 className="ui-card-title mt-3 italic text-white">Everything for an easy stay.</h2>
+            <ul className="mt-7 grid gap-3 sm:grid-cols-2">
+              {room.amenities.map((amenity) => {
+                const key = amenity.toLowerCase().replace(/[\s-]+/g, "_");
+                return (
+                  <li key={amenity} className="flex min-h-16 items-center gap-4 rounded border border-white/10 bg-white/[0.025] px-5 py-4 text-sm font-medium text-gray-200">
+                    <span className="grid size-9 place-items-center rounded-full bg-primary/10 text-primary"><span className="material-symbols-outlined" aria-hidden="true">{amenityIcons[key] || "verified"}</span></span>
+                    {amenity}
+                  </li>
+                );
+              })}
+            </ul>
           </section>
         </div>
 
-        {/* BOOKING CARD */}
-        <aside className="lg:col-span-4 lg:sticky lg:top-32 h-fit">
-          <div className="bg-surface-dark border border-white/10 p-8 md:p-10 space-y-10 shadow-2xl rounded-sm">
-            <div className="text-center">
-              <p className="text-primary text-[9px] uppercase tracking-[0.5em] font-black">
-                Nightly Rate
-              </p>
-              <h3 className="serif-font text-5xl md:text-6xl text-white font-bold tracking-tight">
-                ₦{room.pricePerNight.toLocaleString()}
-              </h3>
-            </div>
-
-            {availabilityMessage && (
-              <p className="text-red-500 text-[10px] uppercase font-black text-center tracking-widest bg-red-500/5 py-3 border border-red-500/10 rounded-sm">
-                {availabilityMessage}
-              </p>
-            )}
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-[8px] uppercase tracking-[0.2em] text-gray-600 font-black ml-1">Check-in</label>
-                <input
-                  type="date"
-                  value={selectedCheckIn}
-                  onChange={(e) => setSelectedCheckIn(e.target.value)}
-                  className="w-full bg-white/[0.07] p-4 text-xs text-white outline-none border border-white/5 focus:border-primary/40 transition-all appearance-none"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[8px] uppercase tracking-[0.2em] text-gray-600 font-black ml-1">Check-out</label>
-                <input
-                  type="date"
-                  value={selectedCheckOut}
-                  onChange={(e) => setSelectedCheckOut(e.target.value)}
-                  className="w-full bg-white/[0.07] p-4 text-xs text-white outline-none border border-white/5 focus:border-primary/40 transition-all appearance-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-between items-end text-xs pt-6 border-t border-white/5">
-              <div className="space-y-1">
-                <p className="text-[9px] text-gray-600 uppercase tracking-widest font-black">Stay Summary</p>
-                <p className="text-white text-lg italic font-medium">{stayCalculations.nights} Nights</p>
-              </div>
-              <div className="text-right space-y-1">
-                <p className="text-[9px] text-gray-600 uppercase tracking-widest font-black">Total Price</p>
-                <p className="serif-font text-3xl text-primary italic font-bold">₦{stayCalculations.total.toLocaleString()}</p>
-              </div>
-            </div>
-
-            <button
-              onClick={handleAuthoriseStay}
-              disabled={!isAvailable || availabilityLoading}
-              className="w-full h-16 bg-primary text-black uppercase text-[10px] font-black tracking-[0.4em] hover:bg-[#B04110] transition-all active:scale-95 disabled:opacity-30 shadow-xl shadow-primary/20 flex items-center justify-center gap-3"
-            >
-              {availabilityLoading ? (
-                 <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-              ) : (
-                "Confirm Booking"
-              )}
-            </button>
-            <p className="text-[8px] text-center text-gray-600 uppercase tracking-[0.3em] font-black italic">Secure Payment Active</p>
+        <aside className="ui-card p-6 shadow-2xl sm:p-8 lg:sticky lg:top-28 lg:col-span-4" aria-label="Book this room">
+          <span className="ui-label">Nightly rate</span>
+          <p className="font-display text-4xl font-semibold text-white sm:text-5xl">₦{room.pricePerNight.toLocaleString()}</p>
+          <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            <label><span className="ui-label">Check-in</span><input type="date" min={todayInputValue()} value={selectedCheckIn} onChange={(event) => { const value = event.target.value; setSelectedCheckIn(value); if (selectedCheckOut <= value) setSelectedCheckOut(addDaysToInput(value, 1)); }} className="ui-input" /></label>
+            <label><span className="ui-label">Check-out</span><input type="date" min={selectedCheckIn || todayInputValue()} value={selectedCheckOut} onChange={(event) => setSelectedCheckOut(event.target.value)} className="ui-input" /></label>
           </div>
+
+          <div className="mt-6 min-h-12" aria-live="polite">
+            {availabilityLoading ? (
+              <p className="flex items-center gap-2 text-sm text-gray-400"><span className="material-symbols-outlined animate-spin text-primary" aria-hidden="true">progress_activity</span> Checking availability…</p>
+            ) : availabilityMessage ? (
+              <p className="rounded border border-red-500/20 bg-red-500/5 p-3 text-sm leading-6 text-red-300">{availabilityMessage}</p>
+            ) : isAvailable ? (
+              <p className="flex items-center gap-2 text-sm text-emerald-400"><span className="material-symbols-outlined" aria-hidden="true">check_circle</span> Available for your dates</p>
+            ) : null}
+          </div>
+
+          <dl className="mt-5 space-y-3 border-y border-white/10 py-5 text-sm">
+            <div className="flex justify-between gap-4 text-gray-400"><dt>Length of stay</dt><dd className="font-semibold text-white">{stay.nights} {stay.nights === 1 ? "night" : "nights"}</dd></div>
+            <div className="flex items-end justify-between gap-4"><dt className="text-gray-400">Stay total</dt><dd className="font-display text-2xl italic text-primary">₦{stay.total.toLocaleString()}</dd></div>
+          </dl>
+
+          <button type="button" onClick={bookRoom} disabled={!isAvailable || availabilityLoading} className="ui-button ui-button-primary mt-6 w-full">Continue to booking <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button>
+          <p className="mt-4 flex items-center justify-center gap-2 text-center text-xs text-gray-500"><span className="material-symbols-outlined text-base" aria-hidden="true">lock</span> Secure checkout</p>
         </aside>
       </div>
     </div>
   );
 };
 
-/* -------- SMALL HELPER COMPONENT -------- */
-const Detail = ({
-  label,
-  value,
-  highlight,
-}: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) => (
-  <div>
-    <p className="text-[8px] uppercase tracking-[0.4em] text-gray-600 font-black mb-1">
-      {label}
-    </p>
-    <p
-      className={`text-lg md:text-xl font-bold italic ${highlight ? "text-primary" : "text-white"}`}
-    >
-      {value}
-    </p>
-  </div>
+const RoomDetailItem = ({ label, value }: { label: string; value: string }) => (
+  <div><dt className="ui-label">{label}</dt><dd className="text-sm font-semibold capitalize text-white sm:text-base">{value}</dd></div>
 );
 
 export default RoomDetail;

@@ -1,7 +1,5 @@
 {
   "name": "Moore Hotel And Suites",
   "description": "A luxury hospitality platform for Moore Hotels & Suites featuring room discovery, booking engine, and guest profile management with a refined, high-end aesthetic.",
-  "requestFramePermissions": [
-    "geolocation"
-  ]
+  "requestFramePermissions": []
 }
