@@ -33,7 +33,7 @@ const getRouteTitle = (pathname: string) => {
   if (pathname.startsWith("/booking-confirmation/")) return "Booking status | Moore Hotels & Suites";
   const titles: Record<string, string> = {
     "/rooms": "Rooms & Suites | Moore Hotels & Suites",
-    "/dining": "Dining | Moore Hotels & Suites",
+    "/dining": "Hotel Experience | Moore Hotels & Suites",
     "/services": "Guest Services | Moore Hotels & Suites",
     "/about": "Our Story | Moore Hotels & Suites",
     "/auth": "Guest Account | Moore Hotels & Suites",

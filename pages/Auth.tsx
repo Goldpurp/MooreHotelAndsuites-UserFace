@@ -149,7 +149,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       <NotificationModal isOpen={modal.show} onClose={() => setModal((current) => ({ ...current, show: false }))} title={modal.title} message={modal.message} type={modal.type} />
 
       <div className="relative hidden min-h-screen overflow-hidden lg:block">
-        <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=82&w=1920" alt="A serene Moore guest suite" className="absolute inset-0 h-full w-full object-cover opacity-60 image-luxury" />
+        <img src="https://res.cloudinary.com/dxryndnhl/image/upload/v1779385274/Screenshot_2026-05-20_at_6.27.21_pm_dtspvl.png" alt="A serene Moore guest suite" className="absolute inset-0 h-full w-full object-cover opacity-60 image-luxury" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/30 to-background-dark" />
         <div className="absolute inset-0 flex items-end p-12 xl:p-16">
           <div className="max-w-xl"><p className="ui-eyebrow">Guest account</p><h2 className="ui-section-title mt-4 italic text-white">Your stay, kept close.</h2><p className="ui-copy mt-5 text-gray-300">Review bookings, manage your profile, and keep important stay information in one place.</p></div>
