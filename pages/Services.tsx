@@ -27,7 +27,7 @@ const signatureServices: SignatureService[] = [
     title: "Restaurant & in-room dining",
     tag: "Local and continental",
     description: "Enjoy familiar Nigerian favourites and continental classics in our dining spaces, or settle in and have a considered meal brought to your room.",
-    image: "/Images/L'Horizon.jpg",
+    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785694895/Screenshot_2026-08-02_at_7.21.28_pm_cdmivl.png",
     imageAlt: "Elegant dining at L’Horizon",
     icon: "room_service",
     note: "Breakfast, lunch and dinner",
@@ -37,7 +37,7 @@ const signatureServices: SignatureService[] = [
     title: "Lounge & bar",
     tag: "Meet and unwind",
     description: "A relaxed setting for informal meetings, a quiet evening, or a well-made drink after the day’s plans are complete.",
-    image: "/Images/TheMeridinLounge.jpg",
+    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785694158/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl.png",
     imageAlt: "The Meridian Lounge at Moore Hotels",
     icon: "local_bar",
     note: "Open to residents and visitors",
@@ -47,7 +47,7 @@ const signatureServices: SignatureService[] = [
     title: "Wellness & recreation",
     tag: "Time for yourself",
     description: "Restore your pace with calm leisure spaces created for unhurried mornings, quiet resets, and easy moments between plans.",
-    image: "/Images/WellnessAndSanctuary.jpg",
+    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1779385271/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3.png",
     imageAlt: "Wellness and leisure space at Moore Hotels",
     icon: "spa",
     note: "Leisure at your own pace",
@@ -57,7 +57,7 @@ const signatureServices: SignatureService[] = [
     title: "Games & social spaces",
     tag: "Stay entertained",
     description: "Gather for friendly competition or spend an easy evening together in spaces designed for connection beyond the room.",
-    image: "/Images/TheApexGamesRoom.jpg",
+    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785697853/Screenshot_2026-08-02_at_8.10.42_pm_ybmndu.png",
     imageAlt: "The Apex games room at Moore Hotels",
     icon: "sports_esports",
     note: "Made for groups and downtime",
@@ -67,7 +67,7 @@ const signatureServices: SignatureService[] = [
     title: "Laundry & garment care",
     tag: "Travel light",
     description: "Professional laundry and dry-cleaning support keeps your wardrobe ready, whether you are staying for one night or settling in for longer.",
-    image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&q=82&w=1400",
+    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785694056/Screenshot_2026-08-02_at_7.07.12_pm_dplfsv.png",
     imageAlt: "Professional garment care service",
     icon: "dry_cleaning",
     note: "Collected and returned to your room",
@@ -93,7 +93,7 @@ const Services: React.FC = () => (
   <div className="min-h-screen bg-background-dark">
     <header className="relative flex min-h-[40rem] items-center overflow-hidden px-4 pb-24 pt-32 text-center sm:min-h-[44rem] sm:px-6">
       <img
-        src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=84&w=1920"
+        src="https://res.cloudinary.com/dxryndnhl/image/upload/v1785694266/Screenshot_2026-08-02_at_7.10.55_pm_y33xug.png"
         alt="A calm hotel wellness setting"
         className="absolute inset-0 h-full w-full object-cover opacity-50 image-luxury"
         fetchPriority="high"
@@ -136,7 +136,6 @@ const Services: React.FC = () => (
                 <div className="relative overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-[0_30px_90px_rgba(0,0,0,.35)]">
                   <img src={service.image} alt={service.imageAlt} className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
-                  <span className="absolute bottom-5 left-5 font-display text-5xl italic leading-none text-white/80 sm:text-6xl" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
                 </div>
                 <div className={`absolute -bottom-5 hidden h-px w-32 bg-primary/60 sm:block ${index % 2 ? "right-8" : "left-8"}`} aria-hidden="true" />
               </div>
@@ -146,7 +145,7 @@ const Services: React.FC = () => (
                   <span className="grid size-11 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined" aria-hidden="true">{service.icon}</span></span>
                   <p className="ui-eyebrow">{service.tag}</p>
                 </div>
-                <h3 className="ui-section-title mt-5 italic text-white">{service.title}</h3>
+                <h3 className="font-display mt-5 text-[clamp(1.85rem,3vw,2.65rem)] italic leading-[1.1] text-white">{service.title}</h3>
                 <p className="ui-copy mt-5 max-w-xl">{service.description}</p>
                 <ul className="mt-7 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3" aria-label={`${service.title} includes`}>
                   {service.features.map((feature) => (
