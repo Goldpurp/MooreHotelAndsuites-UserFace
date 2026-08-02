@@ -33,7 +33,7 @@ const About: React.FC = () => (
           <blockquote className="mt-8 border-l-2 border-primary/50 bg-white/[0.035] p-6 font-display text-xl italic leading-8 text-gray-200">“Luxury feels most meaningful when it is personal, comfortable, and quietly dependable.”</blockquote>
         </div>
         <div className="group overflow-hidden rounded-lg border border-white/10 shadow-2xl">
-          <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1400&q=82" alt="An elegant hotel reception" className="image-luxury aspect-[4/5] w-full object-cover lg:aspect-[4/5]" loading="lazy" />
+          <img src="https://res.cloudinary.com/dxryndnhl/image/upload/v1785694116/Screenshot_2026-08-02_at_7.08.26_pm_xl65yh.png" alt="An elegant hotel reception" className="image-luxury aspect-[4/5] w-full object-cover lg:aspect-[4/5]" loading="lazy" />
         </div>
       </div>
     </section>
@@ -57,7 +57,7 @@ const About: React.FC = () => (
     <section className="ui-section">
       <div className="ui-container grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
         <div className="group overflow-hidden rounded-lg border border-white/10 shadow-2xl">
-          <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1400&q=82" alt="A welcoming hotel arrival" className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" />
+          <img src="https://res.cloudinary.com/dxryndnhl/image/upload/v1785699804/Screenshot_2026-08-02_at_8.43.08_pm_om7gem.png" alt="A welcoming hotel arrival" className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" />
         </div>
         <div>
           <p className="ui-eyebrow">Come as our guest</p>

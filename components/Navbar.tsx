@@ -10,7 +10,7 @@ interface NavbarProps {
 
 const navLinks = [
   { name: "Rooms", path: "/rooms" },
-  { name: "Dining", path: "/dining" },
+  { name: "Experience", path: "/dining" },
   { name: "Services", path: "/services" },
   { name: "Our story", path: "/about" },
 ];

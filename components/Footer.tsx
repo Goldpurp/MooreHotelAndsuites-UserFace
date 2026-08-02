@@ -24,7 +24,7 @@ const Footer: React.FC = () => (
           <h2 className="ui-label mb-5">Explore</h2>
           <ul className="space-y-3 text-sm text-gray-400">
             <li><Link to="/rooms" className="inline-flex min-h-8 items-center hover:text-primary">Rooms &amp; suites</Link></li>
-            <li><Link to="/dining" className="inline-flex min-h-8 items-center hover:text-primary">Dining</Link></li>
+            <li><Link to="/dining" className="inline-flex min-h-8 items-center hover:text-primary">Hotel experience</Link></li>
             <li><Link to="/services" className="inline-flex min-h-8 items-center hover:text-primary">Guest services</Link></li>
             <li><Link to="/about" className="inline-flex min-h-8 items-center hover:text-primary">Our story</Link></li>
           </ul>
