@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { cloudinaryImage, cloudinaryImageSrcSet } from "../utils/cloudinary";
 
 type SignatureService = {
   title: string;
@@ -93,7 +94,9 @@ const Services: React.FC = () => (
   <div className="min-h-screen bg-background-dark">
     <header className="relative flex min-h-[40rem] items-center overflow-hidden px-4 pb-24 pt-32 text-center sm:min-h-[44rem] sm:px-6">
       <img
-        src="https://res.cloudinary.com/dxryndnhl/image/upload/v1785694266/Screenshot_2026-08-02_at_7.10.55_pm_y33xug.png"
+        src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785694266/Screenshot_2026-08-02_at_7.10.55_pm_y33xug.png", 1600)}
+        srcSet={cloudinaryImageSrcSet("https://res.cloudinary.com/dxryndnhl/image/upload/v1785694266/Screenshot_2026-08-02_at_7.10.55_pm_y33xug.png", [640, 960, 1280, 1600])}
+        sizes="100vw"
         alt="A calm hotel wellness setting"
         className="absolute inset-0 h-full w-full object-cover opacity-50 image-luxury"
         fetchPriority="high"
@@ -134,7 +137,7 @@ const Services: React.FC = () => (
             <article key={service.title} className="group grid items-center gap-10 lg:grid-cols-12 lg:gap-16 xl:gap-24">
               <div className={`relative lg:col-span-7 ${index % 2 ? "lg:order-2" : ""}`}>
                 <div className="relative overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-[0_30px_90px_rgba(0,0,0,.35)]">
-                  <img src={service.image} alt={service.imageAlt} className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" />
+                  <img src={cloudinaryImage(service.image, 1100)} srcSet={cloudinaryImageSrcSet(service.image, [480, 720, 1100])} sizes="(min-width: 1024px) 58vw, 100vw" alt={service.imageAlt} className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" decoding="async" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
                 </div>
                 <div className={`absolute -bottom-5 hidden h-px w-32 bg-primary/60 sm:block ${index % 2 ? "right-8" : "left-8"}`} aria-hidden="true" />

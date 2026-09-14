@@ -5,6 +5,8 @@ import Footer from "./components/Footer";
 import AestheticLoader from './components/AestheticLoader';
 import { ApplicationUser } from "./types";
 import { api } from "./services/api";
+import CookieConsent from "./components/CookieConsent";
+import { trackPageView } from "./services/analytics";
 
 // Lazy load all pages
 const Home = lazy(() => import("./pages/Home"));
@@ -63,8 +65,10 @@ const App: React.FC = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    document.title = routeTitle;
-  }, [routeTitle]);
+    const seo = window as typeof window & { MooreSeo?: { update: () => void } };
+    seo.MooreSeo?.update();
+    trackPageView(`${location.pathname}${location.search}`, document.title);
+  }, [location.pathname, location.search]);
 
   // Initialize authentication
   useEffect(() => {
@@ -104,7 +108,7 @@ const App: React.FC = () => {
       <Navbar user={user} onLogout={handleLogout} />
       
       <p className="sr-only" aria-live="polite">{routeTitle}</p>
-      <main className="flex-grow" id="main-content" tabIndex={-1}>
+      <main className="min-h-dvh flex-grow" id="main-content" tabIndex={-1}>
         {/* If still checking auth, show loader. Otherwise, show routes */}
         {loading ? (
           <AestheticLoader 
@@ -141,6 +145,7 @@ const App: React.FC = () => {
       </main>
       
       <Footer />
+      <CookieConsent />
     </div>
   );
 };

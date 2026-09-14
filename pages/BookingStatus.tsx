@@ -6,11 +6,17 @@ const BookingStatus: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const code = searchParams.get("code");
+  const accessToken = new URLSearchParams(window.location.hash.slice(1)).get("accessToken");
 
   useEffect(() => {
-    if (code) navigate(`/booking-confirmation/${encodeURIComponent(code.trim().toUpperCase())}`, { replace: true });
+    if (code) {
+      navigate(`/booking-confirmation/${encodeURIComponent(code.trim().toUpperCase())}`, {
+        replace: true,
+        state: { guestAccessToken: accessToken || "" },
+      });
+    }
     else navigate("/manage-booking", { replace: true });
-  }, [code, navigate]);
+  }, [code, accessToken, navigate]);
 
   return (
     <AestheticLoader

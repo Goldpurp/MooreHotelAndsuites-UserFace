@@ -7,6 +7,7 @@ import FAQ from "../components/FAQ";
 import NotificationModal from "../components/NotificationModal";
 import { addDaysToInput, todayInputValue } from "../utils/dates";
 import RoomCard from "../components/RoomCard";
+import { cloudinaryImage, cloudinaryImageSrcSet, cloudinaryVideo } from "../utils/cloudinary";
 
 const stayAssurances = [
   { icon: "support_agent", title: "24-hour reception", text: "Assistance with arrivals, departures, and guest requests at every hour." },
@@ -101,7 +102,7 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [searching, setSearching] = useState(false);
-  const [videoPlaying, setVideoPlaying] = useState(true);
+  const [videoPlaying, setVideoPlaying] = useState(false);
   const [modal, setModal] = useState<{ show: boolean; title: string; message: string; type: "success" | "error" | "info" }>({
     show: false,
     title: "",
@@ -158,21 +159,6 @@ const Home: React.FC = () => {
     }
   };
 
-  if (error && featuredRooms.length === 0) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-background-dark p-6 text-center">
-        <span className="grid size-16 place-items-center rounded-full border border-primary/30 bg-primary/10 text-primary">
-          <span className="material-symbols-outlined text-3xl" aria-hidden="true">cloud_off</span>
-        </span>
-        <div>
-          <h1 className="ui-page-title italic text-white">We could not load the hotel</h1>
-          <p className="ui-copy mx-auto mt-4 max-w-md">Check your connection and try again. Your dates and guest details have not been changed.</p>
-        </div>
-        <button onClick={() => refetch()} className="ui-button ui-button-primary">Try again</button>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background-dark">
       <NotificationModal
@@ -186,7 +172,9 @@ const Home: React.FC = () => {
       <header className="relative flex min-h-[46rem] items-center overflow-hidden px-4 pb-16 pt-32 text-center sm:px-6 lg:min-h-[50rem]">
         <div className="absolute inset-0">
           <img
-            src="https://res.cloudinary.com/dxryndnhl/image/upload/v1785699735/Screenshot_2026-08-02_at_8.42.08_pm_plc96z.png"
+            src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699735/Screenshot_2026-08-02_at_8.42.08_pm_plc96z.png", 1600)}
+            srcSet={cloudinaryImageSrcSet("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699735/Screenshot_2026-08-02_at_8.42.08_pm_plc96z.png", [640, 960, 1280, 1600])}
+            sizes="100vw"
             alt="Moore Hotels & Suites exterior"
             className="h-full w-full scale-[1.03] object-cover opacity-75 image-luxury"
             fetchPriority="high"
@@ -279,7 +267,9 @@ const Home: React.FC = () => {
           </div>
           <div className="group order-1 overflow-hidden rounded-lg border border-white/10 shadow-2xl lg:order-2">
             <img
-              src="https://res.cloudinary.com/dxryndnhl/image/upload/v1785699634/Screenshot_2026-08-02_at_8.39.54_pm_rggvsx.png"
+              src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699634/Screenshot_2026-08-02_at_8.39.54_pm_rggvsx.png", 1000)}
+              srcSet={cloudinaryImageSrcSet("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699634/Screenshot_2026-08-02_at_8.39.54_pm_rggvsx.png", [480, 720, 1000])}
+              sizes="(min-width: 1024px) 50vw, 100vw"
               alt="Exterior of Moore Hotels & Suites in Sagamu"
               className="image-luxury aspect-[4/3] h-full w-full object-cover"
               loading="lazy"
@@ -301,7 +291,19 @@ const Home: React.FC = () => {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {isLoading
               ? [1, 2, 3, 4].map((item) => <div key={item} className="aspect-[4/5] animate-pulse rounded-lg bg-white/[0.04]" />)
-              : featuredRooms.map((room, index) => (
+              : error ? (
+                <div className="ui-card col-span-full flex min-h-56 flex-col items-center justify-center p-7 text-center">
+                  <span className="material-symbols-outlined text-3xl text-primary" aria-hidden="true">cloud_off</span>
+                  <h3 className="ui-card-title mt-4 italic text-white">Rooms are temporarily unavailable</h3>
+                  <p className="ui-copy mt-2 max-w-lg">The rest of the hotel website is available. Try the room list again in a moment.</p>
+                  <button type="button" onClick={() => refetch()} className="ui-button ui-button-primary mt-5">Try again</button>
+                </div>
+              ) : featuredRooms.length === 0 ? (
+                <div className="ui-card col-span-full min-h-48 p-7 text-center">
+                  <h3 className="ui-card-title italic text-white">New room availability is being prepared</h3>
+                  <p className="ui-copy mx-auto mt-3 max-w-xl">Please contact Guest Relations for current room options while the online inventory is updated.</p>
+                </div>
+              ) : featuredRooms.map((room, index) => (
                   <RoomCard
                     key={room.id}
                     room={room}
@@ -331,7 +333,7 @@ const Home: React.FC = () => {
                 to={item.to}
                 className={`group relative min-h-[24rem] overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-2xl ${index === 0 ? "md:col-span-2 xl:col-span-7 xl:row-span-2 xl:min-h-[43rem]" : "xl:col-span-5 xl:min-h-[20rem]"}`}
               >
-                <img src={item.image} alt={item.imageAlt} className="image-luxury absolute inset-0 h-full w-full object-cover" loading="lazy" />
+                <img src={cloudinaryImage(item.image, 1100)} srcSet={cloudinaryImageSrcSet(item.image, [480, 720, 1100])} sizes="(min-width: 1280px) 58vw, 100vw" alt={item.imageAlt} className="image-luxury absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/5" />
                 <div className="absolute inset-0 border border-white/0 transition-colors duration-500 group-hover:border-primary/35" aria-hidden="true" />
                 <div className={`absolute inset-x-0 bottom-0 p-6 sm:p-8 ${index === 0 ? "xl:p-10" : ""}`}>
@@ -361,7 +363,7 @@ const Home: React.FC = () => {
           <div className="grid gap-5 sm:grid-cols-2 lg:col-span-8">
             {powerSystems.map((system, index) => (
               <article key={system.title} className="group relative min-h-[27rem] overflow-hidden rounded-lg border border-white/10 bg-[#111] p-6 shadow-2xl sm:p-8">
-                <img src={system.image} alt="" className="image-luxury pointer-events-none absolute inset-0 h-full w-full object-cover opacity-65 transition duration-700 group-hover:scale-[1.03] group-hover:opacity-75" loading="lazy" aria-hidden="true" />
+                <img src={cloudinaryImage(system.image, 900)} srcSet={cloudinaryImageSrcSet(system.image, [480, 720, 900])} sizes="(min-width: 1024px) 34vw, 100vw" alt="" className="image-luxury pointer-events-none absolute inset-0 h-full w-full object-cover opacity-65 transition duration-700 group-hover:scale-[1.03] group-hover:opacity-75" loading="lazy" decoding="async" aria-hidden="true" />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/20" aria-hidden="true" />
                 <div className={`pointer-events-none absolute inset-0 opacity-80 ${index === 0 ? "bg-[radial-gradient(circle_at_80%_15%,rgba(201,74,17,0.22),transparent_38%)]" : "bg-[radial-gradient(circle_at_75%_10%,rgba(229,192,104,0.18),transparent_40%)]"}`} aria-hidden="true" />
                 <div className="pointer-events-none absolute -right-16 top-16 size-56 rounded-full border border-white/[0.06] transition-transform duration-700 group-hover:scale-110" aria-hidden="true" />
@@ -416,7 +418,7 @@ const Home: React.FC = () => {
               <Link key={space.title} to={space.to} data-image-slot={space.imageSlot} className="group overflow-hidden rounded-lg border border-white/10 bg-[#101010] shadow-2xl transition-colors duration-300 hover:border-primary/35">
                 <div className="relative aspect-[4/3] overflow-hidden bg-[radial-gradient(circle_at_75%_20%,rgba(201,74,17,.16),transparent_38%),linear-gradient(145deg,#171717,#0c0c0c)]">
                   {space.image ? (
-                    <img src={space.image} alt={`${space.title} at Moore Hotels`} className="image-luxury absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]" loading="lazy" />
+                    <img src={cloudinaryImage(space.image, 720)} srcSet={cloudinaryImageSrcSet(space.image, [360, 540, 720])} sizes="(min-width: 768px) 33vw, 100vw" alt={`${space.title} at Moore Hotels`} className="image-luxury absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]" loading="lazy" decoding="async" />
                   ) : (
                     <div className="absolute inset-0 grid place-items-center" aria-hidden="true">
                       <span className="material-symbols-outlined text-[4.5rem] font-light text-white/[0.08] transition duration-500 group-hover:scale-110 group-hover:text-primary/20">{space.icon}</span>
@@ -452,12 +454,12 @@ const Home: React.FC = () => {
           <div className="group overflow-hidden rounded-lg border border-white/10 shadow-[0_35px_80px_rgba(0,0,0,.55)] lg:col-span-8">
             <video
               ref={videoRef}
-              src="https://res.cloudinary.com/dxryndnhl/video/upload/v1785696570/IMG_1221_jtnwy1.mov"
-              autoPlay
+              src={cloudinaryVideo("https://res.cloudinary.com/dxryndnhl/video/upload/v1785696570/IMG_1221_jtnwy1.mov", 1280)}
+              poster={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699634/Screenshot_2026-08-02_at_8.39.54_pm_rggvsx.png", 1280)}
               muted
               loop
               playsInline
-              preload="metadata"
+              preload="none"
               className="image-luxury aspect-video h-full w-full object-cover"
               aria-label="Moore Hotels atmosphere film"
               onPlay={() => setVideoPlaying(true)}
@@ -479,7 +481,9 @@ const Home: React.FC = () => {
         <div className="ui-container-wide grid overflow-hidden rounded-lg border border-white/10 bg-surface-dark/70 shadow-2xl lg:grid-cols-12">
           <div className="group relative min-h-[24rem] overflow-hidden lg:col-span-7 lg:min-h-[34rem]">
             <img
-              src="https://res.cloudinary.com/dxryndnhl/image/upload/v1785699796/Screenshot_2026-08-02_at_8.42.45_pm_bklvqu.png"
+              src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699796/Screenshot_2026-08-02_at_8.42.45_pm_bklvqu.png", 1200)}
+              srcSet={cloudinaryImageSrcSet("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699796/Screenshot_2026-08-02_at_8.42.45_pm_bklvqu.png", [480, 800, 1200])}
+              sizes="(min-width: 1024px) 58vw, 100vw"
               alt="Moore Hotels & Suites in Sagamu"
               className="image-luxury absolute inset-0 h-full w-full object-cover"
               loading="lazy"

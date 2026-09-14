@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 
 const ManageBooking: React.FC = () => {
-  const navigate = useNavigate();
   const [bookingCode, setBookingCode] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -25,17 +24,15 @@ const ManageBooking: React.FC = () => {
 
     setLoading(true);
     setError("");
+    setNotice("");
     try {
-      const booking = await api.lookupBooking(normalizedCode, normalizedEmail);
-      api.rememberBookingLookup(booking.bookingCode, normalizedEmail);
-      navigate(`/booking-confirmation/${encodeURIComponent(booking.bookingCode)}`, {
-        state: { booking },
-      });
+      await api.requestBookingAccessLink(normalizedCode, normalizedEmail);
+      setNotice("If those details match, a secure booking link is on its way. Check your inbox and spam folder.");
     } catch (lookupError) {
       setError(
         lookupError instanceof Error
           ? lookupError.message
-          : "The booking could not be retrieved.",
+          : "The secure link could not be requested.",
       );
     } finally {
       setLoading(false);
@@ -90,6 +87,11 @@ const ManageBooking: React.FC = () => {
             {error}
           </p>
         )}
+        {notice && (
+          <p role="status" className="mt-4 text-center text-sm text-emerald-300">
+            {notice}
+          </p>
+        )}
 
         <button
           type="submit"
@@ -97,7 +99,7 @@ const ManageBooking: React.FC = () => {
           className="ui-button ui-button-primary mt-6 w-full"
         >
           {loading && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}
-          {loading ? "Verifying" : "Retrieve booking"}
+          {loading ? "Sending" : "Email secure link"}
         </button>
       </form>
     </div>

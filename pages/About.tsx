@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { cloudinaryImage, cloudinaryImageSrcSet } from "../utils/cloudinary";
 
 const standards = [
   { icon: "room_service", title: "Attentive service", text: "A capable team that responds with care, discretion, and local knowledge." },
@@ -11,7 +12,9 @@ const About: React.FC = () => (
   <div className="min-h-screen bg-background-dark text-white">
     <header className="relative flex min-h-[42rem] items-center overflow-hidden px-4 pb-16 pt-32 text-center sm:px-6">
       <img
-        src="https://res.cloudinary.com/dxryndnhl/image/upload/v1779385271/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3.png"
+        src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1779385271/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3.png", 1600)}
+        srcSet={cloudinaryImageSrcSet("https://res.cloudinary.com/dxryndnhl/image/upload/v1779385271/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3.png", [640, 960, 1280, 1600])}
+        sizes="100vw"
         alt="Moore Hotels & Suites"
         className="absolute inset-0 h-full w-full object-cover opacity-60 image-luxury"
         fetchPriority="high"
@@ -33,7 +36,7 @@ const About: React.FC = () => (
           <blockquote className="mt-8 border-l-2 border-primary/50 bg-white/[0.035] p-6 font-display text-xl italic leading-8 text-gray-200">“Luxury feels most meaningful when it is personal, comfortable, and quietly dependable.”</blockquote>
         </div>
         <div className="group overflow-hidden rounded-lg border border-white/10 shadow-2xl">
-          <img src="https://res.cloudinary.com/dxryndnhl/image/upload/v1785694116/Screenshot_2026-08-02_at_7.08.26_pm_xl65yh.png" alt="An elegant hotel reception" className="image-luxury aspect-[4/5] w-full object-cover lg:aspect-[4/5]" loading="lazy" />
+          <img src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785694116/Screenshot_2026-08-02_at_7.08.26_pm_xl65yh.png", 900)} alt="An elegant hotel reception" className="image-luxury aspect-[4/5] w-full object-cover lg:aspect-[4/5]" loading="lazy" decoding="async" />
         </div>
       </div>
     </section>
@@ -57,7 +60,7 @@ const About: React.FC = () => (
     <section className="ui-section">
       <div className="ui-container grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
         <div className="group overflow-hidden rounded-lg border border-white/10 shadow-2xl">
-          <img src="https://res.cloudinary.com/dxryndnhl/image/upload/v1785699804/Screenshot_2026-08-02_at_8.43.08_pm_om7gem.png" alt="A welcoming hotel arrival" className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" />
+          <img src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699804/Screenshot_2026-08-02_at_8.43.08_pm_om7gem.png", 900)} alt="A welcoming hotel arrival" className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" decoding="async" />
         </div>
         <div>
           <p className="ui-eyebrow">Come as our guest</p>

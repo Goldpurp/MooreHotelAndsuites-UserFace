@@ -4,11 +4,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#C94A11",
+        primary: "#D15A20",
         secondary: "#31458E",
         "background-dark": "#0A0A0A",
         "surface-dark": "#121212",
         "border-gold": "rgba(201, 74, 17, 0.2)",
+        gray: {
+          500: "#9CA3AF",
+          600: "#9CA3AF",
+        },
       },
       fontFamily: {
         display: ["Playfair Display", "serif"],

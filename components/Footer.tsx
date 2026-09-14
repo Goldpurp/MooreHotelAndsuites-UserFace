@@ -1,21 +1,22 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { COOKIE_SETTINGS_EVENT } from "./CookieConsent";
 
 const Footer: React.FC = () => (
   <footer className="border-t border-white/10 bg-black py-14 sm:py-16" aria-label="Site footer">
     <div className="ui-container-wide">
       <div className="grid gap-12 lg:grid-cols-[1.25fr_0.75fr_0.75fr_1.2fr] lg:gap-10">
         <div>
-          <Link to="/" className="group inline-flex min-h-11 items-center gap-3" aria-label="Moore Hotels & Suites home">
+          <Link to="/" className="group inline-flex min-h-11 items-center gap-3" title="Moore Hotels & Suites home">
             <span className="grid size-11 place-items-center overflow-hidden rounded-[4px] bg-[#e4e6e8]">
-              <img src="https://res.cloudinary.com/dxryndnhl/image/upload/v1777386017/slazzer-preview-w1yad_jizukz.png" alt="" className="h-full w-full object-contain" />
+              <img src="https://res.cloudinary.com/dxryndnhl/image/upload/f_auto,q_auto,w_96/v1777386017/slazzer-preview-w1yad_jizukz.png" alt="" className="h-full w-full object-contain" loading="lazy" decoding="async" />
             </span>
             <span>
               <span className="block text-sm font-bold tracking-[0.24em] text-white">MOORE</span>
-              <span className="mt-1 block text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-gray-500">Hotels &amp; Suites</span>
+              <span className="mt-1 block text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-gray-400">Hotels &amp; Suites</span>
             </span>
           </Link>
-          <p className="mt-6 max-w-sm text-sm leading-7 text-gray-500">
+          <p className="mt-6 max-w-sm text-sm leading-7 text-gray-400">
             Contemporary four-star hospitality, delivered with professional care and the warmth of Nigerian service.
           </p>
         </div>
@@ -59,11 +60,12 @@ const Footer: React.FC = () => (
         </div>
       </div>
 
-      <div className="mt-14 flex flex-col gap-5 border-t border-white/10 pt-7 text-xs leading-5 text-gray-600 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-14 flex flex-col gap-5 border-t border-white/10 pt-7 text-xs leading-5 text-gray-400 sm:flex-row sm:items-center sm:justify-between">
         <p>© {new Date().getFullYear()} Moore Hotels &amp; Suites. All rights reserved.</p>
         <div className="flex flex-wrap gap-x-6 gap-y-3">
           <Link to="/privacy" className="hover:text-primary">Privacy</Link>
           <Link to="/terms" className="hover:text-primary">Terms</Link>
+          <button type="button" onClick={() => window.dispatchEvent(new Event(COOKIE_SETTINGS_EVENT))} className="hover:text-primary">Cookie choices</button>
           <a href="mailto:info@moorehotelandsuites.com?subject=Guest%20Enquiry" className="hover:text-primary">Contact</a>
         </div>
       </div>

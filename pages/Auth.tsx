@@ -4,12 +4,13 @@ import { api } from "../services/api";
 import { ApplicationUser } from "../types";
 import NotificationModal from "../components/NotificationModal";
 import FormField from "../components/ui/FormField";
+import { cloudinaryImage } from "../utils/cloudinary";
 
 interface AuthProps {
   onLogin: (user: ApplicationUser, token: string) => void;
 }
 
-type AuthMode = "login" | "register" | "forgot" | "verify";
+type AuthMode = "login" | "register" | "forgot" | "verify" | "two-factor";
 type FormData = { email: string; password: string; firstName: string; lastName: string; phone: string };
 type FormField = keyof FormData;
 
@@ -21,6 +22,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FormField, string>>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [twoFactorCode, setTwoFactorCode] = useState("");
+  const [useRecoveryCode, setUseRecoveryCode] = useState(false);
   const [modal, setModal] = useState<{ show: boolean; title: string; message: string; type: "success" | "error" | "info" }>({ show: false, title: "", message: "", type: "info" });
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,8 +52,12 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     if (!email) errors.email = "Email is required.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Enter a valid email address.";
 
-    if ((mode === "login" || mode === "register") && !formData.password) {
+    if ((mode === "login" || mode === "register" || mode === "two-factor") && !formData.password) {
       errors.password = "Password is required.";
+    }
+    if (mode === "two-factor" && !twoFactorCode.trim()) {
+      setModal({ show: true, title: "Authentication code required", message: "Enter the current authenticator code or a recovery code.", type: "error" });
+      return false;
     }
     if (mode === "register") {
       if (!formData.firstName.trim()) errors.firstName = "First name is required.";
@@ -58,8 +65,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       if (!formData.lastName.trim()) errors.lastName = "Last name is required.";
       else if (formData.lastName.trim().length > 80) errors.lastName = "Last name is too long.";
       if (!/^\+?[0-9 ()-]{7,20}$/.test(formData.phone.trim())) errors.phone = "Enter a valid phone number.";
-      if (formData.password.length < 8 || !/[a-z]/.test(formData.password) || !/[A-Z]/.test(formData.password) || !/\d/.test(formData.password) || !/[^A-Za-z0-9]/.test(formData.password)) {
-        errors.password = "Use 8+ characters with upper and lowercase, a number, and a symbol.";
+      if (formData.password.length < 12 || !/[a-z]/.test(formData.password) || !/[A-Z]/.test(formData.password) || !/\d/.test(formData.password) || !/[^A-Za-z0-9]/.test(formData.password)) {
+        errors.password = "Use 12+ characters with upper and lowercase, a number, and a symbol.";
       }
     }
     setFieldErrors(errors);
@@ -94,7 +101,16 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         setFormData((current) => ({ ...current, password: "" }));
         return;
       }
-      const response = await api.login({ email: formData.email.trim().toLowerCase(), password: formData.password });
+      const response = await api.login({
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+        twoFactorCode: mode === "two-factor" ? twoFactorCode.trim() : undefined,
+        useRecoveryCode: mode === "two-factor" && useRecoveryCode,
+      });
+      if (response?.requiresTwoFactor) {
+        setMode("two-factor");
+        return;
+      }
       if (response?.token) {
         api.setToken(response.token);
         const user = await api.getMe();
@@ -102,7 +118,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         navigate("/profile");
       }
     } catch (error: unknown) {
-      if (mode === "login") api.setToken(null);
+      if (mode === "login" || mode === "two-factor") api.setToken(null);
       setModal({
         show: true,
         title: mode === "register" ? "Account not created" : mode === "forgot" || mode === "verify" ? "Request not completed" : "Sign-in failed",
@@ -121,7 +137,9 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         ? "Reset your password"
         : mode === "verify"
           ? "Verify your email"
-          : "Welcome back";
+      : mode === "two-factor"
+        ? "Confirm it’s you"
+        : "Welcome back";
   const intro =
     mode === "register"
       ? "Save your details and keep track of your stays."
@@ -129,27 +147,33 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         ? "Enter your account email and we’ll send reset instructions."
         : mode === "verify"
           ? "Request a fresh activation link for an account that is not yet verified."
-          : "Sign in to view and manage your bookings.";
+          : mode === "two-factor"
+            ? "Enter the current code from your authenticator app."
+            : "Sign in to view and manage your bookings.";
   const submitLabel = loading
     ? mode === "register"
       ? "Creating account"
       : mode === "forgot" || mode === "verify"
         ? "Sending link"
-        : "Signing in"
+        : mode === "two-factor"
+          ? "Checking code"
+          : "Signing in"
     : mode === "register"
       ? "Create account"
       : mode === "forgot"
         ? "Send reset link"
         : mode === "verify"
           ? "Send verification link"
-          : "Sign in";
+      : mode === "two-factor"
+        ? "Verify and sign in"
+        : "Sign in";
 
   return (
     <div className="grid min-h-screen bg-background-dark pt-24 lg:grid-cols-2 lg:pt-0">
       <NotificationModal isOpen={modal.show} onClose={() => setModal((current) => ({ ...current, show: false }))} title={modal.title} message={modal.message} type={modal.type} />
 
       <div className="relative hidden min-h-screen overflow-hidden lg:block">
-        <img src="https://res.cloudinary.com/dxryndnhl/image/upload/v1779385274/Screenshot_2026-05-20_at_6.27.21_pm_dtspvl.png" alt="A serene Moore guest suite" className="absolute inset-0 h-full w-full object-cover opacity-60 image-luxury" />
+        <img src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1779385274/Screenshot_2026-05-20_at_6.27.21_pm_dtspvl.png", 1200)} alt="A serene Moore guest suite" className="absolute inset-0 h-full w-full object-cover opacity-60 image-luxury" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/30 to-background-dark" />
         <div className="absolute inset-0 flex items-end p-12 xl:p-16">
           <div className="max-w-xl"><p className="ui-eyebrow">Guest account</p><h2 className="ui-section-title mt-4 italic text-white">Your stay, kept close.</h2><p className="ui-copy mt-5 text-gray-300">Review bookings, manage your profile, and keep important stay information in one place.</p></div>
@@ -173,7 +197,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             <FormField htmlFor="email" label="Email address" error={fieldErrors.email}><input id="email" type="email" autoComplete="email" maxLength={254} placeholder="you@example.com" disabled={loading} value={formData.email} onChange={(event) => updateField("email", event.target.value)} className="ui-input" aria-invalid={Boolean(fieldErrors.email)} /></FormField>
 
             {(mode === "login" || mode === "register") && (
-              <FormField htmlFor="password" label="Password" error={fieldErrors.password} hint={mode === "register" ? "8+ characters with upper/lowercase, a number, and a symbol." : undefined}>
+              <FormField htmlFor="password" label="Password" error={fieldErrors.password} hint={mode === "register" ? "12+ characters with upper/lowercase, a number, and a symbol." : undefined}>
                 <div className="relative">
                   <input id="password" type={showPassword ? "text" : "password"} autoComplete={mode === "register" ? "new-password" : "current-password"} disabled={loading} value={formData.password} onChange={(event) => updateField("password", event.target.value)} className="ui-input pr-14" aria-invalid={Boolean(fieldErrors.password)} />
                   <button type="button" onClick={() => setShowPassword((current) => !current)} className="absolute inset-y-0 right-1 grid w-12 place-items-center text-gray-500 hover:text-white" aria-label={showPassword ? "Hide password" : "Show password"}>
@@ -183,11 +207,27 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
               </FormField>
             )}
 
+            {mode === "two-factor" && (
+              <>
+                <FormField htmlFor="twoFactorCode" label={useRecoveryCode ? "Recovery code" : "Authenticator code"}>
+                  <input id="twoFactorCode" type="text" inputMode={useRecoveryCode ? "text" : "numeric"} autoComplete="one-time-code" maxLength={32} disabled={loading} value={twoFactorCode} onChange={(event) => setTwoFactorCode(event.target.value)} className="ui-input" />
+                </FormField>
+                <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-gray-400">
+                  <input type="checkbox" checked={useRecoveryCode} onChange={(event) => setUseRecoveryCode(event.target.checked)} className="h-4 w-4 accent-primary" />
+                  Use a recovery code
+                </label>
+              </>
+            )}
+
             {mode === "login" && (
               <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1">
                 <button type="button" disabled={loading} onClick={() => changeMode("verify")} className="min-h-11 text-sm font-semibold text-gray-400 hover:text-white">Resend verification</button>
                 <button type="button" disabled={loading} onClick={() => changeMode("forgot")} className="min-h-11 text-sm font-semibold text-primary hover:text-white">Forgot password?</button>
               </div>
+            )}
+
+            {mode === "two-factor" && (
+              <button type="button" disabled={loading} onClick={() => { setMode("login"); setTwoFactorCode(""); setUseRecoveryCode(false); }} className="min-h-11 text-sm font-semibold text-gray-400 hover:text-white">Back to password sign in</button>
             )}
 
             <button type="submit" disabled={loading} className="ui-button ui-button-primary w-full">
@@ -197,6 +237,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             </button>
           </form>
 
+          {mode !== "two-factor" && (
           <div className="mt-8 border-t border-white/10 pt-6 text-center text-sm text-gray-500">
             {mode === "forgot" || mode === "verify" ? (
               <button type="button" disabled={loading} onClick={() => changeMode("login")} className="min-h-11 font-semibold text-primary hover:text-white">Back to sign in</button>
@@ -204,6 +245,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
               <p>{mode === "register" ? "Already have an account?" : "New to Moore?"} <button type="button" disabled={loading} onClick={() => changeMode(mode === "register" ? "login" : "register")} className="min-h-11 font-semibold text-primary hover:text-white">{mode === "register" ? "Sign in" : "Create an account"}</button></p>
             )}
           </div>
+          )}
         </div>
       </section>
     </div>

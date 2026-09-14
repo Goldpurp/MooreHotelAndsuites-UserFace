@@ -70,10 +70,10 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
         }`}
       >
         <div className="ui-container-wide flex items-center justify-between gap-5">
-          <Link to="/" onClick={handleLogoClick} className="group flex min-h-11 items-center gap-3" aria-label="Moore Hotels & Suites home">
+          <Link to="/" onClick={handleLogoClick} className="group flex min-h-11 items-center gap-3" title="Moore Hotels & Suites home">
             <span className="grid size-11 place-items-center overflow-hidden rounded-[4px] bg-[#e4e6e8] shadow-[0_8px_28px_rgba(201,74,17,0.16)] transition-transform duration-300 group-hover:-translate-y-0.5">
               <img
-                src="https://res.cloudinary.com/dxryndnhl/image/upload/v1777386017/slazzer-preview-w1yad_jizukz.png"
+                src="https://res.cloudinary.com/dxryndnhl/image/upload/f_auto,q_auto,w_96/v1777386017/slazzer-preview-w1yad_jizukz.png"
                 alt=""
                 className="h-full w-full object-contain"
               />

@@ -10,12 +10,13 @@ services:
         name: Content-Security-Policy
         value: >-
           default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none';
-          form-action 'self'; script-src 'self';
+          form-action 'self'; script-src 'self' https://www.googletagmanager.com;
           style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
           font-src 'self' https://fonts.gstatic.com;
           img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com;
-          media-src 'self' https://media.istockphoto.com;
-          connect-src 'self' https://api.moorehotelandsuites.com; upgrade-insecure-requests
+          media-src 'self' https://res.cloudinary.com https://media.istockphoto.com;
+          connect-src 'self' https://api.moorehotelandsuites.com https://www.google-analytics.com
+          https://region1.google-analytics.com; upgrade-insecure-requests
       - path: /*
         name: Referrer-Policy
         value: no-referrer
@@ -43,7 +44,26 @@ services:
       - path: /index.html
         name: Cache-Control
         value: no-cache
+      - path: /sitemap.xml
+        name: Content-Type
+        value: application/xml; charset=utf-8
+      - path: /sitemap.xml
+        name: Cache-Control
+        value: public, max-age=3600, must-revalidate
+      - path: /robots.txt
+        name: Content-Type
+        value: text/plain; charset=utf-8
+      - path: /robots.txt
+        name: Cache-Control
+        value: public, max-age=3600, must-revalidate
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
+    envVars:
+      # The first production deploy runs while the API launch gate is closed.
+      # Change this to true and redeploy after public room access is enabled.
+      - key: SITEMAP_REQUIRE_ROOMS_API
+        value: "false"
+      - key: VITE_GA_MEASUREMENT_ID
+        sync: false
