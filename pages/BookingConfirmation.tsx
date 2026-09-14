@@ -12,7 +12,14 @@ const BookingConfirmation: React.FC = () => {
   const code = routeCode?.trim().toUpperCase() || "";
   const location = useLocation();
   const stateBooking = location.state?.booking as Booking | null;
-  const rememberedEmail = code ? api.getRememberedBookingEmail(code) : "";
+  const rememberedAccess = code
+    ? api.getRememberedBookingAccess(code)
+    : { email: "", guestAccessToken: "" };
+  const rememberedEmail = rememberedAccess.email;
+  const guestAccessToken = (location.state?.guestAccessToken as string | undefined)?.trim()
+    || stateBooking?.guestAccessToken
+    || rememberedAccess.guestAccessToken;
+  const hasAccountSession = api.hasToken();
 
   const [booking, setBooking] = useState<Booking | null>(
     stateBooking?.bookingCode?.toUpperCase() === code ? stateBooking : null,
@@ -22,6 +29,7 @@ const BookingConfirmation: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -38,10 +46,13 @@ const BookingConfirmation: React.FC = () => {
       let currentBooking =
         stateBooking?.bookingCode?.toUpperCase() === code ? stateBooking : null;
 
-      if (!currentBooking && rememberedEmail) {
+      if (!currentBooking && (guestAccessToken || hasAccountSession)) {
         try {
-          currentBooking = await api.lookupBooking(code, rememberedEmail);
-          if (active) setBooking(currentBooking);
+          currentBooking = await api.lookupBooking(code, rememberedEmail, guestAccessToken);
+          if (active) {
+            api.rememberBookingLookup(code, currentBooking.guestEmail, guestAccessToken);
+            setBooking(currentBooking);
+          }
         } catch {
           if (active) {
             setError("Enter the booking email to securely retrieve this reservation.");
@@ -56,7 +67,7 @@ const BookingConfirmation: React.FC = () => {
         } catch {
           if (active) setError("The booking was found, but its room details are unavailable.");
         }
-      } else if (!rememberedEmail && active) {
+      } else if (!guestAccessToken && !hasAccountSession && active) {
         setError("Enter the booking email to securely retrieve this reservation.");
       }
 
@@ -67,7 +78,7 @@ const BookingConfirmation: React.FC = () => {
     return () => {
       active = false;
     };
-  }, [code]);
+  }, [code, guestAccessToken, hasAccountSession]);
 
   useEffect(() => {
     if (!booking || booking.status !== BookingStatus.Pending || !code) return;
@@ -78,7 +89,7 @@ const BookingConfirmation: React.FC = () => {
     const interval = window.setInterval(async () => {
       if (document.visibilityState !== "visible") return;
       try {
-        const updatedBooking = await api.lookupBooking(code, email);
+        const updatedBooking = await api.lookupBooking(code, email, guestAccessToken);
         setBooking(updatedBooking);
       } catch {
         // Keep the last verified record and retry while the payment is pending.
@@ -86,7 +97,7 @@ const BookingConfirmation: React.FC = () => {
     }, 10_000);
 
     return () => window.clearInterval(interval);
-  }, [booking?.status, booking?.guestEmail, code]);
+  }, [booking?.status, booking?.guestEmail, code, guestAccessToken]);
 
   const handleLookup = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -97,12 +108,18 @@ const BookingConfirmation: React.FC = () => {
 
     setVerifying(true);
     setError(null);
+    setNotice(null);
     try {
-      const verifiedBooking = await api.lookupBooking(code, lookupEmail);
-      const roomData = await api.getRoomById(verifiedBooking.roomId);
-      api.rememberBookingLookup(code, lookupEmail);
-      setBooking(verifiedBooking);
-      setRoom(roomData);
+      if (guestAccessToken || hasAccountSession) {
+        const verifiedBooking = await api.lookupBooking(code, lookupEmail, guestAccessToken);
+        const roomData = await api.getRoomById(verifiedBooking.roomId);
+        api.rememberBookingLookup(code, lookupEmail, guestAccessToken);
+        setBooking(verifiedBooking);
+        setRoom(roomData);
+      } else {
+        await api.requestBookingAccessLink(code, lookupEmail);
+        setNotice("If those details match, a secure booking link is on its way. Check your inbox and spam folder.");
+      }
     } catch (lookupError) {
       setError(
         lookupError instanceof Error
@@ -149,13 +166,14 @@ const BookingConfirmation: React.FC = () => {
             />
           </label>
           {error && <p className="mt-4 text-sm text-red-400" role="alert">{error}</p>}
+          {notice && <p className="mt-4 text-sm text-emerald-300" role="status">{notice}</p>}
           <button
             type="submit"
             disabled={verifying || !code}
             className="ui-button ui-button-primary mt-6 w-full"
           >
             {verifying && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}
-            {verifying ? "Verifying" : "Retrieve booking"}
+            {verifying ? "Sending" : guestAccessToken || hasAccountSession ? "Retrieve booking" : "Email secure link"}
           </button>
           <Link to="/manage-booking" className="mt-3 inline-flex min-h-11 items-center text-sm text-gray-500 hover:text-white">
             Use another reference

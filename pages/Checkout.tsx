@@ -8,6 +8,7 @@ import Dialog from "../components/ui/Dialog";
 import { addDaysToInput, differenceInNights, todayInputValue } from "../utils/dates";
 import FormField from "../components/ui/FormField";
 import { appConfig } from "../config/environment";
+import { cloudinaryImage } from "../utils/cloudinary";
 
 interface CheckoutProps {
   user: ApplicationUser | null;
@@ -188,7 +189,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     setProcessing(true);
     try {
       const booking = await createBooking(selectedMethod);
-      api.rememberBookingLookup(booking.bookingCode, guestInfo.email);
+      api.rememberBookingLookup(booking.bookingCode, guestInfo.email, booking.guestAccessToken);
       if (selectedMethod === PaymentMethod.DirectTransfer) {
         setDirectTransferBooking(booking);
         setShowTransferModal(true);
@@ -298,7 +299,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
           <aside className="lg:col-span-4">
             <div className="ui-card sticky top-28 overflow-hidden shadow-2xl">
-              <div className="relative h-48 bg-gray-800"><img src={room.images?.[0]} className="image-luxury h-full w-full object-cover" alt={room.name} loading="lazy" /><div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-black/20 to-transparent p-6"><p className="ui-eyebrow">{room.category}</p><h2 className="ui-card-title mt-2 italic text-white">{room.name}</h2></div></div>
+              <div className="relative h-48 bg-gray-800"><img src={cloudinaryImage(room.images?.[0], 720)} className="image-luxury h-full w-full object-cover" alt={room.name} loading="lazy" decoding="async" /><div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-black/20 to-transparent p-6"><p className="ui-eyebrow">{room.category}</p><h2 className="ui-card-title mt-2 italic text-white">{room.name}</h2></div></div>
               <div className="space-y-6 p-6 sm:p-8">
                 <dl className="space-y-4 text-sm"><SummaryRow label="Stay duration" value={`${nights} ${nights === 1 ? "night" : "nights"}`} /><SummaryRow label="Check-in" value={new Date(checkIn).toLocaleDateString()} /><SummaryRow label="Check-out" value={new Date(checkOut).toLocaleDateString()} /><SummaryRow label="Room capacity" value={`Up to ${room.capacity} ${room.capacity === 1 ? "guest" : "guests"}`} /></dl>
                 <div className="border-t border-white/10 pt-5"><span className="ui-label">Stay total</span><p className="font-display text-3xl font-semibold italic text-primary">₦{totalAmount.toLocaleString()}</p><p className="mt-1 text-xs text-gray-500">{nights} × ₦{room.pricePerNight.toLocaleString()}</p></div>

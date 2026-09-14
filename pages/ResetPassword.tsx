@@ -56,13 +56,13 @@ const ResetPassword: React.FC = () => {
       return "This password-reset link is incomplete or expired. Request a new one.";
     }
     if (
-      newPassword.length < 8 ||
+      newPassword.length < 12 ||
       !/[a-z]/.test(newPassword) ||
       !/[A-Z]/.test(newPassword) ||
       !/\d/.test(newPassword) ||
       !/[^A-Za-z0-9]/.test(newPassword)
     ) {
-      return "Use 8+ characters with upper/lowercase, a number, and a symbol.";
+      return "Use 12+ characters with upper/lowercase, a number, and a symbol.";
     }
     if (newPassword !== confirmNewPassword) return "The passwords do not match.";
     return "";

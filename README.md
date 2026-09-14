@@ -53,10 +53,18 @@ Useful gates:
 
 ```bash
 yarn typecheck
+yarn test
+yarn generate:seo:local
+yarn verify:seo:local
 yarn build:local
 yarn build:production
 yarn check:production
 ```
+
+Both builds generate and validate `sitemap.xml` and `robots.txt` before Vite
+runs. Production also reads the public online-room catalogue and fails closed
+if it cannot produce a complete sitemap. See `SEO_DEPLOYMENT.md` for Search
+Console, crawler policy, and post-deploy checks.
 
 `check:production` is intentionally strict: it fails when the deployed API or
 database is unhealthy even if the hostname itself responds.

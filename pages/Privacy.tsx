@@ -12,7 +12,7 @@ const Privacy: React.FC = () => {
             Your Data, <span className="italic">Clearly Explained</span>
           </h1>
           <p className="mt-4 text-sm text-gray-500">
-            Last Updated: July 13, 2026
+            Last Updated: August 10, 2026
           </p>
         </header>
 
@@ -77,13 +77,16 @@ const Privacy: React.FC = () => {
             </p>
           </PolicySection>
 
-          <PolicySection title="6. Browser Storage and External Content">
+          <PolicySection title="6. Browser Storage, Analytics, and External Content">
             <p>
               The website uses tab-scoped browser storage to keep you signed in and to securely
               reconnect you with a booking after payment. That information is removed when the tab
-              session ends or you sign out. Pages may load fonts, images, video, or payment pages
-              from third-party services, which may receive ordinary connection information under
-              their own notices. We do not currently use advertising cookies on this website.
+              session ends or you sign out. If Google Analytics is configured, it is not loaded
+              until you select “Allow analytics” in the website notice. Analytics is used to
+              understand visits and improve the website; advertising storage and personalised-ad
+              signals remain disabled. You can change this choice using “Cookie choices” in the
+              footer. Pages may also load fonts, images, video, or payment pages from third-party
+              services, which may receive ordinary connection information under their own notices.
             </p>
           </PolicySection>
 

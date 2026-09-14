@@ -8,6 +8,7 @@ interface ImportMetaEnv {
   readonly VITE_MONNIFY_ENABLED?: "true" | "false";
   readonly VITE_DEV_PORT?: string;
   readonly VITE_PREVIEW_PORT?: string;
+  readonly VITE_GA_MEASUREMENT_ID?: string;
 }
 
 interface ImportMeta {

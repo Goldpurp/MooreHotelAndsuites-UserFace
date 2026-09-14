@@ -26,6 +26,11 @@ VITE_API_MODE=direct
 VITE_API_BASE_URL=https://api.moorehotelandsuites.com/api
 VITE_API_TIMEOUT_MS=15000
 VITE_MONNIFY_ENABLED=false
+VITE_GOOGLE_SITE_VERIFICATION=
+SITE_URL=https://moorehotelandsuites.com
+SITEMAP_ROOMS_API_URL=https://api.moorehotelandsuites.com/api/rooms
+SITEMAP_REQUIRE_ROOMS_API=true
+AI_CRAWLER_POLICY=search-only
 ```
 
 Never add database, JWT, Brevo, Cloudinary, administrator or Monnify secrets to
@@ -90,6 +95,8 @@ Test on a real phone, tablet and desktop:
   provider secrets;
 - CSP, HSTS, `nosniff`, frame denial, referrer policy and permissions policy are
   present.
+- `/sitemap.xml` returns generated XML and `/robots.txt` returns plain text;
+  neither route is rewritten to `index.html`.
 
 Run Lighthouse mobile checks after deployment. Investigate any accessibility,
 performance, best-practice or SEO score below 90 before public promotion.

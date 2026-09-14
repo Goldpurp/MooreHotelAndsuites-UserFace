@@ -9,7 +9,7 @@
     --font-body: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --color-ink: #0a0a0a;
     --color-surface: #121212;
-    --color-copper: #c94a11;
+    --color-copper: #d15a20;
     --motion-fast: 180ms;
     --motion-base: 320ms;
     --motion-slow: 700ms;
@@ -244,7 +244,7 @@
 
   .ui-button-primary {
     background: var(--color-copper);
-    color: #090909;
+    color: #000;
     box-shadow: 0 12px 32px rgba(201, 74, 17, 0.18);
   }
 
@@ -354,7 +354,7 @@
 
 .custom-scrollbar::-webkit-scrollbar { width: 5px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: #0a0a0a; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #c94a11; border-radius: 999px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #d15a20; border-radius: 999px; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 

@@ -5,6 +5,7 @@ import { ApplicationUser, Booking } from "../types";
 import NotificationModal from "../components/NotificationModal";
 import Dialog from "../components/ui/Dialog";
 import FormField from "../components/ui/FormField";
+import { cloudinaryImage } from "../utils/cloudinary";
 
 interface ProfileProps {
   user: ApplicationUser;
@@ -156,7 +157,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
     const errors: Record<string, string> = {};
     if (!securityData.oldPassword) errors.oldPassword = "Current password is required.";
     if (!securityData.newPassword) errors.newPassword = "New password is required.";
-    else if (securityData.newPassword.length < 8 || !/[a-z]/.test(securityData.newPassword) || !/[A-Z]/.test(securityData.newPassword) || !/\d/.test(securityData.newPassword) || !/[^A-Za-z0-9]/.test(securityData.newPassword)) errors.newPassword = "Use 8+ characters with upper and lowercase, a number, and a symbol.";
+    else if (securityData.newPassword.length < 12 || !/[a-z]/.test(securityData.newPassword) || !/[A-Z]/.test(securityData.newPassword) || !/\d/.test(securityData.newPassword) || !/[^A-Za-z0-9]/.test(securityData.newPassword)) errors.newPassword = "Use 12+ characters with upper and lowercase, a number, and a symbol.";
     if (securityData.newPassword !== securityData.confirmNewPassword) errors.confirmNewPassword = "Passwords do not match.";
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -248,7 +249,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
         {cancelModal.booking && (
           <>
             <div className="flex items-start justify-between gap-4"><div><p className="ui-eyebrow text-red-400">Cancellation request</p><h2 id="cancel-title" className="ui-card-title mt-2 italic text-white">Cancel {cancelModal.booking.bookingCode}?</h2></div><button ref={cancelCloseRef} type="button" onClick={closeCancelModal} className="ui-icon-button" aria-label="Close cancellation dialog"><span className="material-symbols-outlined" aria-hidden="true">close</span></button></div>
-            <p className="ui-copy mt-4 text-sm">Tell the hotel why you need to cancel. Any payment or refund remains subject to the booking terms and verification.</p>
+            <p className="ui-copy mt-4 text-sm">Tell the hotel why you need to cancel. Cancel at least 24 hours before check-in for a full refund. Cancellations inside the final 24 hours and no-shows are non-refundable.</p>
             <label className="mt-6 block"><span className="ui-label">Reason for cancellation</span><textarea value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} maxLength={500} rows={4} className="ui-input min-h-32 resize-y" placeholder="Add a short reason…" /></label>
             <div className="mt-6 grid gap-3 sm:grid-cols-2"><button type="button" onClick={closeCancelModal} className="ui-button ui-button-secondary">Keep booking</button><button type="button" onClick={confirmCancellation} disabled={cancelling || !cancelReason.trim()} className="ui-button border-red-500/30 bg-red-600 text-white hover:bg-red-500">{cancelling ? "Cancelling" : "Confirm cancellation"}</button></div>
           </>
@@ -330,7 +331,7 @@ const ProfileAvatar = ({ user, size = "default" }: { user: ApplicationUser; size
   const sizeClass = size === "large" ? "size-20 text-xl" : "size-12 text-base";
   return (
     <div className={`${sizeClass} grid flex-none place-items-center overflow-hidden rounded-full border border-primary/25 bg-primary/10 font-semibold tracking-[0.08em] text-primary`}>
-      {user.avatarUrl ? <img src={user.avatarUrl} alt={`${displayName} profile`} className="h-full w-full object-cover" /> : <span aria-hidden="true">{initials}</span>}
+      {user.avatarUrl ? <img src={cloudinaryImage(user.avatarUrl, 256)} alt={`${displayName} profile`} className="h-full w-full object-cover" decoding="async" /> : <span aria-hidden="true">{initials}</span>}
     </div>
   );
 };

@@ -20,7 +20,7 @@ const AestheticLoader: React.FC<AestheticLoaderProps> = ({
       <div className="absolute inset-0 rounded-full border border-primary/20 animate-pulse" />
       <div className="absolute inset-1 rounded-full border border-white/10 border-t-primary animate-spin" />
       <div className="absolute inset-3 grid place-items-center overflow-hidden rounded-full bg-[#e4e6e8]">
-        <img src="https://res.cloudinary.com/dxryndnhl/image/upload/v1777386017/slazzer-preview-w1yad_jizukz.png" alt="" className="h-full w-full object-contain" />
+        <img src="https://res.cloudinary.com/dxryndnhl/image/upload/f_auto,q_auto,w_96/v1777386017/slazzer-preview-w1yad_jizukz.png" alt="" className="h-full w-full object-contain" />
       </div>
     </div>
     <h2 className="font-display text-2xl italic text-white sm:text-3xl">{message}</h2>

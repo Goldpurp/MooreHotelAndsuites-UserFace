@@ -186,21 +186,35 @@ class ApiService {
     return Boolean(this.token);
   }
 
-  rememberBookingLookup(bookingCode: string, email: string) {
+  rememberBookingLookup(bookingCode: string, email: string, guestAccessToken?: string | null) {
     try {
       const key = `${STORAGE_KEYS.BOOKING_LOOKUP_PREFIX}${bookingCode.trim().toUpperCase()}`;
-      sessionStorage.setItem(key, email.trim().toLowerCase());
+      sessionStorage.setItem(key, JSON.stringify({
+        email: email.trim().toLowerCase(),
+        guestAccessToken: guestAccessToken || "",
+      }));
     } catch {
       // Lookup can still be completed manually if storage is unavailable.
     }
   }
 
   getRememberedBookingEmail(bookingCode: string): string {
+    return this.getRememberedBookingAccess(bookingCode).email;
+  }
+
+  getRememberedBookingAccess(bookingCode: string): { email: string; guestAccessToken: string } {
     try {
       const key = `${STORAGE_KEYS.BOOKING_LOOKUP_PREFIX}${bookingCode.trim().toUpperCase()}`;
-      return sessionStorage.getItem(key) || "";
+      const stored = sessionStorage.getItem(key) || "";
+      if (!stored) return { email: "", guestAccessToken: "" };
+      if (!stored.startsWith("{")) return { email: stored, guestAccessToken: "" };
+      const parsed = JSON.parse(stored) as { email?: unknown; guestAccessToken?: unknown };
+      return {
+        email: typeof parsed.email === "string" ? parsed.email : "",
+        guestAccessToken: typeof parsed.guestAccessToken === "string" ? parsed.guestAccessToken : "",
+      };
     } catch {
-      return "";
+      return { email: "", guestAccessToken: "" };
     }
   }
 
@@ -300,8 +314,18 @@ class ApiService {
       body: JSON.stringify(data),
     });
 
-  login = async (credentials: { email: string; password: string }) =>
-    this.request<{ token: string; user?: ApplicationUser }>("/Auth/login", {
+  login = async (credentials: {
+    email: string;
+    password: string;
+    twoFactorCode?: string;
+    useRecoveryCode?: boolean;
+  }) =>
+    this.request<{
+      token?: string;
+      user?: ApplicationUser;
+      requiresTwoFactor?: boolean;
+      mfaSetupRequired?: boolean;
+    }>("/Auth/login", {
       method: "POST",
       body: JSON.stringify(credentials),
     });
@@ -398,26 +422,38 @@ class ApiService {
     return normalizeBooking(booking);
   }
 
-  async lookupBooking(bookingCode: string, email: string): Promise<Booking> {
-    const queryParams = new URLSearchParams({
-      code: bookingCode.trim().toUpperCase(),
-      email: email.trim().toLowerCase(),
-    });
+  async lookupBooking(bookingCode: string, email = "", guestAccessToken = ""): Promise<Booking> {
+    const queryParams = new URLSearchParams({ code: bookingCode.trim().toUpperCase() });
+    if (email.trim()) queryParams.set("email", email.trim().toLowerCase());
+    const headers = new Headers();
+    if (guestAccessToken.trim()) headers.set("X-Booking-Access-Token", guestAccessToken.trim());
     return normalizeBooking(
-      await this.request<Booking>(`/bookings/lookup?${queryParams.toString()}`),
+      await this.request<Booking>(`/bookings/lookup?${queryParams.toString()}`, { headers }),
     );
+  }
+
+  async requestBookingAccessLink(bookingCode: string, email: string): Promise<{ message: string }> {
+    return this.request<{ message: string }>("/bookings/access-link", {
+      method: "POST",
+      body: JSON.stringify({
+        bookingCode: bookingCode.trim().toUpperCase(),
+        email: email.trim().toLowerCase(),
+      }),
+    });
   }
 
   async cancelBookingAsGuest(data: {
     bookingCode: string;
     email: string;
     reason: string;
+    guestAccessToken?: string;
   }): Promise<{ message: string }> {
     return this.request<{ message: string }>("/bookings/guest/cancel", {
       method: "POST",
       body: JSON.stringify({
         bookingCode: data.bookingCode.trim().toUpperCase(),
         email: data.email.trim().toLowerCase(),
+        guestAccessToken: data.guestAccessToken?.trim() || undefined,
         reason: data.reason.trim(),
       }),
     });

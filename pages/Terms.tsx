@@ -11,7 +11,7 @@ const Terms: React.FC = () => {
             Terms of <span className="italic">Use</span>
           </h1>
           <p className="mt-4 text-sm text-gray-500">
-            Effective Date: January 1, 2024
+            Effective Date: September 13, 2026
           </p>
         </header>
 
@@ -19,28 +19,40 @@ const Terms: React.FC = () => {
         <div className="mt-10 space-y-10 text-[0.96rem] leading-8 text-gray-400">
           {[
             {
-              title: "Acceptance of Terms",
-              content: "By accessing the Moore Hotels & Suites digital platforms or booking a room within our properties, you agree to be bound by these Terms of Use. These terms constitute a binding legal agreement between you and Moore Hotels & Suites."
+              title: "Using This Website",
+              content: "By using this website or making a reservation, you agree to these terms and to the specific rates, dates, occupancy limits, payment conditions, and cancellation information displayed or communicated for your booking. If you do not agree, please do not complete the reservation."
             },
             {
-              title: "Reservation & Guarantee",
-              content: "All reservations must be guaranteed by a valid payment method or through authorized member credentials. A room is only considered 'Reserved' upon the issuance of a unique MHS Booking Code."
+              title: "Reservations and Availability",
+              content: "A booking request is subject to room availability and the payment or verification steps shown during checkout. An MHS booking code identifies the request; it does not override a pending, cancelled, failed, or expired status. Please check the confirmation page and email for the current status before travelling."
             },
             {
-              title: "Cancellation & No-Show",
-              content: "To maintain the integrity of our quietude, cancellations must be made 48 hours prior to check-in. Late cancellations or no-shows will incur a fee equivalent to one night's base rate plus applicable resort taxes."
+              title: "Payments and Verification",
+              content: "Available payment methods are shown at checkout. Online payment is completed through the named payment provider. Direct transfers remain pending until verified by authorised hotel staff. Unpaid reservations may expire after the period shown during booking so the room can return to availability. Never send card security codes or account passwords to hotel staff."
             },
             {
-              title: "Guest Conduct",
-              content: "Moore Hotels & Suites are sanctuaries of stillness. Guests are expected to maintain an atmosphere of mutual respect. We reserve the right to terminate a stay, without refund, should conduct disrupt the peace or safety of our staff and other residents."
+              title: "Changes, Cancellations, and Refunds",
+              content: "Cancel at least 24 hours before the scheduled check-in time to receive a full refund. Cancellations made inside the final 24 hours, including on the check-in date, and no-shows are non-refundable. A cancellation request is not complete until its status is confirmed. Approved refunds are returned through an appropriate channel and may take additional processing time outside the hotel’s control. Mandatory rights under applicable law still apply."
             },
             {
-              title: "Limitation of Liability",
-              content: "While we strive for perfection, Moore Hotels & Suites is not liable for indirect, incidental, or consequential damages resulting from the use of our facilities or digital services, except where strictly mandated by law."
+              title: "Guest Details and Conduct",
+              content: "You must provide accurate booking and contact details, follow occupancy and safety rules, respect staff and other guests, and avoid unlawful, dangerous, or disruptive conduct. Identification may be requested at check-in. The hotel may refuse or end a stay where reasonably necessary for safety, security, legal compliance, non-payment, or serious breach of these terms, subject to applicable law."
             },
             {
-              title: "Governing Law",
-              content: "These terms are governed by the laws of the jurisdiction in which the property is located. For global digital disputes, the laws of Nigeria shall apply, with exclusive jurisdiction in the courts of Lagos."
+              title: "Website Content and Availability",
+              content: "We work to keep room descriptions, prices, images, and service information accurate and the website available. Temporary errors, maintenance, network interruptions, or obvious display mistakes may occur. We may correct such errors and will communicate any material booking impact using the contact information provided."
+            },
+            {
+              title: "Liability",
+              content: "Nothing in these terms excludes a right or responsibility that cannot lawfully be excluded. To the extent permitted by law, Moore Hotels & Suites is not responsible for indirect losses or events outside its reasonable control. Guests remain responsible for their belongings except where applicable law provides otherwise."
+            },
+            {
+              title: "Privacy and Communications",
+              content: "Personal information is handled as described in our Privacy Notice. Operational email, SMS, or telephone communication may be used to complete account security, payment, reservation, arrival, cancellation, and guest-support activities."
+            },
+            {
+              title: "Governing Law and Contact",
+              content: "These terms are governed by the laws of the Federal Republic of Nigeria and any mandatory rules that apply where the hotel operates. Please first contact Guest Relations at info@moorehotelandsuites.com or +234 803 377 4544 so we can try to resolve a concern promptly."
             }
           ].map((section, idx) => (
             <section key={idx}>

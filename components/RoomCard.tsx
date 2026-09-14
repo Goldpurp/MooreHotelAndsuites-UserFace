@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Room } from "../types";
+import { cloudinaryImage, cloudinaryImageSrcSet } from "../utils/cloudinary";
 
 type RoomCardVariant = "featured" | "listing" | "compact";
 
@@ -14,19 +15,25 @@ interface RoomCardProps {
 const fallbackRoomImage =
   "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1200&q=80";
 
-const RoomImage = ({ room, eager = false, className }: { room: Room; eager?: boolean; className: string }) => (
-  <img
-    src={room.images?.find(Boolean) || fallbackRoomImage}
+const RoomImage = ({ room, eager = false, className }: { room: Room; eager?: boolean; className: string }) => {
+  const source = room.images?.find(Boolean) || fallbackRoomImage;
+  return <img
+    src={cloudinaryImage(source, 900)}
+    srcSet={cloudinaryImageSrcSet(source, [360, 600, 900]) || undefined}
+    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
     alt={room.name}
     className={className}
     loading={eager ? "eager" : "lazy"}
     fetchPriority={eager ? "high" : "auto"}
     decoding="async"
     onError={(event) => {
-      if (event.currentTarget.src !== fallbackRoomImage) event.currentTarget.src = fallbackRoomImage;
+      if (event.currentTarget.src !== fallbackRoomImage) {
+        event.currentTarget.srcset = "";
+        event.currentTarget.src = fallbackRoomImage;
+      }
     }}
-  />
-);
+  />;
+};
 
 const RoomCard: React.FC<RoomCardProps> = ({ room, to, variant = "listing", eager = false }) => {
   const category = room.category.replace(/([a-z])([A-Z])/g, "$1 $2");

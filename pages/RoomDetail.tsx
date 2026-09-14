@@ -5,6 +5,7 @@ import { api } from "../services/api";
 import { Room } from "../types";
 import AestheticLoader from "../components/AestheticLoader";
 import { addDaysToInput, differenceInNights, todayInputValue } from "../utils/dates";
+import { cloudinaryImage, cloudinaryImageSrcSet } from "../utils/cloudinary";
 
 const amenityIcons: Record<string, string> = {
   wifi: "wifi",
@@ -104,7 +105,7 @@ const RoomDetail: React.FC = () => {
     <div className="min-h-screen bg-background-dark pb-20">
       <header className="relative min-h-[38rem] overflow-hidden bg-black pt-24 sm:min-h-[44rem]">
         {images[activeImage] ? (
-          <img src={images[activeImage]} alt={`${room.name} — view ${activeImage + 1}`} className="absolute inset-0 h-full w-full object-cover image-luxury" fetchPriority="high" />
+          <img src={cloudinaryImage(images[activeImage], 1600)} srcSet={cloudinaryImageSrcSet(images[activeImage], [640, 960, 1280, 1600]) || undefined} sizes="100vw" alt={`${room.name} — view ${activeImage + 1}`} className="absolute inset-0 h-full w-full object-cover image-luxury" fetchPriority="high" />
         ) : <div className="absolute inset-0 bg-surface-dark" />}
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/10 to-background-dark" />
 
@@ -118,7 +119,7 @@ const RoomDetail: React.FC = () => {
               <div className="flex max-w-full gap-2 overflow-x-auto rounded-lg border border-white/10 bg-black/45 p-2 backdrop-blur-lg scrollbar-hide" role="group" aria-label="Room gallery">
                 {images.map((image, index) => (
                   <button key={`${image}-${index}`} type="button" onClick={() => setActiveImage(index)} aria-label={`Show room image ${index + 1}`} aria-pressed={activeImage === index} className={`h-14 w-20 flex-none overflow-hidden rounded border-2 transition-all ${activeImage === index ? "border-primary" : "border-transparent opacity-65 hover:opacity-100"}`}>
-                    <img src={image} alt="" className="h-full w-full object-cover" loading="lazy" />
+                    <img src={cloudinaryImage(image, 240)} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
                   </button>
                 ))}
               </div>
