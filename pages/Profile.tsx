@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../services/api";
-import { ApplicationUser, Booking } from "../types";
+import { ApplicationUser, Booking, PrivacyRequest, PrivacyRequestType } from "../types";
 import NotificationModal from "../components/NotificationModal";
 import Dialog from "../components/ui/Dialog";
 import FormField from "../components/ui/FormField";
@@ -13,7 +13,7 @@ interface ProfileProps {
   onUserChange: (user: ApplicationUser) => void;
 }
 
-type Tab = "profile" | "bookings" | "security";
+type Tab = "profile" | "bookings" | "privacy" | "security";
 
 const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserChange }) => {
   const [user, setUser] = useState(initialUser);
@@ -30,6 +30,10 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [logoutAfterNotice, setLogoutAfterNotice] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [privacyRequests, setPrivacyRequests] = useState<PrivacyRequest[]>([]);
+  const [privacyType, setPrivacyType] = useState<PrivacyRequestType>("Access");
+  const [privacyDetails, setPrivacyDetails] = useState("");
+  const [privacyBusy, setPrivacyBusy] = useState(false);
   const [cancelModal, setCancelModal] = useState<{ open: boolean; booking?: Booking }>({ open: false });
   const [cancelReason, setCancelReason] = useState("");
   const [cancelling, setCancelling] = useState(false);
@@ -51,7 +55,42 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
 
   useEffect(() => {
     api.getMyBookings().then(setBookings).catch(() => setBookings([]));
+    api.getMyPrivacyRequests().then(setPrivacyRequests).catch(() => setPrivacyRequests([]));
   }, []);
+
+  const downloadPrivacyExport = async () => {
+    setPrivacyBusy(true);
+    try {
+      const data = await api.exportMyData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `moore-hotels-data-${new Date().toISOString().slice(0, 10)}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      notify("Export ready", "Your account data has been downloaded to this device.");
+    } catch (error: unknown) {
+      notify("Export unavailable", error instanceof Error ? error.message : "Your data could not be exported.", "error");
+    } finally {
+      setPrivacyBusy(false);
+    }
+  };
+
+  const submitPrivacyRequest = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setPrivacyBusy(true);
+    try {
+      await api.createPrivacyRequest(privacyType, privacyDetails);
+      setPrivacyRequests(await api.getMyPrivacyRequests());
+      setPrivacyDetails("");
+      notify("Request received", "Your privacy request is now in the hotel’s review queue.");
+    } catch (error: unknown) {
+      notify("Request not submitted", error instanceof Error ? error.message : "Your request could not be submitted.", "error");
+    } finally {
+      setPrivacyBusy(false);
+    }
+  };
 
   const notify = (title: string, message: string, type: "success" | "error" | "info" = "success") => setNotification({ show: true, title, message, type });
   const closeCancelModal = () => { setCancelModal({ open: false }); setCancelReason(""); };
@@ -261,7 +300,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
         <header className="mb-10 text-center"><p className="ui-eyebrow">Guest account</p><h1 className="ui-page-title mt-3 text-white">Welcome, {lastName}</h1><p className="ui-copy mx-auto mt-4 max-w-xl">View your details, follow each stay, and keep your account secure.</p></header>
 
         <div className="mx-auto mb-10 flex w-fit max-w-full gap-1 overflow-x-auto rounded border border-white/10 bg-white/[0.025] p-1 scrollbar-hide" role="tablist" aria-label="Guest account sections">
-          {(["profile", "bookings", "security"] as Tab[]).map((tab) => <button key={tab} type="button" role="tab" aria-selected={activeTab === tab} onClick={() => setActiveTab(tab)} className={`min-h-11 whitespace-nowrap rounded px-5 text-xs font-semibold uppercase tracking-[0.1em] transition-colors sm:px-7 ${activeTab === tab ? "bg-primary text-black" : "text-gray-500 hover:text-white"}`}>{tab}</button>)}
+          {(["profile", "bookings", "privacy", "security"] as Tab[]).map((tab) => <button key={tab} type="button" role="tab" aria-selected={activeTab === tab} onClick={() => setActiveTab(tab)} className={`min-h-11 whitespace-nowrap rounded px-5 text-xs font-semibold uppercase tracking-[0.1em] transition-colors sm:px-7 ${activeTab === tab ? "bg-primary text-black" : "text-gray-500 hover:text-white"}`}>{tab}</button>)}
         </div>
 
         <div>
@@ -316,6 +355,31 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
                 <div className="mt-7 space-y-5"><SecurityField field="oldPassword" label="Current password" autoComplete="current-password" value={securityData.oldPassword} error={fieldErrors.oldPassword} onChange={(value) => setSecurityData({ ...securityData, oldPassword: value })} /><SecurityField field="newPassword" label="New password" autoComplete="new-password" value={securityData.newPassword} error={fieldErrors.newPassword} onChange={(value) => setSecurityData({ ...securityData, newPassword: value })} /><SecurityField field="confirmNewPassword" label="Confirm new password" autoComplete="new-password" value={securityData.confirmNewPassword} error={fieldErrors.confirmNewPassword} onChange={(value) => setSecurityData({ ...securityData, confirmNewPassword: value })} /></div>
                 <button type="submit" disabled={updating} className="ui-button ui-button-primary mt-7 w-full">{updating && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}{updating ? "Updating" : "Update password"}</button>
               </form>
+            </div>
+          )}
+
+          {activeTab === "privacy" && (
+            <div role="tabpanel" className="route-transition grid gap-5 lg:grid-cols-2">
+              <section className="ui-card p-6 sm:p-8">
+                <p className="ui-eyebrow">Your information</p>
+                <h2 className="ui-card-title mt-2 italic text-white">Download your data</h2>
+                <p className="ui-copy mt-3 text-sm">Download the personal and booking information linked to your account as a JSON file.</p>
+                <button type="button" onClick={() => void downloadPrivacyExport()} disabled={privacyBusy} className="ui-button ui-button-secondary mt-6"><span className="material-symbols-outlined" aria-hidden="true">download</span>{privacyBusy ? "Preparing" : "Download data"}</button>
+              </section>
+              <form onSubmit={submitPrivacyRequest} className="ui-card p-6 sm:p-8">
+                <p className="ui-eyebrow">Data rights</p>
+                <h2 className="ui-card-title mt-2 italic text-white">Submit a privacy request</h2>
+                <label className="mt-6 block"><span className="ui-label">Request type</span><select value={privacyType} onChange={(event) => setPrivacyType(event.target.value as PrivacyRequestType)} className="ui-input"><option value="Access">Access my data</option><option value="Rectification">Correct my data</option><option value="Erasure">Erase my data</option><option value="Restriction">Restrict processing</option><option value="Portability">Data portability</option><option value="Objection">Object to processing</option></select></label>
+                <label className="mt-5 block"><span className="ui-label">Details</span><textarea value={privacyDetails} onChange={(event) => setPrivacyDetails(event.target.value)} maxLength={2000} rows={4} className="ui-input min-h-28 resize-y" placeholder="Tell us what you need…" /></label>
+                <button type="submit" disabled={privacyBusy} className="ui-button ui-button-primary mt-6 w-full">{privacyBusy ? "Submitting" : "Submit request"}</button>
+              </form>
+              <section className="ui-card p-6 sm:p-8 lg:col-span-2">
+                <p className="ui-eyebrow">Request history</p>
+                <h2 className="ui-card-title mt-2 italic text-white">Privacy requests</h2>
+                <div className="mt-6 space-y-3">
+                  {privacyRequests.length ? privacyRequests.map((request) => <article key={request.id} className="rounded border border-white/10 bg-black/20 p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-semibold text-white">{request.type}</p><p className="mt-1 text-xs text-gray-500">Submitted {new Date(request.requestedAtUtc).toLocaleDateString()} · Due {new Date(request.dueAtUtc).toLocaleDateString()}</p></div><span className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{request.status}</span></div>{request.details && <p className="mt-3 text-sm text-gray-400">{request.details}</p>}{request.resolutionNotes && <p className="mt-3 text-sm text-gray-400">Resolution: {request.resolutionNotes}</p>}</article>) : <p className="text-sm text-gray-500">You have not submitted a privacy request.</p>}
+                </div>
+              </section>
             </div>
           )}
         </div>

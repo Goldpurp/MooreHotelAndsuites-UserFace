@@ -27,6 +27,7 @@ const ManageBooking = lazy(() => import("./pages/ManageBooking"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const VerifyEmail = lazy(() => import("./components/VerifyEmail"));
+const Book = lazy(() => import("./pages/Book"));
 
 const getRouteTitle = (pathname: string) => {
   if (pathname === "/") return "Moore Hotels & Suites";
@@ -46,6 +47,7 @@ const getRouteTitle = (pathname: string) => {
     "/manage-booking": "Manage Booking | Moore Hotels & Suites",
     "/booking-status": "Booking Status | Moore Hotels & Suites",
     "/verify-email": "Verify Email | Moore Hotels & Suites",
+    "/book": "Continue Booking | Moore Hotels & Suites",
     "/reset-password": "Reset Password | Moore Hotels & Suites",
   };
   return titles[pathname] || "Page Not Found | Moore Hotels & Suites";
@@ -135,6 +137,7 @@ const App: React.FC = () => {
               <Route path="/booking-status" element={<BookingStatus />} />
               <Route path="/manage-booking" element={<ManageBooking />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/book" element={<Book />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               
               <Route path="*" element={<NotFound />} />

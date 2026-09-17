@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api, getTrustedPaymentUrl } from "../services/api";
-import { ApplicationUser, Booking, PaymentMethod, Room } from "../types";
+import { ApplicationUser, Booking, PaymentMethod, PrivacyPolicy, Room } from "../types";
 import NotificationModal from "../components/NotificationModal";
 import AestheticLoader from "../components/AestheticLoader";
 import Dialog from "../components/ui/Dialog";
@@ -36,12 +36,21 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const [availabilityLoading, setAvailabilityLoading] = useState(true);
   const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ show: boolean; title: string; message: string; type: "success" | "error" | "info" }>({ show: false, title: "", message: "", type: "info" });
-  const [guestInfo, setGuestInfo] = useState<GuestInfo>({
+  const pendingVerification = !user ? api.getPendingBookingVerification() : null;
+  const pendingForRoom = pendingVerification?.roomId === roomId ? pendingVerification : null;
+  const [guestInfo, setGuestInfo] = useState<GuestInfo>(pendingForRoom?.guestInfo || {
     firstName: user?.firstName || user?.name?.split(" ")[0] || "",
     lastName: user?.lastName || user?.name?.split(" ").slice(1).join(" ") || "",
     email: user?.email || "",
     phone: user?.phone || "",
   });
+  const [adultCount, setAdultCount] = useState(pendingForRoom?.adultCount || 1);
+  const [childCount, setChildCount] = useState(pendingForRoom?.childCount || 0);
+  const [policies, setPolicies] = useState<PrivacyPolicy | null>(null);
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
+  const [emailVerificationToken] = useState(() =>
+    user ? "" : api.consumeBookingVerificationToken(),
+  );
 
   const checkIn = searchParams.get("checkIn") || todayInputValue();
   const checkOut = searchParams.get("checkOut") || addDaysToInput(checkIn, 1);
@@ -55,6 +64,23 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
       phone: user.phone || "",
     });
   }, [user]);
+
+  useEffect(() => {
+    let active = true;
+    api.getCurrentPolicies()
+      .then((value) => { if (active) setPolicies(value); })
+      .catch(() => {
+        if (active) {
+          setNotification({
+            show: true,
+            title: "Booking setup unavailable",
+            message: "The current privacy and booking terms could not be loaded. Please try again.",
+            type: "error",
+          });
+        }
+      });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -143,6 +169,13 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     checkOut,
     paymentMethod,
     notes: user ? `Member selected ${paymentMethod}.` : `Guest selected ${paymentMethod}.`,
+    adultCount,
+    childCount,
+    emailVerificationToken: emailVerificationToken || undefined,
+    acceptPrivacyPolicy: acceptedPolicies,
+    privacyPolicyVersion: policies?.privacyPolicyVersion || "",
+    acceptBookingTerms: acceptedPolicies,
+    bookingTermsVersion: policies?.bookingTermsVersion || "",
   });
 
   const returnToRoom = () => {
@@ -150,10 +183,50 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     navigate(`/rooms/${roomId}${suffix ? `?${suffix}` : ""}`);
   };
 
-  const continueToPayment = () => {
+  const continueToPayment = async () => {
     if (!validateGuestInfo()) return;
+    if (!room || adultCount < 1 || childCount < 0 || adultCount + childCount > room.capacity) {
+      setNotification({ show: true, title: "Occupancy unavailable", message: `This room allows up to ${room?.capacity || 1} guests.`, type: "error" });
+      return;
+    }
+    if (!policies) {
+      setNotification({ show: true, title: "Booking setup unavailable", message: "The current legal terms are still loading. Please try again.", type: "error" });
+      return;
+    }
+    if (!acceptedPolicies) {
+      setNotification({ show: true, title: "Acceptance required", message: "Accept the Privacy Notice and Booking Terms to continue.", type: "info" });
+      return;
+    }
     if (availabilityLoading || !isAvailable) {
       setNotification({ show: true, title: "Room unavailable", message: availabilityMessage || "This room is unavailable for the selected dates.", type: "error" });
+      return;
+    }
+    if (!user && !emailVerificationToken) {
+      setProcessing(true);
+      try {
+        api.rememberPendingBookingVerification({
+          roomId: roomId!,
+          checkIn,
+          checkOut,
+          guestInfo: {
+            ...guestInfo,
+            email: guestInfo.email.trim().toLowerCase(),
+          },
+          adultCount,
+          childCount,
+        });
+        await api.requestBookingEmailVerification(guestInfo.email);
+        setNotification({
+          show: true,
+          title: "Check your email",
+          message: "Open the secure link we sent, then choose the room again to complete your booking. The link expires in 15 minutes.",
+          type: "success",
+        });
+      } catch (error) {
+        setNotification({ show: true, title: "Verification not sent", message: error instanceof Error ? error.message : "Please try again.", type: "error" });
+      } finally {
+        setProcessing(false);
+      }
       return;
     }
     setCurrentStep(3);
@@ -189,6 +262,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     setProcessing(true);
     try {
       const booking = await createBooking(selectedMethod);
+      api.clearPendingBookingVerification();
       api.rememberBookingLookup(booking.bookingCode, guestInfo.email, booking.guestAccessToken);
       if (selectedMethod === PaymentMethod.DirectTransfer) {
         setDirectTransferBooking(booking);
@@ -269,7 +343,14 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   <FormField label="Last name" error={fieldErrors.lastName}><input type="text" autoComplete="family-name" maxLength={80} disabled={processing} value={guestInfo.lastName} onChange={(event) => updateGuestField("lastName", event.target.value)} className={`ui-input ${fieldErrors.lastName ? "border-red-500/50" : ""}`} aria-invalid={Boolean(fieldErrors.lastName)} /></FormField>
                   <FormField label="Email address" error={fieldErrors.email}><input type="email" autoComplete="email" maxLength={254} disabled={processing} value={guestInfo.email} onChange={(event) => updateGuestField("email", event.target.value)} className={`ui-input ${fieldErrors.email ? "border-red-500/50" : ""}`} aria-invalid={Boolean(fieldErrors.email)} /></FormField>
                   <FormField label="Contact phone" error={fieldErrors.phone}><input type="tel" autoComplete="tel" maxLength={30} placeholder="+234 …" disabled={processing} value={guestInfo.phone} onChange={(event) => updateGuestField("phone", event.target.value)} className={`ui-input ${fieldErrors.phone ? "border-red-500/50" : ""}`} aria-invalid={Boolean(fieldErrors.phone)} /></FormField>
+                  <FormField label="Adults"><input type="number" min={1} max={Math.min(20, room.capacity)} disabled={processing} value={adultCount} onChange={(event) => setAdultCount(Math.max(1, Number(event.target.value) || 1))} className="ui-input" /></FormField>
+                  <FormField label="Children"><input type="number" min={0} max={Math.min(20, room.capacity - 1)} disabled={processing} value={childCount} onChange={(event) => setChildCount(Math.max(0, Number(event.target.value) || 0))} className="ui-input" /></FormField>
                 </div>
+                <label className="mt-6 flex cursor-pointer items-start gap-3 rounded border border-white/10 bg-white/[0.025] p-4 text-sm text-gray-400">
+                  <input type="checkbox" checked={acceptedPolicies} onChange={(event) => setAcceptedPolicies(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-primary" />
+                  <span>I agree to the <a href={policies?.privacyPolicyUrl || "/privacy"} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-white">Privacy Notice</a> and <a href={policies?.bookingTermsUrl || "/terms"} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-white">Booking Terms</a>.</span>
+                </label>
+                {adultCount + childCount > room.capacity && <p className="mt-3 text-sm text-red-400" role="alert">This room allows up to {room.capacity} guests.</p>}
                 {!user && <p className="mt-6 text-sm leading-6 text-gray-500">You can create an account later to keep future bookings together.</p>}
                 <button type="button" onClick={goBack} className="mt-7 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-white"><span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span> Back to room and dates</button>
               </section>
@@ -305,8 +386,8 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                 <div className="border-t border-white/10 pt-5"><span className="ui-label">Stay total</span><p className="font-display text-3xl font-semibold italic text-primary">₦{totalAmount.toLocaleString()}</p><p className="mt-1 text-xs text-gray-500">{nights} × ₦{room.pricePerNight.toLocaleString()}</p></div>
                 <button
                   type="button"
-                  onClick={currentStep === 2 ? continueToPayment : handleBooking}
-                  disabled={processing || availabilityLoading || !isAvailable || (currentStep === 3 && !selectedMethod)}
+                  onClick={currentStep === 2 ? () => void continueToPayment() : handleBooking}
+                  disabled={processing || availabilityLoading || !isAvailable || !policies || (currentStep === 3 && !selectedMethod)}
                   className="ui-button ui-button-primary w-full"
                 >
                   {(processing || availabilityLoading) && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}

@@ -7,6 +7,9 @@ import {
   BookingStatus,
   PaymentStatus,
   ProfileStatus,
+  PrivacyPolicy,
+  PrivacyRequest,
+  PrivacyRequestType,
   UserRole,
 } from "../types";
 import { appConfig } from "../config/environment";
@@ -14,7 +17,18 @@ import { appConfig } from "../config/environment";
 const STORAGE_KEYS = {
   TOKEN: "mhs_auth_token",
   BOOKING_LOOKUP_PREFIX: "mhs_booking_lookup_",
+  BOOKING_VERIFICATION_TOKEN: "mhs_booking_verification_token",
+  PENDING_BOOKING_VERIFICATION: "mhs_pending_booking_verification",
 } as const;
+
+export interface PendingBookingVerification {
+  roomId: string;
+  checkIn: string;
+  checkOut: string;
+  guestInfo: { firstName: string; lastName: string; email: string; phone: string };
+  adultCount: number;
+  childCount: number;
+}
 
 function normalizeEnum<T extends string>(
   value: unknown,
@@ -308,6 +322,8 @@ class ApiService {
     email: string;
     password: string;
     phone: string;
+    acceptPrivacyPolicy: boolean;
+    privacyPolicyVersion: string;
   }) =>
     this.request<{ message: string }>("/Auth/register", {
       method: "POST",
@@ -410,6 +426,13 @@ class ApiService {
     checkOut: string;
     paymentMethod: PaymentMethod;
     notes?: string;
+    adultCount: number;
+    childCount: number;
+    emailVerificationToken?: string;
+    acceptPrivacyPolicy: boolean;
+    privacyPolicyVersion: string;
+    acceptBookingTerms: boolean;
+    bookingTermsVersion: string;
   }): Promise<Booking> {
     const booking = await this.request<Booking>("/bookings", {
       method: "POST",
@@ -423,13 +446,80 @@ class ApiService {
   }
 
   async lookupBooking(bookingCode: string, email = "", guestAccessToken = ""): Promise<Booking> {
-    const queryParams = new URLSearchParams({ code: bookingCode.trim().toUpperCase() });
-    if (email.trim()) queryParams.set("email", email.trim().toLowerCase());
+    void email;
     const headers = new Headers();
     if (guestAccessToken.trim()) headers.set("X-Booking-Access-Token", guestAccessToken.trim());
     return normalizeBooking(
-      await this.request<Booking>(`/bookings/lookup?${queryParams.toString()}`, { headers }),
+      await this.request<Booking>("/bookings/lookup", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ code: bookingCode.trim().toUpperCase() }),
+      }),
     );
+  }
+
+  getCurrentPolicies = () => this.request<PrivacyPolicy>("/privacy/policies/current");
+
+  exportMyData = () => this.request<Record<string, unknown>>("/privacy/export");
+
+  getMyPrivacyRequests = () => this.request<PrivacyRequest[]>("/privacy/requests/mine");
+
+  createPrivacyRequest = (type: PrivacyRequestType, details?: string) =>
+    this.request<PrivacyRequest>("/privacy/requests", {
+      method: "POST",
+      body: JSON.stringify({ type, details: details?.trim() || undefined }),
+    });
+
+  requestBookingEmailVerification = (email: string) =>
+    this.request<{ message: string }>("/bookings/verification/request", {
+      method: "POST",
+      body: JSON.stringify({ email: email.trim().toLowerCase() }),
+    });
+
+  rememberBookingVerificationToken(token: string) {
+    try {
+      sessionStorage.setItem(STORAGE_KEYS.BOOKING_VERIFICATION_TOKEN, token.trim());
+    } catch {
+      // The booking page will ask the guest to request a fresh link instead.
+    }
+  }
+
+  rememberPendingBookingVerification(value: PendingBookingVerification) {
+    try {
+      sessionStorage.setItem(STORAGE_KEYS.PENDING_BOOKING_VERIFICATION, JSON.stringify(value));
+    } catch {
+      // The secure link can still return the guest to the room catalogue.
+    }
+  }
+
+  getPendingBookingVerification(): PendingBookingVerification | null {
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEYS.PENDING_BOOKING_VERIFICATION);
+      if (!raw) return null;
+      const value = JSON.parse(raw) as PendingBookingVerification;
+      if (!value.roomId || !value.guestInfo?.email) return null;
+      return value;
+    } catch {
+      return null;
+    }
+  }
+
+  clearPendingBookingVerification() {
+    try {
+      sessionStorage.removeItem(STORAGE_KEYS.PENDING_BOOKING_VERIFICATION);
+    } catch {
+      // No action is required when storage is unavailable.
+    }
+  }
+
+  consumeBookingVerificationToken(): string {
+    try {
+      const token = sessionStorage.getItem(STORAGE_KEYS.BOOKING_VERIFICATION_TOKEN) || "";
+      sessionStorage.removeItem(STORAGE_KEYS.BOOKING_VERIFICATION_TOKEN);
+      return token;
+    } catch {
+      return "";
+    }
   }
 
   async requestBookingAccessLink(bookingCode: string, email: string): Promise<{ message: string }> {

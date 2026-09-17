@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import { ApplicationUser } from "../types";
+import { ApplicationUser, PrivacyPolicy } from "../types";
 import NotificationModal from "../components/NotificationModal";
 import FormField from "../components/ui/FormField";
 import { cloudinaryImage } from "../utils/cloudinary";
@@ -24,6 +24,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [twoFactorCode, setTwoFactorCode] = useState("");
   const [useRecoveryCode, setUseRecoveryCode] = useState(false);
+  const [policies, setPolicies] = useState<PrivacyPolicy | null>(null);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [modal, setModal] = useState<{ show: boolean; title: string; message: string; type: "success" | "error" | "info" }>({ show: false, title: "", message: "", type: "info" });
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,6 +36,13 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       navigate("/auth", { replace: true });
     }
   }, [location.search, navigate]);
+
+  useEffect(() => {
+    if (mode !== "register" || policies) return;
+    api.getCurrentPolicies()
+      .then(setPolicies)
+      .catch(() => setModal({ show: true, title: "Registration unavailable", message: "The current Privacy Notice could not be loaded. Please try again.", type: "error" }));
+  }, [mode, policies]);
 
   const changeMode = (nextMode: AuthMode) => {
     setMode(nextMode);
@@ -68,6 +77,10 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       if (formData.password.length < 12 || !/[a-z]/.test(formData.password) || !/[A-Z]/.test(formData.password) || !/\d/.test(formData.password) || !/[^A-Za-z0-9]/.test(formData.password)) {
         errors.password = "Use 12+ characters with upper and lowercase, a number, and a symbol.";
       }
+      if (!policies || !acceptedPrivacy) {
+        setModal({ show: true, title: "Privacy acceptance required", message: "Read and accept the current Privacy Notice to create an account.", type: "info" });
+        return false;
+      }
     }
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -95,6 +108,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           lastName: formData.lastName.trim(),
           email: formData.email.trim().toLowerCase(),
           phone: formData.phone.trim(),
+          acceptPrivacyPolicy: true,
+          privacyPolicyVersion: policies!.privacyPolicyVersion,
         });
         setModal({ show: true, title: "Account created", message: response.message, type: "success" });
         setMode("login");
@@ -119,6 +134,14 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       }
     } catch (error: unknown) {
       if (mode === "login" || mode === "two-factor") api.setToken(null);
+      if (mode === "register") {
+        const message = error instanceof Error ? error.message : "";
+        if (/privacy|policy|terms|accept/i.test(message)) {
+          setAcceptedPrivacy(false);
+          setPolicies(null);
+          api.getCurrentPolicies().then(setPolicies).catch(() => undefined);
+        }
+      }
       setModal({
         show: true,
         title: mode === "register" ? "Account not created" : mode === "forgot" || mode === "verify" ? "Request not completed" : "Sign-in failed",
@@ -207,6 +230,13 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
               </FormField>
             )}
 
+            {mode === "register" && (
+              <label className="flex cursor-pointer items-start gap-3 rounded border border-white/10 bg-white/[0.025] p-4 text-sm text-gray-400">
+                <input type="checkbox" checked={acceptedPrivacy} onChange={(event) => setAcceptedPrivacy(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-primary" />
+                <span>I have read and accept the <a href={policies?.privacyPolicyUrl || "/privacy"} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-white">Privacy Notice</a>.</span>
+              </label>
+            )}
+
             {mode === "two-factor" && (
               <>
                 <FormField htmlFor="twoFactorCode" label={useRecoveryCode ? "Recovery code" : "Authenticator code"}>
@@ -230,7 +260,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
               <button type="button" disabled={loading} onClick={() => { setMode("login"); setTwoFactorCode(""); setUseRecoveryCode(false); }} className="min-h-11 text-sm font-semibold text-gray-400 hover:text-white">Back to password sign in</button>
             )}
 
-            <button type="submit" disabled={loading} className="ui-button ui-button-primary w-full">
+            <button type="submit" disabled={loading || (mode === "register" && !policies)} className="ui-button ui-button-primary w-full">
               {loading && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}
               {submitLabel}
               {!loading && <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>}
