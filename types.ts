@@ -107,6 +107,29 @@ export interface Booking {
   notificationMessage?: string | null;
   paymentExpiresAtUtc?: string | null;
   guestAccessToken?: string | null;
+  adultCount?: number;
+  childCount?: number;
+}
+
+export interface PrivacyPolicy {
+  privacyPolicyVersion: string;
+  bookingTermsVersion: string;
+  privacyPolicyUrl: string;
+  bookingTermsUrl: string;
+  acceptanceRequired: boolean;
+}
+
+export type PrivacyRequestType = "Access" | "Rectification" | "Erasure" | "Restriction" | "Portability" | "Objection";
+
+export interface PrivacyRequest {
+  id: string;
+  type: PrivacyRequestType;
+  status: "Pending" | "InProgress" | "Completed" | "Rejected";
+  details?: string | null;
+  requestedAtUtc: string;
+  dueAtUtc: string;
+  resolvedAtUtc?: string | null;
+  resolutionNotes?: string | null;
 }
 
 export interface AuthResponse {
