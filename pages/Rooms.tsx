@@ -85,7 +85,7 @@ const Rooms: React.FC = () => {
   const filteredRooms = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     const result = rooms.filter((room) => {
-      const searchable = [room.name, room.category, room.description, room.size].join(" ").toLowerCase();
+      const searchable = [room.name, room.category, room.description].join(" ").toLowerCase();
       const matchesSearch = !query || searchable.includes(query);
       const matchesMin = minPrice === null || room.pricePerNight >= minPrice;
       const matchesMax = maxPrice === null || room.pricePerNight <= maxPrice;
