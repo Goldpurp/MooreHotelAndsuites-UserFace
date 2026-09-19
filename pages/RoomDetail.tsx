@@ -1,3 +1,4 @@
+import { SHOW_ROOM_SIZES } from "../config/roomPresentation";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -131,12 +132,12 @@ const RoomDetail: React.FC = () => {
       <div className="ui-container-wide relative z-20 -mt-10 grid gap-9 lg:grid-cols-12 lg:items-start">
         <div className="space-y-12 lg:col-span-8">
           <section className="ui-card p-6 sm:p-8">
-            <p className="font-display text-[clamp(1.35rem,2.5vw,2rem)] italic leading-8 text-white">{room.description || "A refined room designed for a comfortable and restorative stay."}</p>
-            <dl className="mt-8 grid grid-cols-2 gap-6 border-t border-white/10 pt-7 sm:grid-cols-4">
+            {room.description && <p className="font-display text-[clamp(1.35rem,2.5vw,2rem)] italic leading-8 text-white">{room.description}</p>}
+            <dl className="mt-8 grid grid-cols-2 gap-6 border-t border-white/10 pt-7 sm:grid-cols-3">
               <RoomDetailItem label="Category" value={room.category.replace(/([a-z])([A-Z])/g, "$1 $2")} />
               <RoomDetailItem label="Location" value="Assigned at check-in" />
               <RoomDetailItem label="Guests" value={room.capacity ? `${room.capacity} guests` : "Ask hotel"} />
-              <RoomDetailItem label="Size" value={room.size ?? "Not specified"} />
+              {SHOW_ROOM_SIZES && room.size && <RoomDetailItem label="Size" value={room.size} />}
             </dl>
           </section>
 
