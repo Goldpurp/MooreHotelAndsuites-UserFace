@@ -36,21 +36,16 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const [availabilityLoading, setAvailabilityLoading] = useState(true);
   const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ show: boolean; title: string; message: string; type: "success" | "error" | "info" }>({ show: false, title: "", message: "", type: "info" });
-  const pendingVerification = !user ? api.getPendingBookingVerification() : null;
-  const pendingForRoom = pendingVerification?.roomId === roomId ? pendingVerification : null;
-  const [guestInfo, setGuestInfo] = useState<GuestInfo>(pendingForRoom?.guestInfo || {
+  const [guestInfo, setGuestInfo] = useState<GuestInfo>({
     firstName: user?.firstName || user?.name?.split(" ")[0] || "",
     lastName: user?.lastName || user?.name?.split(" ").slice(1).join(" ") || "",
     email: user?.email || "",
     phone: user?.phone || "",
   });
-  const [adultCount, setAdultCount] = useState(pendingForRoom?.adultCount || 1);
-  const [childCount, setChildCount] = useState(pendingForRoom?.childCount || 0);
+  const [adultCount, setAdultCount] = useState(1);
+  const [childCount, setChildCount] = useState(0);
   const [policies, setPolicies] = useState<PrivacyPolicy | null>(null);
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
-  const [emailVerificationToken, setEmailVerificationToken] = useState(() =>
-    user ? "" : api.consumeBookingVerificationToken(),
-  );
 
   const checkIn = searchParams.get("checkIn") || todayInputValue();
   const checkOut = searchParams.get("checkOut") || addDaysToInput(checkIn, 1);
@@ -126,9 +121,6 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const totalAmount = room ? room.pricePerNight * nights : 0;
 
   const updateGuestField = (field: keyof GuestInfo, value: string) => {
-    if (field === "email" && value.trim().toLowerCase() !== guestInfo.email.trim().toLowerCase()) {
-      setEmailVerificationToken("");
-    }
     setGuestInfo((current) => ({ ...current, [field]: value }));
     if (fieldErrors[field]) setFieldErrors((current) => ({ ...current, [field]: "" }));
   };
@@ -174,7 +166,6 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     notes: user ? `Member selected ${paymentMethod}.` : `Guest selected ${paymentMethod}.`,
     adultCount,
     childCount,
-    emailVerificationToken: emailVerificationToken || undefined,
     acceptPrivacyPolicy: acceptedPolicies,
     privacyPolicyVersion: policies?.privacyPolicyVersion || "",
     acceptBookingTerms: acceptedPolicies,
@@ -202,34 +193,6 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     }
     if (availabilityLoading || !isAvailable) {
       setNotification({ show: true, title: "Room unavailable", message: availabilityMessage || "This room is unavailable for the selected dates.", type: "error" });
-      return;
-    }
-    if (!user && !emailVerificationToken) {
-      setProcessing(true);
-      try {
-        api.rememberPendingBookingVerification({
-          roomId: roomId!,
-          checkIn,
-          checkOut,
-          guestInfo: {
-            ...guestInfo,
-            email: guestInfo.email.trim().toLowerCase(),
-          },
-          adultCount,
-          childCount,
-        });
-        await api.requestBookingEmailVerification(guestInfo.email);
-        setNotification({
-          show: true,
-          title: "Check your email",
-          message: "Open the secure link we sent, then choose the room again to complete your booking. The link expires in 15 minutes.",
-          type: "success",
-        });
-      } catch (error) {
-        setNotification({ show: true, title: "Verification not sent", message: error instanceof Error ? error.message : "Please try again.", type: "error" });
-      } finally {
-        setProcessing(false);
-      }
       return;
     }
     setCurrentStep(3);
@@ -265,7 +228,6 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     setProcessing(true);
     try {
       const booking = await createBooking(selectedMethod);
-      api.clearPendingBookingVerification();
       api.rememberBookingLookup(booking.bookingCode, guestInfo.email, booking.guestAccessToken);
       if (selectedMethod === PaymentMethod.DirectTransfer) {
         setDirectTransferBooking(booking);
@@ -281,18 +243,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
       navigate(`/booking-confirmation/${booking.bookingCode}`, { state: { booking } });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "We could not process your booking. Please try again.";
-      if (!user && /^Verify the guest email(?: again)? before creating this booking\.$/.test(message)) {
-        setEmailVerificationToken("");
-        setCurrentStep(2);
-        setNotification({
-          show: true,
-          title: "Verify your email again",
-          message: "Your email verification is no longer valid. Your booking details are saved on this page. Continue from guest details to request a new link, then open the newest email within 15 minutes.",
-          type: "info",
-        });
-      } else {
-        setNotification({ show: true, title: "Booking not completed", message, type: "error" });
-      }
+      setNotification({ show: true, title: "Booking not completed", message, type: "error" });
     } finally {
       setProcessing(false);
     }
