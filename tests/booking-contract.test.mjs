@@ -17,7 +17,11 @@ test("guest booking uses the hardened API contract", async () => {
   assert.match(checkout, /childCount/);
   assert.match(checkout, /acceptPrivacyPolicy: acceptedPolicies/);
   assert.match(checkout, /acceptBookingTerms: acceptedPolicies/);
-  assert.match(app, /path="\/book"/);
+  assert.doesNotMatch(checkout, /requestBookingEmailVerification/);
+  assert.doesNotMatch(checkout, /emailVerificationToken/);
+  assert.doesNotMatch(api, /\/bookings\/verification\/request/);
+  assert.doesNotMatch(api, /emailVerificationToken/);
+  assert.doesNotMatch(app, /path="\/book"/);
 });
 
 test("guest account exposes privacy export and request history", async () => {

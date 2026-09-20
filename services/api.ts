@@ -17,18 +17,7 @@ import { appConfig } from "../config/environment";
 const STORAGE_KEYS = {
   TOKEN: "mhs_auth_token",
   BOOKING_LOOKUP_PREFIX: "mhs_booking_lookup_",
-  BOOKING_VERIFICATION_TOKEN: "mhs_booking_verification_token",
-  PENDING_BOOKING_VERIFICATION: "mhs_pending_booking_verification",
 } as const;
-
-export interface PendingBookingVerification {
-  roomId: string;
-  checkIn: string;
-  checkOut: string;
-  guestInfo: { firstName: string; lastName: string; email: string; phone: string };
-  adultCount: number;
-  childCount: number;
-}
 
 function normalizeEnum<T extends string>(
   value: unknown,
@@ -428,7 +417,6 @@ class ApiService {
     notes?: string;
     adultCount: number;
     childCount: number;
-    emailVerificationToken?: string;
     acceptPrivacyPolicy: boolean;
     privacyPolicyVersion: string;
     acceptBookingTerms: boolean;
@@ -469,58 +457,6 @@ class ApiService {
       method: "POST",
       body: JSON.stringify({ type, details: details?.trim() || undefined }),
     });
-
-  requestBookingEmailVerification = (email: string) =>
-    this.request<{ message: string }>("/bookings/verification/request", {
-      method: "POST",
-      body: JSON.stringify({ email: email.trim().toLowerCase() }),
-    });
-
-  rememberBookingVerificationToken(token: string) {
-    try {
-      sessionStorage.setItem(STORAGE_KEYS.BOOKING_VERIFICATION_TOKEN, token.trim());
-    } catch {
-      // The booking page will ask the guest to request a fresh link instead.
-    }
-  }
-
-  rememberPendingBookingVerification(value: PendingBookingVerification) {
-    try {
-      sessionStorage.setItem(STORAGE_KEYS.PENDING_BOOKING_VERIFICATION, JSON.stringify(value));
-    } catch {
-      // The secure link can still return the guest to the room catalogue.
-    }
-  }
-
-  getPendingBookingVerification(): PendingBookingVerification | null {
-    try {
-      const raw = sessionStorage.getItem(STORAGE_KEYS.PENDING_BOOKING_VERIFICATION);
-      if (!raw) return null;
-      const value = JSON.parse(raw) as PendingBookingVerification;
-      if (!value.roomId || !value.guestInfo?.email) return null;
-      return value;
-    } catch {
-      return null;
-    }
-  }
-
-  clearPendingBookingVerification() {
-    try {
-      sessionStorage.removeItem(STORAGE_KEYS.PENDING_BOOKING_VERIFICATION);
-    } catch {
-      // No action is required when storage is unavailable.
-    }
-  }
-
-  consumeBookingVerificationToken(): string {
-    try {
-      const token = sessionStorage.getItem(STORAGE_KEYS.BOOKING_VERIFICATION_TOKEN) || "";
-      sessionStorage.removeItem(STORAGE_KEYS.BOOKING_VERIFICATION_TOKEN);
-      return token;
-    } catch {
-      return "";
-    }
-  }
 
   async requestBookingAccessLink(bookingCode: string, email: string): Promise<{ message: string }> {
     return this.request<{ message: string }>("/bookings/access-link", {
