@@ -48,7 +48,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const [childCount, setChildCount] = useState(pendingForRoom?.childCount || 0);
   const [policies, setPolicies] = useState<PrivacyPolicy | null>(null);
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
-  const [emailVerificationToken] = useState(() =>
+  const [emailVerificationToken, setEmailVerificationToken] = useState(() =>
     user ? "" : api.consumeBookingVerificationToken(),
   );
 
@@ -126,6 +126,9 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const totalAmount = room ? room.pricePerNight * nights : 0;
 
   const updateGuestField = (field: keyof GuestInfo, value: string) => {
+    if (field === "email" && value.trim().toLowerCase() !== guestInfo.email.trim().toLowerCase()) {
+      setEmailVerificationToken("");
+    }
     setGuestInfo((current) => ({ ...current, [field]: value }));
     if (fieldErrors[field]) setFieldErrors((current) => ({ ...current, [field]: "" }));
   };
@@ -277,7 +280,19 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
       }
       navigate(`/booking-confirmation/${booking.bookingCode}`, { state: { booking } });
     } catch (error: unknown) {
-      setNotification({ show: true, title: "Booking not completed", message: error instanceof Error ? error.message : "We could not process your booking. Please try again.", type: "error" });
+      const message = error instanceof Error ? error.message : "We could not process your booking. Please try again.";
+      if (!user && /^Verify the guest email(?: again)? before creating this booking\.$/.test(message)) {
+        setEmailVerificationToken("");
+        setCurrentStep(2);
+        setNotification({
+          show: true,
+          title: "Verify your email again",
+          message: "Your email verification is no longer valid. Your booking details are saved on this page. Continue from guest details to request a new link, then open the newest email within 15 minutes.",
+          type: "info",
+        });
+      } else {
+        setNotification({ show: true, title: "Booking not completed", message, type: "error" });
+      }
     } finally {
       setProcessing(false);
     }
