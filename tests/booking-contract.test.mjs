@@ -17,6 +17,13 @@ test("guest booking uses the hardened API contract", async () => {
   assert.match(checkout, /childCount/);
   assert.match(checkout, /acceptPrivacyPolicy: acceptedPolicies/);
   assert.match(checkout, /acceptBookingTerms: acceptedPolicies/);
+  assert.match(api, /"\/pricing\/quotes"[\s\S]*method: "POST"/);
+  assert.match(checkout, /api\.createPricingQuote/);
+  assert.match(checkout, /quoteId: quote\.quoteId/);
+  assert.match(checkout, /quoteToken: quote\.quoteToken/);
+  assert.match(checkout, /pricingQuote\.totalAmount/);
+  assert.match(checkout, /The stay price changed while you were checking out/);
+  assert.match(checkout, /pricing quote\|after pricing\|new quote/);
   assert.doesNotMatch(checkout, /requestBookingEmailVerification/);
   assert.doesNotMatch(checkout, /emailVerificationToken/);
   assert.doesNotMatch(api, /\/bookings\/verification\/request/);

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api, getTrustedPaymentUrl } from "../services/api";
-import { ApplicationUser, Booking, PaymentMethod, PrivacyPolicy, Room } from "../types";
+import { ApplicationUser, Booking, PaymentMethod, PricingQuote, PrivacyPolicy, Room } from "../types";
 import NotificationModal from "../components/NotificationModal";
 import AestheticLoader from "../components/AestheticLoader";
 import Dialog from "../components/ui/Dialog";
@@ -46,6 +46,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const [childCount, setChildCount] = useState(0);
   const [policies, setPolicies] = useState<PrivacyPolicy | null>(null);
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
+  const [pricingQuote, setPricingQuote] = useState<PricingQuote | null>(null);
 
   const checkIn = searchParams.get("checkIn") || todayInputValue();
   const checkOut = searchParams.get("checkOut") || addDaysToInput(checkIn, 1);
@@ -117,8 +118,19 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     verify();
   }, [roomId, checkIn, checkOut]);
 
+  useEffect(() => {
+    setPricingQuote(null);
+  }, [roomId, checkIn, checkOut, adultCount, childCount]);
+
   const nights = Math.max(1, differenceInNights(checkIn, checkOut));
-  const totalAmount = room ? room.pricePerNight * nights : 0;
+  const estimatedTotal = room ? room.pricePerNight * nights : 0;
+
+  const formatMoney = (amount: number, currency = "NGN") =>
+    new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(amount);
 
   const updateGuestField = (field: keyof GuestInfo, value: string) => {
     setGuestInfo((current) => ({ ...current, [field]: value }));
@@ -154,7 +166,16 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     }
   };
 
-  const createBooking = (paymentMethod: PaymentMethod) => api.createBooking({
+  const requestPricingQuote = () => api.createPricingQuote({
+    roomId: roomId!,
+    checkIn,
+    checkOut,
+    adultCount,
+    childCount,
+    roomQuantity: 1,
+  });
+
+  const createBooking = (paymentMethod: PaymentMethod, quote: PricingQuote) => api.createBooking({
     roomId: roomId!,
     guestFirstName: guestInfo.firstName.trim(),
     guestLastName: guestInfo.lastName.trim(),
@@ -170,6 +191,9 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     privacyPolicyVersion: policies?.privacyPolicyVersion || "",
     acceptBookingTerms: acceptedPolicies,
     bookingTermsVersion: policies?.bookingTermsVersion || "",
+    quoteId: quote.quoteId,
+    quoteToken: quote.quoteToken,
+    roomQuantity: quote.roomQuantity,
   });
 
   const returnToRoom = () => {
@@ -195,8 +219,18 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
       setNotification({ show: true, title: "Room unavailable", message: availabilityMessage || "This room is unavailable for the selected dates.", type: "error" });
       return;
     }
-    setCurrentStep(3);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setProcessing(true);
+    try {
+      const quote = await requestPricingQuote();
+      setPricingQuote(quote);
+      setCurrentStep(3);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Current pricing could not be loaded. Please try again.";
+      setNotification({ show: true, title: "Pricing unavailable", message, type: "error" });
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const goBack = () => {
@@ -227,7 +261,25 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
     setProcessing(true);
     try {
-      const booking = await createBooking(selectedMethod);
+      let quote = pricingQuote;
+      if (!quote || new Date(quote.expiresAtUtc).getTime() <= Date.now() + 30_000) {
+        const refreshedQuote = await requestPricingQuote();
+        setPricingQuote(refreshedQuote);
+        if (quote && (
+          quote.currency !== refreshedQuote.currency ||
+          quote.totalAmount !== refreshedQuote.totalAmount
+        )) {
+          setNotification({
+            show: true,
+            title: "Price updated",
+            message: "The stay price changed while you were checking out. Review the new total, then confirm again.",
+            type: "info",
+          });
+          return;
+        }
+        quote = refreshedQuote;
+      }
+      const booking = await createBooking(selectedMethod, quote);
       api.rememberBookingLookup(booking.bookingCode, guestInfo.email, booking.guestAccessToken);
       if (selectedMethod === PaymentMethod.DirectTransfer) {
         setDirectTransferBooking(booking);
@@ -243,6 +295,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
       navigate(`/booking-confirmation/${booking.bookingCode}`, { state: { booking } });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "We could not process your booking. Please try again.";
+      if (/pricing quote|after pricing|new quote/i.test(message)) setPricingQuote(null);
       setNotification({ show: true, title: "Booking not completed", message, type: "error" });
     } finally {
       setProcessing(false);
@@ -339,6 +392,23 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   <p className="font-medium text-white">{guestInfo.firstName} {guestInfo.lastName}</p>
                   <p className="mt-1 break-all text-gray-500">{guestInfo.email}</p>
                 </div>
+                {pricingQuote && (
+                  <div className="mt-5 rounded border border-white/10 bg-black/20 p-4 text-sm">
+                    <div className="flex items-start justify-between gap-4">
+                      <div><p className="ui-label">Current hotel quote</p><p className="mt-1 text-gray-500">{pricingQuote.ratePlanName}</p></div>
+                      <p className="font-semibold text-primary">{formatMoney(pricingQuote.totalAmount, pricingQuote.currency)}</p>
+                    </div>
+                    <details className="mt-4 border-t border-white/10 pt-3">
+                      <summary className="cursor-pointer text-xs font-semibold uppercase tracking-widest text-gray-400">Price details</summary>
+                      <dl className="mt-3 space-y-2 text-xs text-gray-400">
+                        {pricingQuote.lines.map((line, index) => (
+                          <div key={`${line.code}-${line.stayDate || index}`} className="flex justify-between gap-4"><dt>{line.description}</dt><dd className="shrink-0 text-gray-200">{formatMoney(line.amount, pricingQuote.currency)}</dd></div>
+                        ))}
+                      </dl>
+                    </details>
+                    <p className="mt-3 text-xs text-gray-500">Price held until {new Date(pricingQuote.expiresAtUtc).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.</p>
+                  </div>
+                )}
                 <button type="button" onClick={goBack} className="mt-7 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-white"><span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span> Back to guest details</button>
               </section>
             )}
@@ -349,7 +419,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
               <div className="relative h-48 bg-gray-800"><img src={cloudinaryImage(room.images?.[0], 720)} className="image-luxury h-full w-full object-cover" alt={room.name} loading="lazy" decoding="async" /><div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-black/20 to-transparent p-6"><p className="ui-eyebrow">{room.category}</p><h2 className="ui-card-title mt-2 italic text-white">{room.name}</h2></div></div>
               <div className="space-y-6 p-6 sm:p-8">
                 <dl className="space-y-4 text-sm"><SummaryRow label="Stay duration" value={`${nights} ${nights === 1 ? "night" : "nights"}`} /><SummaryRow label="Check-in" value={new Date(checkIn).toLocaleDateString()} /><SummaryRow label="Check-out" value={new Date(checkOut).toLocaleDateString()} /><SummaryRow label="Room capacity" value={`Up to ${room.capacity} ${room.capacity === 1 ? "guest" : "guests"}`} /></dl>
-                <div className="border-t border-white/10 pt-5"><span className="ui-label">Stay total</span><p className="font-display text-3xl font-semibold italic text-primary">₦{totalAmount.toLocaleString()}</p><p className="mt-1 text-xs text-gray-500">{nights} × ₦{room.pricePerNight.toLocaleString()}</p></div>
+                <div className="border-t border-white/10 pt-5"><span className="ui-label">Stay total</span><p className="font-display text-3xl font-semibold italic text-primary">{pricingQuote ? formatMoney(pricingQuote.totalAmount, pricingQuote.currency) : formatMoney(estimatedTotal)}</p><p className="mt-1 text-xs text-gray-500">{pricingQuote ? "Hotel-confirmed price" : `${nights} × ${formatMoney(room.pricePerNight)}`}</p></div>
                 <button
                   type="button"
                   onClick={currentStep === 2 ? () => void continueToPayment() : handleBooking}

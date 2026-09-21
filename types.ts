@@ -84,6 +84,44 @@ export interface Room {
   description: string;
 }
 
+export interface PricingQuoteLine {
+  type: "roomNight" | "discount" | "tax" | "fee";
+  code: string;
+  description: string;
+  stayDate?: string | null;
+  quantity: number;
+  unitAmount: number;
+  amount: number;
+  isInclusive: boolean;
+}
+
+export interface PricingQuote {
+  quoteId: string;
+  quoteToken: string;
+  roomId?: string | null;
+  roomTypeId: string;
+  roomTypeCode: string;
+  roomTypeName: string;
+  roomQuantity: number;
+  ratePlanCode: string;
+  ratePlanName: string;
+  promotionCode?: string | null;
+  checkInDate: string;
+  checkOutDate: string;
+  adultCount: number;
+  childCount: number;
+  nights: number;
+  currency: string;
+  roomSubtotal: number;
+  discountAmount: number;
+  includedTaxAmount: number;
+  taxAmount: number;
+  feeAmount: number;
+  totalAmount: number;
+  expiresAtUtc: string;
+  lines: PricingQuoteLine[];
+}
+
 export interface Booking {
   id: string;
   bookingCode: string;
