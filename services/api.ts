@@ -371,8 +371,12 @@ class ApiService {
   }
 
   async getRoomById(id: string): Promise<Room> {
+    const trimmed = id?.trim();
+    if (!trimmed || trimmed === "undefined" || trimmed === "null") {
+      throw new Error("Invalid room identifier.");
+    }
     return normalizeRoom(
-      await this.request<Room>(`/rooms/${encodeURIComponent(id)}`),
+      await this.request<Room>(`/rooms/${encodeURIComponent(trimmed)}`),
     );
   }
 

@@ -145,6 +145,10 @@ export interface Booking {
   guestAccessToken?: string | null;
   adultCount?: number;
   childCount?: number;
+  roomTypeId?: string | null;
+  roomTypeCode?: string | null;
+  roomTypeName?: string | null;
+  roomQuantity?: number;
 }
 
 export interface PrivacyPolicy {
