@@ -24,7 +24,7 @@ test("production profile targets only the HTTPS production API", async () => {
   assert.equal(apiUrl.protocol, "https:");
   assert.equal(apiUrl.hostname, "api.moorehotelandsuites.com");
   assert.equal(apiUrl.pathname, "/api");
-  assert.equal(env.VITE_MONNIFY_ENABLED, "false");
+  assert.equal(env.VITE_MONNIFY_ENABLED, undefined);
 });
 
 test("production browser configuration contains no secret-shaped keys", async () => {

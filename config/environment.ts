@@ -74,13 +74,6 @@ function resolveRequestTimeout(): number {
   return Number.isFinite(value) ? Math.min(60_000, Math.max(3_000, value)) : 15_000;
 }
 
-function resolveBoolean(name: string, value: string | undefined): boolean {
-  const normalized = value?.trim().toLowerCase();
-  if (normalized === "true") return true;
-  if (normalized === "false") return false;
-  throw new Error(`${name} must be either true or false.`);
-}
-
 const environment = resolveEnvironment();
 const apiMode = resolveApiMode();
 
@@ -89,10 +82,6 @@ export const appConfig = Object.freeze({
   apiMode,
   apiBaseUrl: resolveApiBaseUrl(environment, apiMode),
   requestTimeoutMs: resolveRequestTimeout(),
-  monnifyEnabled: resolveBoolean(
-    "VITE_MONNIFY_ENABLED",
-    import.meta.env.VITE_MONNIFY_ENABLED,
-  ),
   isLocal: environment === "local",
   isProduction: environment === "production",
 });

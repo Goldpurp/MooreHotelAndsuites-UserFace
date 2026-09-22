@@ -69,9 +69,8 @@ Console, crawler policy, and post-deploy checks.
 `check:production` is intentionally strict: it fails when the deployed API or
 database is unhealthy even if the hostname itself responds.
 
-Monnify is independently controlled with `VITE_MONNIFY_ENABLED`. Keep it
-`false` until the matching API flag and provider verification are complete.
-The API remains the enforcement boundary if a browser is modified.
+Guest checkout uses direct hotel bank transfer. The API returns the booking
+reference and transfer instructions after validating a current pricing quote.
 
 For the Render Blueprint, security headers, release steps and mobile acceptance
 checklist, follow `FRONTEND_RENDER_DEPLOYMENT.md`.
