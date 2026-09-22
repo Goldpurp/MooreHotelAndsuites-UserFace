@@ -446,8 +446,8 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                 </p>
 
                 {/* Bank Account Details Card */}
-                <div className="mt-6 overflow-hidden rounded-lg border border-primary/30 bg-primary/5 p-5 sm:p-6">
-                  <div className="flex items-center justify-between">
+                <div className="mt-6 overflow-hidden rounded-lg border border-primary/30 bg-primary/5 p-4 sm:p-6">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                     <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary">
                       <span className="material-symbols-outlined text-lg" aria-hidden="true">account_balance</span>
                       Hotel Official Bank Account
@@ -457,39 +457,38 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                     </span>
                   </div>
 
-                  <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-                    <div className="rounded border border-white/10 bg-black/40 p-3.5">
-                      <dt className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Bank Name</dt>
-                      <dd className="mt-1 font-semibold text-white text-base">{HOTEL_BANK_DETAILS.bankName}</dd>
+                  <dl className="mt-4 divide-y divide-white/10 overflow-hidden rounded border border-white/10 bg-black/40">
+                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 p-3.5">
+                      <dt className="text-xs font-semibold uppercase tracking-wider text-gray-400">Bank Name</dt>
+                      <dd className="font-semibold text-white text-base">{HOTEL_BANK_DETAILS.bankName}</dd>
                     </div>
-                    <div className="rounded border border-white/10 bg-black/40 p-3.5">
-                      <dt className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Account Name</dt>
-                      <dd className="mt-1 font-semibold text-white text-base">{HOTEL_BANK_DETAILS.accountName}</dd>
+                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 p-3.5">
+                      <dt className="text-xs font-semibold uppercase tracking-wider text-gray-400">Account Name</dt>
+                      <dd className="font-semibold text-white text-base">{HOTEL_BANK_DETAILS.accountName}</dd>
                     </div>
-                    <div className="rounded border border-white/10 bg-black/40 p-3.5 sm:col-span-2">
-                      <div className="flex items-center justify-between">
+                    <div className="p-3.5">
+                      <div className="flex items-center justify-between gap-3">
                         <dt className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Account Number</dt>
                         <button
                           type="button"
                           onClick={handleCopyAccount}
-                          className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:text-white"
+                          className="inline-flex shrink-0 items-center gap-1 text-xs text-primary font-semibold hover:text-white"
                         >
                           <span className="material-symbols-outlined text-sm" aria-hidden="true">content_copy</span>
-                          {copiedAccount ? "Copied" : "Copy Account"}
+                          {copiedAccount ? "Copied" : "Copy"}
                         </button>
                       </div>
-                      <dd className="mt-1 font-mono text-2xl font-bold tracking-widest text-primary">
+                      <dd className="mt-1.5 font-mono text-xl sm:text-2xl font-bold tracking-widest text-primary">
                         {HOTEL_BANK_DETAILS.accountNumber}
                       </dd>
                     </div>
+                    <div className="flex items-center justify-between gap-3 bg-black/30 p-3.5 text-sm">
+                      <span className="text-gray-400">Total Amount to Pay</span>
+                      <span className="font-display text-lg sm:text-xl font-bold text-white">
+                        ₦{currentTotalAmount.toLocaleString()}
+                      </span>
+                    </div>
                   </dl>
-
-                  <div className="mt-4 flex items-center justify-between rounded border border-white/10 bg-black/30 p-3.5 text-sm">
-                    <span className="text-gray-400">Total Amount to Pay:</span>
-                    <span className="font-display text-xl font-bold text-white">
-                      ₦{currentTotalAmount.toLocaleString()}
-                    </span>
-                  </div>
                 </div>
 
                 <div className="mt-6 rounded border border-white/10 bg-black/20 p-4 text-sm">
@@ -534,7 +533,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label htmlFor="checkout-checkin" className="block text-xs text-gray-400 mb-1">Check-in</label>
+                      <label htmlFor="checkout-checkin" className="ui-label">Check-in</label>
                       <input
                         id="checkout-checkin"
                         type="date"
@@ -546,7 +545,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                       />
                     </div>
                     <div>
-                      <label htmlFor="checkout-checkout" className="block text-xs text-gray-400 mb-1">Check-out</label>
+                      <label htmlFor="checkout-checkout" className="ui-label">Check-out</label>
                       <input
                         id="checkout-checkout"
                         type="date"

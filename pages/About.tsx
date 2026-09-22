@@ -43,8 +43,8 @@ const About: React.FC = () => (
 
     <section className="border-y border-primary/20 bg-primary py-16 text-black sm:py-20">
       <div className="ui-container">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-black/60">What guests can expect</p>
-        <h2 className="font-display mt-3 text-[clamp(2rem,4.5vw,3.75rem)] font-semibold leading-[1.05]">The experience, made simple.</h2>
+        <p className="text-[0.72rem] font-bold uppercase tracking-[0.18em] text-black/60">What guests can expect</p>
+        <h2 className="ui-section-title mt-3 italic">The experience, made simple.</h2>
         <div className="mt-10 grid gap-px overflow-hidden rounded-lg bg-black/15 md:grid-cols-3">
           {standards.map((standard) => (
             <article key={standard.title} className="bg-primary p-6 sm:p-8">
