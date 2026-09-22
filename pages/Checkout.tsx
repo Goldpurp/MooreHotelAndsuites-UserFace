@@ -16,9 +16,15 @@ interface CheckoutProps {
 type GuestInfo = { firstName: string; lastName: string; email: string; phone: string };
 type CheckoutStep = 2 | 3;
 
+const HOTEL_BANK_DETAILS = {
+  bankName: "Moniepoint Microfinance Bank",
+  accountName: "Yakubu Omobolanle",
+  accountNumber: "5452508008",
+};
+
 const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const { roomId } = useParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef<HTMLElement>(null);
   const transferCloseRef = useRef<HTMLButtonElement>(null);
@@ -28,7 +34,8 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const [processing, setProcessing] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [directTransferBooking, setDirectTransferBooking] = useState<Booking | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedAccount, setCopiedAccount] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isAvailable, setIsAvailable] = useState(false);
   const [availabilityLoading, setAvailabilityLoading] = useState(true);
@@ -46,8 +53,23 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const [pricingQuote, setPricingQuote] = useState<PricingQuote | null>(null);
 
-  const checkIn = searchParams.get("checkIn") || todayInputValue();
-  const checkOut = searchParams.get("checkOut") || addDaysToInput(checkIn, 1);
+  const [checkIn, setCheckIn] = useState<string>(() => searchParams.get("checkIn") || todayInputValue());
+  const [checkOut, setCheckOut] = useState<string>(() => searchParams.get("checkOut") || addDaysToInput(searchParams.get("checkIn") || todayInputValue(), 1));
+
+  const handleCheckInChange = (newCheckIn: string) => {
+    setCheckIn(newCheckIn);
+    let newCheckOut = checkOut;
+    if (!newCheckOut || newCheckOut <= newCheckIn) {
+      newCheckOut = addDaysToInput(newCheckIn, 1);
+      setCheckOut(newCheckOut);
+    }
+    setSearchParams({ checkIn: newCheckIn, checkOut: newCheckOut }, { replace: true });
+  };
+
+  const handleCheckOutChange = (newCheckOut: string) => {
+    setCheckOut(newCheckOut);
+    setSearchParams({ checkIn, checkOut: newCheckOut }, { replace: true });
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -149,18 +171,25 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleCopy = async () => {
-    const instructions = directTransferBooking?.paymentInstruction;
-    if (!instructions) {
-      setNotification({ show: true, title: "Instructions unavailable", message: "Contact Guest Relations and quote your booking reference.", type: "info" });
-      return;
-    }
+  const handleCopyCode = async () => {
+    const code = directTransferBooking?.bookingCode;
+    if (!code) return;
     try {
-      await navigator.clipboard.writeText(instructions);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(true);
+      window.setTimeout(() => setCopiedCode(false), 2000);
     } catch {
-      setNotification({ show: true, title: "Could not copy", message: "Select and copy the transfer details manually.", type: "info" });
+      // fallback
+    }
+  };
+
+  const handleCopyAccount = async () => {
+    try {
+      await navigator.clipboard.writeText(HOTEL_BANK_DETAILS.accountNumber);
+      setCopiedAccount(true);
+      window.setTimeout(() => setCopiedAccount(false), 2000);
+    } catch {
+      // fallback
     }
   };
 
@@ -294,38 +323,89 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
   if (fetchingRoom || !room) return <AestheticLoader message="Preparing your booking" subtext="Loading stay details" />;
 
+  const currentTotalAmount = pricingQuote ? pricingQuote.totalAmount : estimatedTotal;
+
   return (
     <div className="min-h-screen bg-background-dark px-4 pb-24 pt-32 sm:px-6">
       <NotificationModal isOpen={notification.show} onClose={() => setNotification((current) => ({ ...current, show: false }))} title={notification.title} message={notification.message} type={notification.type} />
       {processing && <AestheticLoader message="Securing your booking" subtext="Please keep this page open" />}
 
+      {/* Celebratory Booking Successful Dialog */}
       <Dialog
         isOpen={showTransferModal}
         onClose={viewTransferBooking}
-        labelledBy="transfer-title"
+        labelledBy="booking-success-title"
         initialFocusRef={transferCloseRef}
         closeOnBackdrop={false}
         closeOnEscape={false}
         panelClassName="ui-card w-full max-w-lg p-6 shadow-[0_30px_100px_rgba(0,0,0,.75)] sm:p-8"
       >
-            <div className="flex items-start justify-between gap-5">
-              <div><span className="grid size-12 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined" aria-hidden="true">account_balance</span></span><p className="ui-eyebrow mt-5">Direct transfer</p><h2 id="transfer-title" className="ui-card-title mt-2 italic text-white">Payment instructions</h2></div>
-              <button ref={transferCloseRef} type="button" onClick={viewTransferBooking} className="ui-icon-button" aria-label="Continue to booking status"><span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button>
+        <div className="text-center">
+          <span className="mx-auto grid size-16 place-items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+            <span className="material-symbols-outlined text-4xl" aria-hidden="true">check_circle</span>
+          </span>
+          <p className="ui-eyebrow mt-4 text-emerald-400">Reservation Received</p>
+          <h2 id="booking-success-title" className="ui-card-title mt-1 italic text-white">Booking Successful!</h2>
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold text-amber-300">
+            <span className="size-2 rounded-full bg-amber-400 animate-pulse" aria-hidden="true" />
+            Pending Verification
+          </div>
+          <p className="mt-3 text-sm leading-6 text-gray-300">
+            Thank you, <span className="font-semibold text-white">{guestInfo.firstName}</span>! Your booking request has been submitted.
+          </p>
+        </div>
+
+        <div className="mt-6 rounded border border-white/10 bg-black/30 p-4">
+          <div className="flex items-center justify-between">
+            <span className="ui-label">Booking Reference</span>
+            <button
+              type="button"
+              onClick={handleCopyCode}
+              className="inline-flex items-center gap-1 text-xs text-primary transition-colors hover:text-white"
+            >
+              <span className="material-symbols-outlined text-sm" aria-hidden="true">content_copy</span>
+              {copiedCode ? "Copied" : "Copy"}
+            </button>
+          </div>
+          <p className="mt-1 break-all font-mono text-2xl font-bold tracking-wider text-primary">
+            {directTransferBooking?.bookingCode}
+          </p>
+          <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3 text-xs text-gray-400">
+            <span>Total Amount:</span>
+            <span className="text-sm font-semibold text-white">₦{directTransferBooking?.amount.toLocaleString()}</span>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded border border-primary/20 bg-primary/5 p-4 text-left text-xs leading-6 text-gray-300">
+          <div className="flex items-start gap-2.5">
+            <span className="material-symbols-outlined shrink-0 text-primary" aria-hidden="true">mail</span>
+            <div>
+              <p className="font-semibold text-white">Confirmation & Ticket Validation</p>
+              <p className="mt-0.5 text-gray-400">
+                A confirmation email with your booking code has been dispatched to <strong className="text-gray-200">{guestInfo.email}</strong>.
+                Your ticket validation and payment receipt will be updated to your email once verified by hotel reception.
+              </p>
             </div>
-            <dl className="mt-6 grid grid-cols-2 gap-4 rounded border border-white/10 bg-black/25 p-4">
-              <div><dt className="ui-label">Booking reference</dt><dd className="break-all font-mono text-base font-bold text-primary">{directTransferBooking?.bookingCode}</dd></div>
-              <div><dt className="ui-label">Amount due</dt><dd className="text-lg font-semibold text-white">₦{directTransferBooking?.amount.toLocaleString()}</dd></div>
-            </dl>
-            <div className="mt-6">
-              <div className="flex items-center justify-between"><span className="ui-label">Transfer details</span><span className="text-xs text-emerald-400" aria-live="polite">{copied ? "Copied" : ""}</span></div>
-              <button type="button" onClick={handleCopy} className="mt-2 flex w-full items-start justify-between gap-4 rounded border border-white/10 bg-white/[0.035] p-4 text-left transition-colors hover:border-primary/30 hover:bg-primary/5">
-                <span className="whitespace-pre-wrap text-sm leading-7 text-gray-200">{directTransferBooking?.paymentInstruction || "Transfer instructions are temporarily unavailable. Contact Guest Relations and quote the booking reference above."}</span>
-                <span className="material-symbols-outlined text-primary" aria-hidden="true">content_copy</span>
-              </button>
-            </div>
-            <p className="mt-5 flex items-start gap-3 rounded border border-primary/20 bg-primary/5 p-4 text-sm leading-6 text-gray-400"><span className="material-symbols-outlined mt-0.5 text-primary" aria-hidden="true">info</span><span>Use the booking reference above. Your reservation is confirmed after the hotel verifies receipt of funds.</span></p>
-            {directTransferBooking?.notificationMessage && <p className="mt-4 text-sm leading-6 text-gray-400">{directTransferBooking.notificationMessage}</p>}
-            <div className="mt-6 grid gap-3 sm:grid-cols-2"><button type="button" onClick={handleCopy} className="ui-button ui-button-secondary">Copy details</button><button type="button" onClick={viewTransferBooking} className="ui-button ui-button-primary">View booking status</button></div>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <button
+            ref={transferCloseRef}
+            type="button"
+            onClick={viewTransferBooking}
+            className="ui-button ui-button-primary"
+          >
+            View Booking Details
+          </button>
+          <button
+            type="button"
+            onClick={() => { setShowTransferModal(false); navigate("/"); }}
+            className="ui-button ui-button-secondary"
+          >
+            Return Home
+          </button>
+        </div>
       </Dialog>
 
       <div className="ui-container-wide">
@@ -355,22 +435,69 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                 </label>
                 {adultCount + childCount > room.capacity && <p className="mt-3 text-sm text-red-400" role="alert">This room allows up to {room.capacity} guests.</p>}
                 {!user && <p className="mt-6 text-sm leading-6 text-gray-500">You can create an account later to keep future bookings together.</p>}
-                <button type="button" onClick={goBack} className="mt-7 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-white"><span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span> Back to room and dates</button>
+                <button type="button" onClick={goBack} className="mt-7 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-white"><span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span> Back to room</button>
               </section>
             ) : (
               <section id="payment-section" className="ui-card scroll-mt-32 p-6 sm:p-8">
-                <p className="ui-eyebrow">Payment</p><h2 className="ui-card-title mt-2 italic text-white">Direct bank transfer</h2>
-                <p className="mt-3 text-sm leading-6 text-gray-500">Create the booking to receive the hotel bank details and your unique booking reference. Your reservation is confirmed after the hotel verifies receipt.</p>
-                <div className="mt-7 rounded border border-primary/25 bg-primary/10 p-5">
-                  <span className="material-symbols-outlined text-2xl text-primary" aria-hidden="true">account_balance</span>
-                  <h3 className="mt-3 text-base font-semibold text-white">Hotel bank transfer</h3>
-                  <p className="mt-2 text-sm leading-6 text-gray-400">The transfer instructions appear immediately after your booking is created.</p>
+                <p className="ui-eyebrow">Step 3 of 3</p>
+                <h2 className="ui-card-title mt-2 italic text-white">Direct Bank Transfer</h2>
+                <p className="mt-3 text-sm leading-6 text-gray-400">
+                  Please transfer the total stay amount directly to our hotel bank account below. Once transferred, click the button to acknowledge payment. Your booking reference will be generated and ticket validation will be updated to your email upon reception verification.
+                </p>
+
+                {/* Bank Account Details Card */}
+                <div className="mt-6 overflow-hidden rounded-lg border border-primary/30 bg-primary/5 p-5 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary">
+                      <span className="material-symbols-outlined text-lg" aria-hidden="true">account_balance</span>
+                      Hotel Official Bank Account
+                    </span>
+                    <span className="text-xs text-emerald-400" aria-live="polite">
+                      {copiedAccount ? "Copied!" : ""}
+                    </span>
+                  </div>
+
+                  <dl className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div className="rounded border border-white/10 bg-black/40 p-3.5">
+                      <dt className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Bank Name</dt>
+                      <dd className="mt-1 font-semibold text-white text-base">{HOTEL_BANK_DETAILS.bankName}</dd>
+                    </div>
+                    <div className="rounded border border-white/10 bg-black/40 p-3.5">
+                      <dt className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Account Name</dt>
+                      <dd className="mt-1 font-semibold text-white text-base">{HOTEL_BANK_DETAILS.accountName}</dd>
+                    </div>
+                    <div className="rounded border border-white/10 bg-black/40 p-3.5 sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <dt className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Account Number</dt>
+                        <button
+                          type="button"
+                          onClick={handleCopyAccount}
+                          className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:text-white"
+                        >
+                          <span className="material-symbols-outlined text-sm" aria-hidden="true">content_copy</span>
+                          {copiedAccount ? "Copied" : "Copy Account"}
+                        </button>
+                      </div>
+                      <dd className="mt-1 font-mono text-2xl font-bold tracking-widest text-primary">
+                        {HOTEL_BANK_DETAILS.accountNumber}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <div className="mt-4 flex items-center justify-between rounded border border-white/10 bg-black/30 p-3.5 text-sm">
+                    <span className="text-gray-400">Total Amount to Pay:</span>
+                    <span className="font-display text-xl font-bold text-white">
+                      ₦{currentTotalAmount.toLocaleString()}
+                    </span>
+                  </div>
                 </div>
-                <div className="mt-7 rounded border border-white/10 bg-black/20 p-4 text-sm">
+
+                <div className="mt-6 rounded border border-white/10 bg-black/20 p-4 text-sm">
                   <p className="ui-label">Booking contact</p>
                   <p className="font-medium text-white">{guestInfo.firstName} {guestInfo.lastName}</p>
                   <p className="mt-1 break-all text-gray-500">{guestInfo.email}</p>
                 </div>
+
                 {pricingQuote && (
                   <div className="mt-5 rounded border border-white/10 bg-black/20 p-4 text-sm">
                     <div className="flex items-start justify-between gap-4">
@@ -388,6 +515,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                     <p className="mt-3 text-xs text-gray-500">Price held until {new Date(pricingQuote.expiresAtUtc).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.</p>
                   </div>
                 )}
+
                 <button type="button" onClick={goBack} className="mt-7 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-white"><span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span> Back to guest details</button>
               </section>
             )}
@@ -397,7 +525,44 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
             <div className="ui-card sticky top-28 overflow-hidden shadow-2xl">
               <div className="relative h-48 bg-gray-800"><img src={cloudinaryImage(room.images?.[0], 720)} className="image-luxury h-full w-full object-cover" alt={room.name} loading="lazy" decoding="async" /><div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-black/20 to-transparent p-6"><p className="ui-eyebrow">{room.category}</p><h2 className="ui-card-title mt-2 italic text-white">{room.name}</h2></div></div>
               <div className="space-y-6 p-6 sm:p-8">
-                <dl className="space-y-4 text-sm"><SummaryRow label="Stay duration" value={`${nights} ${nights === 1 ? "night" : "nights"}`} /><SummaryRow label="Check-in" value={new Date(checkIn).toLocaleDateString()} /><SummaryRow label="Check-out" value={new Date(checkOut).toLocaleDateString()} /><SummaryRow label="Room capacity" value={`Up to ${room.capacity} ${room.capacity === 1 ? "guest" : "guests"}`} /></dl>
+                
+                {/* Stay Dates with Direct Change Support */}
+                <div className="rounded border border-white/10 bg-black/25 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="ui-label">Stay dates</span>
+                    <span className="text-xs font-semibold text-primary">{nights} {nights === 1 ? "night" : "nights"}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label htmlFor="checkout-checkin" className="block text-xs text-gray-400 mb-1">Check-in</label>
+                      <input
+                        id="checkout-checkin"
+                        type="date"
+                        min={todayInputValue()}
+                        value={checkIn}
+                        disabled={processing}
+                        onChange={(event) => handleCheckInChange(event.target.value)}
+                        className="ui-input py-1.5 px-2 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="checkout-checkout" className="block text-xs text-gray-400 mb-1">Check-out</label>
+                      <input
+                        id="checkout-checkout"
+                        type="date"
+                        min={addDaysToInput(checkIn, 1)}
+                        value={checkOut}
+                        disabled={processing}
+                        onChange={(event) => handleCheckOutChange(event.target.value)}
+                        className="ui-input py-1.5 px-2 text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <dl className="space-y-4 text-sm">
+                  <SummaryRow label="Room capacity" value={`Up to ${room.capacity} ${room.capacity === 1 ? "guest" : "guests"}`} />
+                </dl>
                 <div className="border-t border-white/10 pt-5"><span className="ui-label">Stay total</span><p className="font-display text-3xl font-semibold italic text-primary">{pricingQuote ? formatMoney(pricingQuote.totalAmount, pricingQuote.currency) : formatMoney(estimatedTotal)}</p><p className="mt-1 text-xs text-gray-500">{pricingQuote ? "Hotel-confirmed price" : `${nights} × ${formatMoney(room.pricePerNight)}`}</p></div>
                 <button
                   type="button"
@@ -406,7 +571,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   className="ui-button ui-button-primary w-full"
                 >
                   {(processing || availabilityLoading) && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}
-                  {availabilityLoading ? "Verifying" : processing ? "Processing" : currentStep === 2 ? "Review payment" : "Create booking"}
+                  {availabilityLoading ? "Verifying" : processing ? "Processing" : currentStep === 2 ? "Review payment" : "I have made this transfer"}
                   {!processing && !availabilityLoading && <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>}
                 </button>
                 {availabilityMessage && <p className="rounded border border-red-500/20 bg-red-500/5 p-3 text-center text-sm text-red-300" aria-live="polite">{availabilityMessage}</p>}

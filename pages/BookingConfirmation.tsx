@@ -61,11 +61,13 @@ const BookingConfirmation: React.FC = () => {
       }
 
       if (currentBooking) {
-        try {
-          const roomData = await api.getRoomById(currentBooking.roomId);
-          if (active) setRoom(roomData);
-        } catch {
-          if (active) setError("The booking was found, but its room details are unavailable.");
+        if (currentBooking.roomId && currentBooking.roomId !== "undefined") {
+          try {
+            const roomData = await api.getRoomById(currentBooking.roomId);
+            if (active) setRoom(roomData);
+          } catch {
+            // Room details can be omitted if room ID is unassigned
+          }
         }
       } else if (!guestAccessToken && !hasAccountSession && active) {
         setError("Enter the booking email to securely retrieve this reservation.");
@@ -111,11 +113,24 @@ const BookingConfirmation: React.FC = () => {
     setNotice(null);
     try {
       if (guestAccessToken || hasAccountSession) {
-        const verifiedBooking = await api.lookupBooking(code, lookupEmail, guestAccessToken);
-        const roomData = await api.getRoomById(verifiedBooking.roomId);
-        api.rememberBookingLookup(code, lookupEmail, guestAccessToken);
-        setBooking(verifiedBooking);
-        setRoom(roomData);
+        try {
+          const verifiedBooking = await api.lookupBooking(code, lookupEmail, guestAccessToken);
+          api.rememberBookingLookup(code, lookupEmail, guestAccessToken);
+          setBooking(verifiedBooking);
+          if (verifiedBooking.roomId && verifiedBooking.roomId !== "undefined") {
+            try {
+              const roomData = await api.getRoomById(verifiedBooking.roomId);
+              setRoom(roomData);
+            } catch {
+              // Room details are optional
+            }
+          }
+          return;
+        } catch {
+          // If remembered session access token failed or expired, send an access link
+          await api.requestBookingAccessLink(code, lookupEmail);
+          setNotice("A secure booking access link has been sent to your email. Check your inbox and spam folder.");
+        }
       } else {
         await api.requestBookingAccessLink(code, lookupEmail);
         setNotice("If those details match, a secure booking link is on its way. Check your inbox and spam folder.");
@@ -137,7 +152,7 @@ const BookingConfirmation: React.FC = () => {
     return <AestheticLoader message="Retrieving your booking" subtext="Verifying details" />;
   }
 
-  if (!booking || !room) {
+  if (!booking) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
         <form
@@ -220,7 +235,7 @@ const BookingConfirmation: React.FC = () => {
             </p>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-5 border-t border-white/10 pt-6 text-sm sm:grid-cols-4">
-            <BookingField label="Room" value={room.name} detail={room.category} />
+            <BookingField label="Room" value={booking.roomTypeName || room?.name || "Standard Room"} detail={room?.category || booking.roomTypeCode || ""} />
             <BookingField
               label="Nights"
               value={String(
