@@ -16,7 +16,7 @@ const Privacy: React.FC = () => {
           </p>
         </header>
 
-        <div className="mt-10 space-y-10 text-[0.96rem] leading-8 text-gray-400">
+        <div className="mt-10 max-w-3xl space-y-10 text-[0.96rem] leading-8 text-gray-400">
           <PolicySection title="1. Who This Notice Covers">
             <p>
               This notice explains how Moore Hotels &amp; Suites handles personal data when you
@@ -112,7 +112,7 @@ const Privacy: React.FC = () => {
             <p>
               For privacy questions or requests, contact{" "}
               <a
-                className="text-primary italic hover:text-white"
+                className="text-primary hover:text-white transition-colors"
                 href="mailto:info@moorehotelandsuites.com"
               >
                 info@moorehotelandsuites.com

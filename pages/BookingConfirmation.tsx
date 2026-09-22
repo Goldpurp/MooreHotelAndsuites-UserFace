@@ -212,7 +212,7 @@ const BookingConfirmation: React.FC = () => {
     ? "border-primary bg-primary/10 text-primary"
     : isCancelled
       ? "border-red-500 bg-red-500/10 text-red-500"
-      : "border-green-500 bg-green-500/10 text-green-500";
+      : "border-emerald-500 bg-emerald-500/10 text-emerald-500";
   return (
     <div className="booking-print-page flex min-h-screen items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
       <div className="booking-print-card ui-card w-full max-w-2xl p-6 shadow-2xl sm:p-10">

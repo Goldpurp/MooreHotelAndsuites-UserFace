@@ -16,7 +16,7 @@ const Terms: React.FC = () => {
         </header>
 
         {/* Terms Sections */}
-        <div className="mt-10 space-y-10 text-[0.96rem] leading-8 text-gray-400">
+        <div className="mt-10 max-w-3xl space-y-10 text-[0.96rem] leading-8 text-gray-400">
           {[
             {
               title: "Using This Website",
