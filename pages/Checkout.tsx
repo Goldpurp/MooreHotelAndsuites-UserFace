@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { api, getTrustedPaymentUrl } from "../services/api";
+import { api } from "../services/api";
 import { ApplicationUser, Booking, PaymentMethod, PricingQuote, PrivacyPolicy, Room } from "../types";
 import NotificationModal from "../components/NotificationModal";
 import AestheticLoader from "../components/AestheticLoader";
 import Dialog from "../components/ui/Dialog";
 import { addDaysToInput, differenceInNights, todayInputValue } from "../utils/dates";
 import FormField from "../components/ui/FormField";
-import { appConfig } from "../config/environment";
 import { cloudinaryImage } from "../utils/cloudinary";
 
 interface CheckoutProps {
@@ -26,7 +25,6 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const [room, setRoom] = useState<Room | null>(null);
   const [fetchingRoom, setFetchingRoom] = useState(true);
   const [currentStep, setCurrentStep] = useState<CheckoutStep>(2);
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [processing, setProcessing] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [directTransferBooking, setDirectTransferBooking] = useState<Booking | null>(null);
@@ -175,7 +173,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     roomQuantity: 1,
   });
 
-  const createBooking = (paymentMethod: PaymentMethod, quote: PricingQuote) => api.createBooking({
+  const createBooking = (quote: PricingQuote) => api.createBooking({
     roomId: roomId!,
     guestFirstName: guestInfo.firstName.trim(),
     guestLastName: guestInfo.lastName.trim(),
@@ -183,8 +181,8 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     guestPhone: guestInfo.phone.trim(),
     checkIn,
     checkOut,
-    paymentMethod,
-    notes: user ? `Member selected ${paymentMethod}.` : `Guest selected ${paymentMethod}.`,
+    paymentMethod: PaymentMethod.DirectTransfer,
+    notes: user ? "Member selected direct bank transfer." : "Guest selected direct bank transfer.",
     adultCount,
     childCount,
     acceptPrivacyPolicy: acceptedPolicies,
@@ -245,16 +243,11 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
   const handleBooking = async () => {
     if (processing || !validateGuestInfo()) return;
-    if (!selectedMethod) {
-      setNotification({ show: true, title: "Choose a payment method", message: "Select online payment or direct bank transfer to continue.", type: "info" });
-      document.getElementById("payment-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
-    }
     if (availabilityLoading || !isAvailable) {
       setNotification({ show: true, title: "Room unavailable", message: availabilityMessage || "This room is unavailable for the selected dates.", type: "error" });
       return;
     }
-    if (selectedMethod === PaymentMethod.DirectTransfer && directTransferBooking) {
+    if (directTransferBooking) {
       setShowTransferModal(true);
       return;
     }
@@ -279,20 +272,11 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
         }
         quote = refreshedQuote;
       }
-      const booking = await createBooking(selectedMethod, quote);
+      const booking = await createBooking(quote);
       api.rememberBookingLookup(booking.bookingCode, guestInfo.email, booking.guestAccessToken);
-      if (selectedMethod === PaymentMethod.DirectTransfer) {
-        setDirectTransferBooking(booking);
-        setShowTransferModal(true);
-        return;
-      }
-      if (booking.paymentUrl) {
-        const trustedPaymentUrl = getTrustedPaymentUrl(booking.paymentUrl);
-        if (!trustedPaymentUrl) throw new Error("The payment provider returned an invalid checkout address.");
-        window.location.assign(trustedPaymentUrl);
-        return;
-      }
-      navigate(`/booking-confirmation/${booking.bookingCode}`, { state: { booking } });
+      setDirectTransferBooking(booking);
+      setShowTransferModal(true);
+      return;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "We could not process your booking. Please try again.";
       if (/pricing quote|after pricing|new quote/i.test(message)) setPricingQuote(null);
@@ -375,17 +359,12 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
               </section>
             ) : (
               <section id="payment-section" className="ui-card scroll-mt-32 p-6 sm:p-8">
-                <p className="ui-eyebrow">Payment</p><h2 className="ui-card-title mt-2 italic text-white">Choose how to pay</h2>
-                <p className="mt-3 text-sm leading-6 text-gray-500">
-                  {appConfig.monnifyEnabled
-                    ? "No card details are collected by Moore Hotels. Online payments continue through Monnify’s secure checkout."
-                    : "Direct bank transfer is currently available. Your reservation is confirmed only after the hotel verifies receipt."}
-                </p>
-                <div className={`mt-7 grid gap-4 ${appConfig.monnifyEnabled ? "md:grid-cols-2" : ""}`}>
-                  {appConfig.monnifyEnabled && (
-                    <PaymentChoice icon="credit_card" title="Pay online with Monnify" description="Use card, bank transfer, or USSD on the secure provider page." selected={selectedMethod === PaymentMethod.Monnify} disabled={processing} onClick={() => setSelectedMethod(PaymentMethod.Monnify)} />
-                  )}
-                  <PaymentChoice icon="account_balance" title="Direct bank transfer" description="Receive hotel transfer instructions, then await verification." selected={selectedMethod === PaymentMethod.DirectTransfer} disabled={processing} onClick={() => setSelectedMethod(PaymentMethod.DirectTransfer)} />
+                <p className="ui-eyebrow">Payment</p><h2 className="ui-card-title mt-2 italic text-white">Direct bank transfer</h2>
+                <p className="mt-3 text-sm leading-6 text-gray-500">Create the booking to receive the hotel bank details and your unique booking reference. Your reservation is confirmed after the hotel verifies receipt.</p>
+                <div className="mt-7 rounded border border-primary/25 bg-primary/10 p-5">
+                  <span className="material-symbols-outlined text-2xl text-primary" aria-hidden="true">account_balance</span>
+                  <h3 className="mt-3 text-base font-semibold text-white">Hotel bank transfer</h3>
+                  <p className="mt-2 text-sm leading-6 text-gray-400">The transfer instructions appear immediately after your booking is created.</p>
                 </div>
                 <div className="mt-7 rounded border border-white/10 bg-black/20 p-4 text-sm">
                   <p className="ui-label">Booking contact</p>
@@ -423,15 +402,15 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                 <button
                   type="button"
                   onClick={currentStep === 2 ? () => void continueToPayment() : handleBooking}
-                  disabled={processing || availabilityLoading || !isAvailable || !policies || (currentStep === 3 && !selectedMethod)}
+                  disabled={processing || availabilityLoading || !isAvailable || !policies}
                   className="ui-button ui-button-primary w-full"
                 >
                   {(processing || availabilityLoading) && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}
-                  {availabilityLoading ? "Verifying" : processing ? "Processing" : currentStep === 2 ? "Continue to payment" : "Confirm & continue"}
+                  {availabilityLoading ? "Verifying" : processing ? "Processing" : currentStep === 2 ? "Review payment" : "Create booking"}
                   {!processing && !availabilityLoading && <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>}
                 </button>
                 {availabilityMessage && <p className="rounded border border-red-500/20 bg-red-500/5 p-3 text-center text-sm text-red-300" aria-live="polite">{availabilityMessage}</p>}
-                <p className="flex items-center justify-center gap-2 text-center text-xs text-gray-500"><span className="material-symbols-outlined text-base" aria-hidden="true">lock</span> Secure booking and payment handoff</p>
+                <p className="flex items-center justify-center gap-2 text-center text-xs text-gray-500"><span className="material-symbols-outlined text-base" aria-hidden="true">lock</span> Secure booking and transfer instructions</p>
               </div>
             </div>
           </aside>
@@ -470,10 +449,6 @@ const CheckoutProgress = ({ currentStep, onStay, onGuest }: { currentStep: Check
     </nav>
   );
 };
-
-const PaymentChoice = ({ icon, title, description, selected, disabled, onClick }: { icon: string; title: string; description: string; selected: boolean; disabled: boolean; onClick: () => void }) => (
-  <button type="button" disabled={disabled} onClick={onClick} aria-pressed={selected} className={`group min-h-36 rounded border p-5 text-left transition duration-200 ${selected ? "border-primary bg-primary/10 shadow-[0_12px_30px_rgba(201,74,17,.08)]" : "border-white/10 bg-white/[0.025] hover:-translate-y-0.5 hover:border-white/25"}`}><span className={`material-symbols-outlined text-2xl ${selected ? "text-primary" : "text-gray-500 group-hover:text-primary"}`} aria-hidden="true">{icon}</span><h3 className="mt-3 text-base font-semibold text-white">{title}</h3><p className="mt-2 text-sm leading-6 text-gray-500">{description}</p></button>
-);
 
 const SummaryRow = ({ label, value }: { label: string; value: string }) => <div className="flex justify-between gap-4"><dt className="text-gray-500">{label}</dt><dd className="font-semibold text-white">{value}</dd></div>;
 

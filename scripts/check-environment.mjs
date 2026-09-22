@@ -57,10 +57,6 @@ if (!Object.hasOwn(definitions, profile)) {
     if (values.VITE_API_MODE !== definition.apiMode) {
       errors.push(`VITE_API_MODE must be ${definition.apiMode}`);
     }
-    if (!["true", "false"].includes(values.VITE_MONNIFY_ENABLED)) {
-      errors.push("VITE_MONNIFY_ENABLED must be true or false");
-    }
-
     const baseUrl = values.VITE_API_BASE_URL || "";
     const proxyTarget = values.API_PROXY_TARGET || "";
     let healthUrl;

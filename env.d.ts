@@ -5,7 +5,6 @@ interface ImportMetaEnv {
   readonly VITE_API_MODE?: "proxy" | "direct";
   readonly VITE_API_BASE_URL?: string;
   readonly VITE_API_TIMEOUT_MS?: string;
-  readonly VITE_MONNIFY_ENABLED?: "true" | "false";
   readonly VITE_DEV_PORT?: string;
   readonly VITE_PREVIEW_PORT?: string;
   readonly VITE_GA_MEASUREMENT_ID?: string;

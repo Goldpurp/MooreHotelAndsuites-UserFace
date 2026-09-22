@@ -39,7 +39,6 @@ export enum PaymentStatus
 }
 
 export enum PaymentMethod {
-  Monnify = "Monnify",
   DirectTransfer = "DirectTransfer",
 }
 
@@ -140,7 +139,6 @@ export interface Booking {
   transactionReference?: string | null;
   notes?: string;
   createdAt: string;
-  paymentUrl?: string | null;
   paymentInstruction?: string | null;
   notificationMessage?: string | null;
   paymentExpiresAtUtc?: string | null;

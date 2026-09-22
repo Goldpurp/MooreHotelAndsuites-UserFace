@@ -129,26 +129,6 @@ function extractErrorMessage(error: unknown, status: number): string {
   return `Request failed (${status}).`;
 }
 
-export function getTrustedPaymentUrl(value: string | null | undefined): string | null {
-  if (!value) return null;
-
-  try {
-    const url = new URL(value);
-    const isMonnifyHost =
-      url.hostname === "monnify.com" || url.hostname.endsWith(".monnify.com");
-    const isLocalDevelopment =
-      appConfig.isLocal &&
-      (url.hostname === "localhost" || url.hostname === "127.0.0.1");
-
-    if (url.protocol !== "https:" && !isLocalDevelopment) return null;
-    if (!isMonnifyHost && !isLocalDevelopment) return null;
-
-    return url.toString();
-  } catch {
-    return null;
-  }
-}
-
 class ApiService {
   private token: string | null = this.loadToken();
 

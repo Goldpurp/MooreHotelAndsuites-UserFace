@@ -25,7 +25,6 @@ VITE_APP_ENV=production
 VITE_API_MODE=direct
 VITE_API_BASE_URL=https://api.moorehotelandsuites.com/api
 VITE_API_TIMEOUT_MS=15000
-VITE_MONNIFY_ENABLED=false
 VITE_GOOGLE_SITE_VERIFICATION=
 SITE_URL=https://moorehotelandsuites.com
 SITEMAP_ROOMS_API_URL=https://api.moorehotelandsuites.com/api/rooms
@@ -33,26 +32,13 @@ SITEMAP_REQUIRE_ROOMS_API=true
 AI_CRAWLER_POLICY=search-only
 ```
 
-Never add database, JWT, Brevo, Cloudinary, administrator or Monnify secrets to
+Never add database, JWT, Brevo, Cloudinary, administrator or payment-provider secrets to
 this repository or a `VITE_*` value. Every Vite variable is visible to users.
 
 ## Payment state
 
-Monnify is intentionally hidden while `VITE_MONNIFY_ENABLED=false`. The API
-also rejects Monnify booking attempts while its server flag is disabled, so
-changing browser code cannot bypass this control. Direct bank transfer remains
-available.
-
-Enable Monnify only after the API deployment guide's sandbox, webhook,
-verification, controlled transaction and refund checks pass. Both flags must
-then be changed together:
-
-```text
-API: MonnifySettings__Enabled=true
-Website: VITE_MONNIFY_ENABLED=true
-```
-
-Rebuild this website after changing the frontend flag.
+Guest checkout uses direct hotel bank transfer. The API supplies the bank
+details and booking reference after it validates the server-issued price quote.
 
 ## Release procedure
 
@@ -89,8 +75,6 @@ Test on a real phone, tablet and desktop:
 - unpaid bookings expire after one hour and show the cancellation state;
 - booking, cancellation, expiry and checkout emails arrive;
 - profile and avatar updates survive refresh and a new login;
-- external payment URLs, when later enabled, are accepted only for trusted
-  Monnify HTTPS hosts;
 - browser console and network responses contain no tokens, passwords or
   provider secrets;
 - CSP, HSTS, `nosniff`, frame denial, referrer policy and permissions policy are

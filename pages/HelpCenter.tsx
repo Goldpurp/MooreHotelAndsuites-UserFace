@@ -13,8 +13,8 @@ const faqGroups = [
     { q: "Can I arrange an airport transfer?", a: "Transfer requests can be arranged in advance through Guest Relations. Availability and pricing depend on the route and vehicle required." },
   ]},
   { category: "Payments & security", questions: [
-    { q: "Which payment methods are supported?", a: "Direct hotel bank transfer is currently available and remains pending until the hotel verifies receipt. Secure Monnify checkout will appear here when the hotel enables it." },
-    { q: "Does Moore collect my card details?", a: "No. When secure online payment is enabled, card and supported payment details are entered on the payment provider’s checkout, not on the Moore Hotels website." },
+    { q: "Which payment methods are supported?", a: "Direct hotel bank transfer is available. The booking remains pending until the hotel verifies receipt." },
+    { q: "Does Moore collect my card details?", a: "No. Moore Hotels does not collect card details on this website." },
     { q: "How do I check a payment or booking status?", a: "Use Manage Booking with the booking reference and the exact email used at checkout. The retrieved record shows the latest verified booking and payment status." },
   ]},
 ];

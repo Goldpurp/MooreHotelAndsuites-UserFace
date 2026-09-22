@@ -5,9 +5,13 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("guest booking uses the hardened API contract", async () => {
-  const [api, checkout, app] = await Promise.all([
+  const [api, checkout, confirmation, helpCenter, environment, types, app] = await Promise.all([
     read("services/api.ts"),
     read("pages/Checkout.tsx"),
+    read("pages/BookingConfirmation.tsx"),
+    read("pages/HelpCenter.tsx"),
+    read("config/environment.ts"),
+    read("types.ts"),
     read("App.tsx"),
   ]);
 
@@ -24,6 +28,13 @@ test("guest booking uses the hardened API contract", async () => {
   assert.match(checkout, /pricingQuote\.totalAmount/);
   assert.match(checkout, /The stay price changed while you were checking out/);
   assert.match(checkout, /pricing quote\|after pricing\|new quote/);
+  assert.match(checkout, /paymentMethod: PaymentMethod\.DirectTransfer/);
+  assert.doesNotMatch(checkout, /PaymentMethod\.Monnify/);
+  assert.doesNotMatch(checkout, /getTrustedPaymentUrl/);
+  assert.doesNotMatch(
+    [api, checkout, confirmation, helpCenter, environment, types].join("\n"),
+    /monnify/i,
+  );
   assert.doesNotMatch(checkout, /requestBookingEmailVerification/);
   assert.doesNotMatch(checkout, /emailVerificationToken/);
   assert.doesNotMatch(api, /\/bookings\/verification\/request/);

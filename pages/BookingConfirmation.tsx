@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
-import { api, getTrustedPaymentUrl } from "../services/api";
+import { api } from "../services/api";
 import { Booking, Room, BookingStatus } from "../types";
 import AestheticLoader from "../components/AestheticLoader";
 
@@ -198,10 +198,6 @@ const BookingConfirmation: React.FC = () => {
     : isCancelled
       ? "border-red-500 bg-red-500/10 text-red-500"
       : "border-green-500 bg-green-500/10 text-green-500";
-  const trustedPaymentUrl = isPending
-    ? getTrustedPaymentUrl(booking.paymentUrl)
-    : null;
-
   return (
     <div className="booking-print-page flex min-h-screen items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
       <div className="booking-print-card ui-card w-full max-w-2xl p-6 shadow-2xl sm:p-10">
@@ -275,18 +271,7 @@ const BookingConfirmation: React.FC = () => {
           </section>
         )}
 
-        {trustedPaymentUrl && (
-          <a
-            href={trustedPaymentUrl}
-            rel="noopener noreferrer"
-            className="print-hidden ui-button ui-button-primary mt-7 w-full"
-          >
-            <span className="material-symbols-outlined" aria-hidden="true">payments</span>
-            Continue secure Monnify payment
-          </a>
-        )}
-
-        <div className={`print-hidden grid gap-3 sm:grid-cols-3 ${trustedPaymentUrl ? "mt-3" : "mt-7"}`}>
+        <div className="print-hidden mt-7 grid gap-3 sm:grid-cols-3">
           <button
             onClick={printBooking}
             className="ui-button ui-button-primary w-full"
