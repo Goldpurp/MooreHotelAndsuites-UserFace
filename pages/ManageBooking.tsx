@@ -11,7 +11,6 @@ const ManageBooking: React.FC = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
   const [statusBooking, setStatusBooking] = useState<Booking | null>(null);
   const [statusRoom, setStatusRoom] = useState<Room | null>(null);
 
@@ -80,28 +79,15 @@ const ManageBooking: React.FC = () => {
 
     setLoading(true);
     setError("");
-    setNotice("");
     try {
-      // A previously verified guest already holds a secure access token for
-      // this reference — reuse it to show the status instantly rather than
-      // sending another email.
-      const remembered = api.getRememberedBookingAccess(normalizedCode);
-      if (remembered.guestAccessToken && remembered.email === normalizedEmail) {
-        try {
-          await showBookingStatus(normalizedCode, normalizedEmail, remembered.guestAccessToken);
-          return;
-        } catch {
-          // The remembered token may have expired; fall back to emailing a new link.
-        }
-      }
-
-      await api.requestBookingAccessLink(normalizedCode, normalizedEmail);
-      setNotice("If those details match, a secure booking link is on its way. Check your inbox and spam folder.");
+      // The booking email is itself a valid credential for /bookings/lookup,
+      // so a matching reference + email shows the status immediately.
+      await showBookingStatus(normalizedCode, normalizedEmail, "");
     } catch (lookupError) {
       setError(
         lookupError instanceof Error
           ? lookupError.message
-          : "The secure link could not be requested.",
+          : "No booking was found with that reference and email.",
       );
     } finally {
       setLoading(false);
@@ -154,11 +140,6 @@ const ManageBooking: React.FC = () => {
         {error && (
           <p role="alert" className="mt-4 text-center text-sm text-red-400">
             {error}
-          </p>
-        )}
-        {notice && (
-          <p role="status" className="mt-4 text-center text-sm text-emerald-300">
-            {notice}
           </p>
         )}
 

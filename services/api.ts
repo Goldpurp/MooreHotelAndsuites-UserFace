@@ -441,14 +441,17 @@ class ApiService {
   }
 
   async lookupBooking(bookingCode: string, email = "", guestAccessToken = ""): Promise<Booking> {
-    void email;
     const headers = new Headers();
     if (guestAccessToken.trim()) headers.set("X-Booking-Access-Token", guestAccessToken.trim());
+    const trimmedEmail = email.trim();
     return normalizeBooking(
       await this.request<Booking>("/bookings/lookup", {
         method: "POST",
         headers,
-        body: JSON.stringify({ code: bookingCode.trim().toUpperCase() }),
+        body: JSON.stringify({
+          code: bookingCode.trim().toUpperCase(),
+          ...(trimmedEmail ? { email: trimmedEmail } : {}),
+        }),
       }),
     );
   }
