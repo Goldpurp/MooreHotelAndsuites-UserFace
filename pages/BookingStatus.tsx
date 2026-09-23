@@ -9,13 +9,20 @@ const BookingStatus: React.FC = () => {
   const accessToken = new URLSearchParams(window.location.hash.slice(1)).get("accessToken");
 
   useEffect(() => {
-    if (code) {
-      navigate(`/booking-confirmation/${encodeURIComponent(code.trim().toUpperCase())}`, {
+    if (code && accessToken) {
+      navigate("/manage-booking", {
         replace: true,
-        state: { guestAccessToken: accessToken || "" },
+        state: { lookupCode: code.trim().toUpperCase(), guestAccessToken: accessToken },
       });
+    } else if (code) {
+      // A code without a token can't be auto-verified; just prefill the form.
+      navigate("/manage-booking", {
+        replace: true,
+        state: { prefillCode: code.trim().toUpperCase() },
+      });
+    } else {
+      navigate("/manage-booking", { replace: true });
     }
-    else navigate("/manage-booking", { replace: true });
   }, [code, accessToken, navigate]);
 
   return (

@@ -1,12 +1,68 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import { Booking, Room } from "../types";
+import BookingStatusModal from "../components/BookingStatusModal";
 
 const ManageBooking: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [bookingCode, setBookingCode] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [statusBooking, setStatusBooking] = useState<Booking | null>(null);
+  const [statusRoom, setStatusRoom] = useState<Room | null>(null);
+
+  const showBookingStatus = async (
+    code: string,
+    lookupEmail: string,
+    guestAccessToken: string,
+  ) => {
+    const booking = await api.lookupBooking(code, lookupEmail, guestAccessToken);
+    api.rememberBookingLookup(code, booking.guestEmail || lookupEmail, guestAccessToken);
+    setStatusBooking(booking);
+    setStatusRoom(null);
+    if (booking.roomId && booking.roomId !== "undefined") {
+      try {
+        setStatusRoom(await api.getRoomById(booking.roomId));
+      } catch {
+        // Room details are optional in the status modal.
+      }
+    }
+  };
+
+  // A guest who followed the emailed secure link lands here with the code
+  // and access token handed off in router state (see BookingStatus.tsx) —
+  // show the result immediately instead of asking them to fill the form again.
+  useEffect(() => {
+    const state = location.state as
+      | { lookupCode?: string; guestAccessToken?: string; prefillCode?: string }
+      | null;
+    if (!state?.lookupCode && !state?.prefillCode) return;
+
+    navigate(location.pathname, { replace: true, state: null });
+
+    if (state.lookupCode && state.guestAccessToken) {
+      const code = state.lookupCode.trim().toUpperCase();
+      setBookingCode(code);
+      setLoading(true);
+      setError("");
+      showBookingStatus(code, api.getRememberedBookingEmail(code), state.guestAccessToken)
+        .catch((statusError) => {
+          setError(
+            statusError instanceof Error
+              ? statusError.message
+              : "This secure link is invalid or has expired.",
+          );
+        })
+        .finally(() => setLoading(false));
+    } else if (state.prefillCode) {
+      setBookingCode(state.prefillCode.trim().toUpperCase());
+    }
+    // Runs once on mount to consume the one-time hand-off from BookingStatus.tsx.
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -26,6 +82,19 @@ const ManageBooking: React.FC = () => {
     setError("");
     setNotice("");
     try {
+      // A previously verified guest already holds a secure access token for
+      // this reference — reuse it to show the status instantly rather than
+      // sending another email.
+      const remembered = api.getRememberedBookingAccess(normalizedCode);
+      if (remembered.guestAccessToken && remembered.email === normalizedEmail) {
+        try {
+          await showBookingStatus(normalizedCode, normalizedEmail, remembered.guestAccessToken);
+          return;
+        } catch {
+          // The remembered token may have expired; fall back to emailing a new link.
+        }
+      }
+
       await api.requestBookingAccessLink(normalizedCode, normalizedEmail);
       setNotice("If those details match, a secure booking link is on its way. Check your inbox and spam folder.");
     } catch (lookupError) {
@@ -99,9 +168,16 @@ const ManageBooking: React.FC = () => {
           className="ui-button ui-button-primary mt-6 w-full"
         >
           {loading && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}
-          {loading ? "Sending" : "Email secure link"}
+          {loading ? "Checking" : "Check booking status"}
         </button>
       </form>
+
+      <BookingStatusModal
+        isOpen={Boolean(statusBooking)}
+        onClose={() => setStatusBooking(null)}
+        booking={statusBooking}
+        room={statusRoom}
+      />
     </div>
   );
 };
