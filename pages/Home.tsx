@@ -21,7 +21,7 @@ const discoverMore = [
     eyebrow: "Poolside ease",
     title: "A relaxed corner of the property.",
     description: "Settle into an open-air pause, cool off, or simply let the afternoon move at its own pace.",
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1779385271/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3-large.webp",
     imageAlt: "Poolside seating at Moore Hotels",
     to: "/services",
     action: "Explore poolside",
@@ -30,7 +30,7 @@ const discoverMore = [
     eyebrow: "Games & connection",
     title: "A little room for friendly competition.",
     description: "An easy-going games corner for conversation, connection, and unplanned moments between guests.",
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785697853/Screenshot_2026-08-02_at_8.10.42_pm_ybmndu.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_8.10.42_pm_ybmndu-large.webp",
     imageAlt: "Pool table in the Moore Hotels games area",
     to: "/services",
     action: "See leisure spaces",
@@ -39,7 +39,7 @@ const discoverMore = [
     eyebrow: "Open-air lounge",
     title: "Quiet seats above the day.",
     description: "A sheltered outdoor setting for a private conversation, a clear thought, or a slower evening.",
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785694158/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl-large.webp",
     imageAlt: "Covered lounge seating at Moore Hotels",
     to: "/about",
     action: "Discover the property",
@@ -53,7 +53,7 @@ const powerSystems = [
     title: "Backup power, ready when needed.",
     description: "Dedicated generation supports essential hotel operations whenever public supply is interrupted.",
     details: ["Dedicated backup generation", "Essential guest areas prioritised"],
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785694392/Screenshot_2026-08-02_at_7.13.04_pm_xpzvmg.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.13.04_pm_xpzvmg-large.webp",
   },
   {
     icon: "solar_power",
@@ -61,7 +61,7 @@ const powerSystems = [
     title: "A quieter layer of resilience.",
     description: "Solar storage and inverter support help smooth supply transitions and reduce unnecessary generator runtime.",
     details: ["Solar-supported energy storage", "Managed power transitions"],
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785694330/Screenshot_2026-08-02_at_7.12.03_pm_fu9faq.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.12.03_pm_fu9faq-large.webp",
   },
 ];
 
@@ -74,7 +74,7 @@ const premisesSpaces = [
     to: "/about",
     action: "View our story",
     image: "/Images/premises/upstairs-corridor.jpg",
-    imageSlot: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785702977/Screenshot_2026-08-02_at_9.35.56_pm_ynyuh0.png",
+    imageSlot: "https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_9.35.56_pm_ynyuh0-large.webp",
   },
   {
     icon: "stairs",
@@ -84,7 +84,7 @@ const premisesSpaces = [
     to: "/about",
     action: "Explore the property",
     image: "/Images/premises/stairway-landing.jpg",
-    imageSlot: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785703020/Screenshot_2026-08-02_at_9.36.33_pm_tq31t5.png",
+    imageSlot: "https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_9.36.33_pm_tq31t5-large.webp",
   },
   {
     icon: "weekend",
@@ -172,8 +172,8 @@ const Home: React.FC = () => {
       <header className="relative flex min-h-[46rem] items-center overflow-hidden px-4 pb-16 pt-32 text-center sm:px-6 lg:min-h-[50rem]">
         <div className="absolute inset-0">
           <img
-            src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699735/Screenshot_2026-08-02_at_8.42.08_pm_plc96z.png", 1600)}
-            srcSet={cloudinaryImageSrcSet("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699735/Screenshot_2026-08-02_at_8.42.08_pm_plc96z.png", [640, 960, 1280, 1600])}
+            src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_8.42.08_pm_plc96z-large.webp", 1600)}
+            srcSet={cloudinaryImageSrcSet("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_8.42.08_pm_plc96z-large.webp", [640, 960, 1280, 1600])}
             sizes="100vw"
             alt="Moore Hotels & Suites exterior"
             className="h-full w-full scale-[1.03] object-cover opacity-75 image-luxury"
@@ -256,7 +256,7 @@ const Home: React.FC = () => {
       </header>
 
       <section className="ui-section">
-        <div className="ui-container grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+        <div className="ui-container">
           <div className="order-2 lg:order-1">
             <p className="ui-eyebrow">Nigerian professionalism</p>
             <h2 className="ui-section-title mt-4 italic text-white">Refined hotel service at every touchpoint.</h2>
@@ -264,16 +264,6 @@ const Home: React.FC = () => {
               Moore Hotels &amp; Suites blends modern standards with genuine local warmth. From arrival to departure, every detail is designed to make your stay calm, efficient, and memorable.
             </p>
             <Link to="/about" className="ui-button ui-button-secondary mt-8">Discover our story <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></Link>
-          </div>
-          <div className="group order-1 overflow-hidden rounded-lg border border-white/10 shadow-2xl lg:order-2">
-            <img
-              src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699634/Screenshot_2026-08-02_at_8.39.54_pm_rggvsx.png", 1000)}
-              srcSet={cloudinaryImageSrcSet("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699634/Screenshot_2026-08-02_at_8.39.54_pm_rggvsx.png", [480, 720, 1000])}
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              alt="Exterior of Moore Hotels & Suites in Sagamu"
-              className="image-luxury aspect-[4/3] h-full w-full object-cover"
-              loading="lazy"
-            />
           </div>
         </div>
       </section>
@@ -454,8 +444,7 @@ const Home: React.FC = () => {
           <div className="group overflow-hidden rounded-lg border border-white/10 shadow-[0_35px_80px_rgba(0,0,0,.55)] lg:col-span-8">
             <video
               ref={videoRef}
-              src={cloudinaryVideo("https://res.cloudinary.com/dxryndnhl/video/upload/v1785696570/IMG_1221_jtnwy1.mov", 1280)}
-              poster={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699634/Screenshot_2026-08-02_at_8.39.54_pm_rggvsx.png", 1280)}
+              src={cloudinaryVideo("https://media.moorehotelandsuites.com/IMG_1221_jtnwy1-web.mp4", 1280)}
               muted
               loop
               playsInline
@@ -481,8 +470,8 @@ const Home: React.FC = () => {
         <div className="ui-container-wide grid overflow-hidden rounded-lg border border-white/10 bg-surface-dark/70 shadow-2xl lg:grid-cols-12">
           <div className="group relative min-h-[24rem] overflow-hidden lg:col-span-7 lg:min-h-[34rem]">
             <img
-              src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699796/Screenshot_2026-08-02_at_8.42.45_pm_bklvqu.png", 1200)}
-              srcSet={cloudinaryImageSrcSet("https://res.cloudinary.com/dxryndnhl/image/upload/v1785699796/Screenshot_2026-08-02_at_8.42.45_pm_bklvqu.png", [480, 800, 1200])}
+              src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_8.42.45_pm_bklvqu-large.webp", 1200)}
+              srcSet={cloudinaryImageSrcSet("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_8.42.45_pm_bklvqu-large.webp", [480, 800, 1200])}
               sizes="(min-width: 1024px) 58vw, 100vw"
               alt="Moore Hotels & Suites in Sagamu"
               className="image-luxury absolute inset-0 h-full w-full object-cover"

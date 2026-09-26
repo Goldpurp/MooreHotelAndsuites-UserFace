@@ -1,11 +1,11 @@
 export const SITE_NAME = "Moore Hotels & Suites";
 export const SITE_URL = "https://moorehotelandsuites.com";
 export const SOCIAL_IMAGE =
-  "https://res.cloudinary.com/dxryndnhl/image/upload/f_auto,q_auto,w_1200,h_630,c_fill/v1785699634/Screenshot_2026-08-02_at_8.39.54_pm_rggvsx.png";
+  "https://media.moorehotelandsuites.com/slazzer-preview-ofc3f_uvulyz-original";
 export const SOCIAL_IMAGE_ALT =
-  "Moore Hotels & Suites exterior and guest facilities in Sagamu, Ogun State";
+  "Moore Hotels & Suites logo";
 export const LOGO_URL =
-  "https://res.cloudinary.com/dxryndnhl/image/upload/f_auto,q_auto,w_512/v1777386016/slazzer-preview-ofc3f_uvulyz.png";
+  "https://media.moorehotelandsuites.com/slazzer-preview-ofc3f_uvulyz-original";
 
 export const PUBLIC_ROUTE_METADATA = Object.freeze({
   "/": {

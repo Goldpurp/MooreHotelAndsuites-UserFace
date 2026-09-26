@@ -30,21 +30,21 @@ const hotelExperiences = [
     title: "Poolside pauses",
     eyebrow: "Open-air leisure",
     text: "A relaxed setting for a slower afternoon and an easy change of pace.",
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1779385271/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3-large.webp",
     alt: "Poolside leisure area at Moore Hotels",
   },
   {
     title: "Games & connection",
     eyebrow: "Social spaces",
     text: "Spend time together over a game, a conversation, or a quiet break between plans.",
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785697853/Screenshot_2026-08-02_at_8.10.42_pm_ybmndu.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_8.10.42_pm_ybmndu-large.webp",
     alt: "Pool table in the Moore Hotels games area",
   },
   {
     title: "A calmer pace",
     eyebrow: "Wellness moments",
     text: "Comfortable shared spaces give you room to reset without leaving the hotel.",
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785694158/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl-large.webp",
     alt: "Covered lounge seating at Moore Hotels",
   },
 ];
@@ -52,7 +52,7 @@ const hotelExperiences = [
 const Dining: React.FC = () => (
   <div className="min-h-screen bg-background-dark">
     <header className="relative flex min-h-[32rem] items-end overflow-hidden px-4 pb-16 pt-32 sm:min-h-[36rem] sm:px-6 sm:pb-20">
-      <img src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785694158/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl.png", 1600)} srcSet={cloudinaryImageSrcSet("https://res.cloudinary.com/dxryndnhl/image/upload/v1785694158/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl.png", [640, 960, 1280, 1600])} sizes="100vw" alt="Covered lounge seating at Moore Hotels" className="absolute inset-0 h-full w-full object-cover opacity-50 image-luxury" fetchPriority="high" />
+      <img src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl-large.webp", 1600)} srcSet={cloudinaryImageSrcSet("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl-large.webp", [640, 960, 1280, 1600])} sizes="100vw" alt="Covered lounge seating at Moore Hotels" className="absolute inset-0 h-full w-full object-cover opacity-50 image-luxury" fetchPriority="high" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/55 to-black/20" />
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background-dark to-transparent" />
       <div className="ui-container-wide relative z-10 w-full">
@@ -67,7 +67,7 @@ const Dining: React.FC = () => (
     <section className="ui-section" aria-labelledby="dining-overview-title">
       <div className="ui-container-wide grid items-center gap-10 lg:grid-cols-12 lg:gap-16">
         <div className="group overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-2xl lg:col-span-7">
-          <img src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785694895/Screenshot_2026-08-02_at_7.21.28_pm_cdmivl.png", 1100)} alt="A Moore Hotels chef preparing food in the hotel kitchen" className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" decoding="async" />
+          <img src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.21.28_pm_cdmivl-large.webp", 1100)} alt="A Moore Hotels chef preparing food in the hotel kitchen" className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" decoding="async" />
         </div>
         <div className="lg:col-span-5">
           <p className="ui-eyebrow">Food & refreshment</p>

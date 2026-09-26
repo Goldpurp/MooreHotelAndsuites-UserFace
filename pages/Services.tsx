@@ -18,7 +18,7 @@ const signatureServices: SignatureService[] = [
     title: "24-hour front desk",
     tag: "Always available",
     description: "From a smooth arrival to local recommendations and late-night requests, our reception team remains available throughout your stay.",
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1779385274/Screenshot_2026-05-20_at_6.27.21_pm_dtspvl.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-05-20_at_6.27.21_pm_dtspvl-large.webp",
     imageAlt: "Moore Hotels guest reception",
     icon: "support_agent",
     note: "Assistance at every hour",
@@ -28,7 +28,7 @@ const signatureServices: SignatureService[] = [
     title: "Restaurant & in-room dining",
     tag: "Local and continental",
     description: "Enjoy familiar Nigerian favourites and continental classics in our dining spaces, or settle in and have a considered meal brought to your room.",
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785694895/Screenshot_2026-08-02_at_7.21.28_pm_cdmivl.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.21.28_pm_cdmivl-large.webp",
     imageAlt: "Elegant dining at L’Horizon",
     icon: "room_service",
     note: "Breakfast, lunch and dinner",
@@ -38,7 +38,7 @@ const signatureServices: SignatureService[] = [
     title: "Lounge & bar",
     tag: "Meet and unwind",
     description: "A relaxed setting for informal meetings, a quiet evening, or a well-made drink after the day’s plans are complete.",
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785694158/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl-large.webp",
     imageAlt: "The Meridian Lounge at Moore Hotels",
     icon: "local_bar",
     note: "Open to residents and visitors",
@@ -48,7 +48,7 @@ const signatureServices: SignatureService[] = [
     title: "Wellness & recreation",
     tag: "Time for yourself",
     description: "Restore your pace with calm leisure spaces created for unhurried mornings, quiet resets, and easy moments between plans.",
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1779385271/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3-large.webp",
     imageAlt: "Wellness and leisure space at Moore Hotels",
     icon: "spa",
     note: "Leisure at your own pace",
@@ -58,7 +58,7 @@ const signatureServices: SignatureService[] = [
     title: "Games & social spaces",
     tag: "Stay entertained",
     description: "Gather for friendly competition or spend an easy evening together in spaces designed for connection beyond the room.",
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785697853/Screenshot_2026-08-02_at_8.10.42_pm_ybmndu.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_8.10.42_pm_ybmndu-large.webp",
     imageAlt: "The Apex games room at Moore Hotels",
     icon: "sports_esports",
     note: "Made for groups and downtime",
@@ -68,7 +68,7 @@ const signatureServices: SignatureService[] = [
     title: "Laundry & garment care",
     tag: "Travel light",
     description: "Professional laundry and dry-cleaning support keeps your wardrobe ready, whether you are staying for one night or settling in for longer.",
-    image: "https://res.cloudinary.com/dxryndnhl/image/upload/v1785694056/Screenshot_2026-08-02_at_7.07.12_pm_dplfsv.png",
+    image: "https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.07.12_pm_dplfsv-large.webp",
     imageAlt: "Professional garment care service",
     icon: "dry_cleaning",
     note: "Collected and returned to your room",
@@ -94,8 +94,8 @@ const Services: React.FC = () => (
   <div className="min-h-screen bg-background-dark">
     <header className="relative flex min-h-[40rem] items-center overflow-hidden px-4 pb-24 pt-32 text-center sm:min-h-[44rem] sm:px-6">
       <img
-        src={cloudinaryImage("https://res.cloudinary.com/dxryndnhl/image/upload/v1785694266/Screenshot_2026-08-02_at_7.10.55_pm_y33xug.png", 1600)}
-        srcSet={cloudinaryImageSrcSet("https://res.cloudinary.com/dxryndnhl/image/upload/v1785694266/Screenshot_2026-08-02_at_7.10.55_pm_y33xug.png", [640, 960, 1280, 1600])}
+        src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.10.55_pm_y33xug-large.webp", 1600)}
+        srcSet={cloudinaryImageSrcSet("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.10.55_pm_y33xug-large.webp", [640, 960, 1280, 1600])}
         sizes="100vw"
         alt="A calm hotel wellness setting"
         className="absolute inset-0 h-full w-full object-cover opacity-50 image-luxury"
