@@ -9,7 +9,7 @@ const Footer: React.FC = () => (
         <div>
           <Link to="/" className="group inline-flex min-h-11 items-center gap-3" title="Moore Hotels & Suites home">
             <span className="grid size-11 place-items-center overflow-hidden rounded-[4px] bg-[#e4e6e8]">
-              <img src="https://res.cloudinary.com/dxryndnhl/image/upload/f_auto,q_auto,w_96/v1777386017/slazzer-preview-w1yad_jizukz.png" alt="" className="h-full w-full object-contain" loading="lazy" decoding="async" />
+              <img src="https://media.moorehotelandsuites.com/slazzer-preview-w1yad_jizukz-thumb.webp" alt="" className="h-full w-full object-contain" loading="lazy" decoding="async" />
             </span>
             <span>
               <span className="block text-sm font-bold tracking-[0.24em] text-white">MOORE</span>
