@@ -34,6 +34,7 @@ export enum PaymentStatus
     Paid = "Paid",
     Unpaid = "Unpaid",
     AwaitingVerification = "AwaitingVerification",
+    PaymentReported = "PaymentReported",
     RefundPending = "RefundPending",
     Refunded = "Refunded"
 }

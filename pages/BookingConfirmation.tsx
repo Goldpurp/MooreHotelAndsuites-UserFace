@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { api } from "../services/api";
-import { Booking, Room, BookingStatus } from "../types";
+import { Booking, Room, BookingStatus, PaymentStatus, PaymentMethod } from "../types";
 import AestheticLoader from "../components/AestheticLoader";
 
 const formatStatus = (value: string | null | undefined) =>
@@ -25,6 +25,8 @@ const BookingConfirmation: React.FC = () => {
     stateBooking?.bookingCode?.toUpperCase() === code ? stateBooking : null,
   );
   const [room, setRoom] = useState<Room | null>(null);
+  const [reportingPayment, setReportingPayment] = useState(false);
+  const [paymentReportMessage, setPaymentReportMessage] = useState("");
   const [lookupEmail, setLookupEmail] = useState(rememberedEmail);
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState(false);
@@ -236,6 +238,25 @@ const BookingConfirmation: React.FC = () => {
           </div>
           <div className="mt-6 grid grid-cols-2 gap-5 border-t border-white/10 pt-6 text-sm sm:grid-cols-4">
             <BookingField label="Room" value={room?.name || (booking.roomId ? "Room details unavailable" : "Room assignment pending")} detail={room?.category || booking.roomTypeName || booking.roomTypeCode || ""} />
+            {booking.paymentStatus === PaymentStatus.PaymentReported && <p role="status" className="text-sm text-amber-300">{booking.status === BookingStatus.Cancelled ? "Payment reported after the room hold ended. Contact the hotel for reconciliation; a room is not guaranteed yet." : "Payment reported—not yet verified. Your room is held while staff check the bank credit."}</p>}
+            {booking.paymentMethod === PaymentMethod.DirectTransfer && [PaymentStatus.Unpaid, PaymentStatus.AwaitingVerification].includes(booking.paymentStatus) && booking.status === BookingStatus.Pending && (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-400">Already sent the transfer? Report it here so staff can verify the bank credit. If the hold has already expired, the hotel must recheck availability.</p>
+                <button type="button" disabled={reportingPayment} className="ui-button ui-button-primary" onClick={async () => {
+                  setReportingPayment(true);
+                  setPaymentReportMessage("");
+                  try {
+                    const result = await api.reportTransfer(booking.bookingCode, guestAccessToken || "");
+                    // The API serializes enums as strings; normalize through the regular lookup.
+                    setBooking(await api.lookupBooking(booking.bookingCode, booking.guestEmail, guestAccessToken || ""));
+                    setPaymentReportMessage(result.message);
+                  } catch (error) {
+                    setPaymentReportMessage(error instanceof Error ? error.message : "Could not report payment. Contact the hotel before sending another transfer.");
+                  } finally { setReportingPayment(false); }
+                }}>{reportingPayment ? "Reporting…" : "I have sent the bank transfer"}</button>
+              </div>
+            )}
+            {paymentReportMessage && <p role="status" className="text-sm text-amber-300">{paymentReportMessage}</p>}
             <BookingField
               label="Nights"
               value={String(

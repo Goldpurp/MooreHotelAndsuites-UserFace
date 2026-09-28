@@ -418,6 +418,7 @@ class ApiService {
     checkIn: string;
     checkOut: string;
     paymentMethod: PaymentMethod;
+    paymentReported?: boolean;
     notes?: string;
     adultCount: number;
     childCount: number;
@@ -438,6 +439,13 @@ class ApiService {
       }),
     });
     return normalizeBooking(booking);
+  }
+
+  async reportTransfer(bookingCode: string, guestAccessToken = ""): Promise<{ status: BookingStatus; paymentStatus: PaymentStatus; message: string }> {
+    return this.request(`/bookings/${encodeURIComponent(bookingCode)}/report-transfer`, {
+      method: "POST",
+      body: JSON.stringify({ guestAccessToken }),
+    });
   }
 
   async lookupBooking(bookingCode: string, email = "", guestAccessToken = ""): Promise<Booking> {
