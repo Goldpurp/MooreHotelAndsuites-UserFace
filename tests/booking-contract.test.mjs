@@ -4,6 +4,14 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
+test("booking room labels prefer the physical room name, with honest missing-room fallbacks", async () => {
+  for (const path of ["pages/BookingConfirmation.tsx", "components/BookingStatusModal.tsx"]) {
+    const source = await read(path);
+    assert.match(source, /label="Room" value=\{room\?\.name \|\| \(booking\.roomId \? "Room details unavailable" : "Room assignment pending"\)\}/);
+    assert.doesNotMatch(source, /booking\.roomTypeName \|\| room\?\.name/);
+  }
+});
+
 test("guest booking uses the hardened API contract", async () => {
   const [api, checkout, confirmation, helpCenter, environment, types, app] = await Promise.all([
     read("services/api.ts"),

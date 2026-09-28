@@ -235,7 +235,7 @@ const BookingConfirmation: React.FC = () => {
             </p>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-5 border-t border-white/10 pt-6 text-sm sm:grid-cols-4">
-            <BookingField label="Room" value={booking.roomTypeName || room?.name || "Standard Room"} detail={room?.category || booking.roomTypeCode || ""} />
+            <BookingField label="Room" value={room?.name || (booking.roomId ? "Room details unavailable" : "Room assignment pending")} detail={room?.category || booking.roomTypeName || booking.roomTypeCode || ""} />
             <BookingField
               label="Nights"
               value={String(

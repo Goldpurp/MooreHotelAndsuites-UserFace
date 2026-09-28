@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { parseGuestCounts } from "../utils/guestCounts";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import { ApplicationUser, Booking, PaymentMethod, PricingQuote, PrivacyPolicy, Room } from "../types";
@@ -47,8 +48,9 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     email: user?.email || "",
     phone: user?.phone || "",
   });
-  const [adultCount, setAdultCount] = useState(1);
-  const [childCount, setChildCount] = useState(0);
+  const [adultCountInput, setAdultCountInput] = useState("1");
+  const [childCountInput, setChildCountInput] = useState("0");
+  const { adultCount, childCount, validGuestCounts } = parseGuestCounts(adultCountInput, childCountInput);
   const [policies, setPolicies] = useState<PrivacyPolicy | null>(null);
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const [pricingQuote, setPricingQuote] = useState<PricingQuote | null>(null);
@@ -230,7 +232,11 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
   const continueToPayment = async () => {
     if (!validateGuestInfo()) return;
-    if (!room || adultCount < 1 || childCount < 0 || adultCount + childCount > room.capacity) {
+    if (!validGuestCounts) {
+      setNotification({ show: true, title: "Check guest counts", message: "Enter whole numbers: 1–20 adults and 0–20 children, within the room capacity.", type: "error" });
+      return;
+    }
+    if (!room || adultCount + childCount > room.capacity) {
       setNotification({ show: true, title: "Occupancy unavailable", message: `This room allows up to ${room?.capacity || 1} guests.`, type: "error" });
       return;
     }
@@ -272,6 +278,11 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
   const handleBooking = async () => {
     if (processing || !validateGuestInfo()) return;
+    if (!validGuestCounts || !room || adultCount + childCount > room.capacity) {
+      setCurrentStep(2);
+      setNotification({ show: true, title: "Check guest counts", message: "Enter valid whole-number guest counts within the room capacity.", type: "error" });
+      return;
+    }
     if (availabilityLoading || !isAvailable) {
       setNotification({ show: true, title: "Room unavailable", message: availabilityMessage || "This room is unavailable for the selected dates.", type: "error" });
       return;
@@ -426,8 +437,8 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   <FormField label="Last name" error={fieldErrors.lastName}><input type="text" autoComplete="family-name" maxLength={80} disabled={processing} value={guestInfo.lastName} onChange={(event) => updateGuestField("lastName", event.target.value)} className={`ui-input ${fieldErrors.lastName ? "border-red-500/50" : ""}`} aria-invalid={Boolean(fieldErrors.lastName)} /></FormField>
                   <FormField label="Email address" error={fieldErrors.email}><input type="email" autoComplete="email" maxLength={254} disabled={processing} value={guestInfo.email} onChange={(event) => updateGuestField("email", event.target.value)} className={`ui-input ${fieldErrors.email ? "border-red-500/50" : ""}`} aria-invalid={Boolean(fieldErrors.email)} /></FormField>
                   <FormField label="Contact phone" error={fieldErrors.phone}><input type="tel" autoComplete="tel" maxLength={30} placeholder="+234 …" disabled={processing} value={guestInfo.phone} onChange={(event) => updateGuestField("phone", event.target.value)} className={`ui-input ${fieldErrors.phone ? "border-red-500/50" : ""}`} aria-invalid={Boolean(fieldErrors.phone)} /></FormField>
-                  <FormField label="Adults"><input type="number" min={1} max={Math.min(20, room.capacity)} disabled={processing} value={adultCount} onChange={(event) => setAdultCount(Math.max(1, Number(event.target.value) || 1))} className="ui-input" /></FormField>
-                  <FormField label="Children"><input type="number" min={0} max={Math.min(20, room.capacity - 1)} disabled={processing} value={childCount} onChange={(event) => setChildCount(Math.max(0, Number(event.target.value) || 0))} className="ui-input" /></FormField>
+                  <FormField label="Adults"><input type="number" inputMode="numeric" step={1} required min={1} max={Math.min(20, room.capacity)} disabled={processing} value={adultCountInput} onChange={(event) => setAdultCountInput(event.target.value)} className="ui-input" /></FormField>
+                  <FormField label="Children"><input type="number" inputMode="numeric" step={1} required min={0} max={Math.min(20, room.capacity - 1)} disabled={processing} value={childCountInput} onChange={(event) => setChildCountInput(event.target.value)} className="ui-input" /></FormField>
                 </div>
                 <label className="mt-6 flex cursor-pointer items-start gap-3 rounded border border-white/10 bg-white/[0.025] p-4 text-sm text-gray-400">
                   <input type="checkbox" checked={acceptedPolicies} onChange={(event) => setAcceptedPolicies(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-primary" />

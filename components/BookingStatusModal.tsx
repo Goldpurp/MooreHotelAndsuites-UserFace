@@ -61,7 +61,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
           </p>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-5 border-t border-white/10 pt-6 text-sm sm:grid-cols-4">
-          <ModalField label="Room" value={booking.roomTypeName || room?.name || "Standard Room"} detail={room?.category || booking.roomTypeCode || ""} />
+          <ModalField label="Room" value={room?.name || (booking.roomId ? "Room details unavailable" : "Room assignment pending")} detail={room?.category || booking.roomTypeName || booking.roomTypeCode || ""} />
           <ModalField
             label="Nights"
             value={String(
