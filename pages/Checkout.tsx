@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { parseGuestCounts } from "../utils/guestCounts";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
-import { ApplicationUser, Booking, PaymentMethod, PricingQuote, PrivacyPolicy, Room } from "../types";
+import { ApplicationUser, Booking, BookingStatus, PaymentMethod, PricingQuote, PrivacyPolicy, Room } from "../types";
 import NotificationModal from "../components/NotificationModal";
 import AestheticLoader from "../components/AestheticLoader";
 import Dialog from "../components/ui/Dialog";
@@ -35,6 +35,13 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const [processing, setProcessing] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [directTransferBooking, setDirectTransferBooking] = useState<Booking | null>(null);
+  const [holdNow, setHoldNow] = useState(Date.now);
+  useEffect(() => {
+    if (!directTransferBooking) return;
+    const timer = window.setInterval(() => setHoldNow(Date.now()), 15_000);
+    return () => window.clearInterval(timer);
+  }, [directTransferBooking?.id]);
+  const holdExpired = Boolean(directTransferBooking?.paymentExpiresAtUtc && Date.parse(directTransferBooking.paymentExpiresAtUtc) <= holdNow);
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -59,6 +66,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const [checkOut, setCheckOut] = useState<string>(() => searchParams.get("checkOut") || addDaysToInput(searchParams.get("checkIn") || todayInputValue(), 1));
 
   const handleCheckInChange = (newCheckIn: string) => {
+    if (directTransferBooking) return;
     setCheckIn(newCheckIn);
     let newCheckOut = checkOut;
     if (!newCheckOut || newCheckOut <= newCheckIn) {
@@ -69,6 +77,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   };
 
   const handleCheckOutChange = (newCheckOut: string) => {
+    if (directTransferBooking) return;
     setCheckOut(newCheckOut);
     setSearchParams({ checkIn, checkOut: newCheckOut }, { replace: true });
   };
@@ -213,6 +222,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     checkIn,
     checkOut,
     paymentMethod: PaymentMethod.DirectTransfer,
+    paymentReported: false,
     notes: user ? "Member selected direct bank transfer." : "Guest selected direct bank transfer.",
     adultCount,
     childCount,
@@ -231,6 +241,8 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   };
 
   const continueToPayment = async () => {
+    if (processing) return;
+    if (directTransferBooking) { setCurrentStep(3); return; }
     if (!validateGuestInfo()) return;
     if (!validGuestCounts) {
       setNotification({ show: true, title: "Check guest counts", message: "Enter whole numbers: 1–20 adults and 0–20 children, within the room capacity.", type: "error" });
@@ -256,11 +268,16 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     try {
       const quote = await requestPricingQuote();
       setPricingQuote(quote);
+      // Reserve inventory before showing bank details or asking the guest to pay.
+      const booking = await createBooking(quote);
+      api.rememberBookingLookup(booking.bookingCode, guestInfo.email, booking.guestAccessToken);
+      setDirectTransferBooking(booking);
       setCurrentStep(3);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Current pricing could not be loaded. Please try again.";
-      setNotification({ show: true, title: "Pricing unavailable", message, type: "error" });
+      if (/pricing quote|after pricing|new quote/i.test(message)) setPricingQuote(null);
+      setNotification({ show: true, title: "Reservation not created", message: `${message} Do not transfer money until you have a booking reference.`, type: "error" });
     } finally {
       setProcessing(false);
     }
@@ -277,50 +294,21 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   };
 
   const handleBooking = async () => {
-    if (processing || !validateGuestInfo()) return;
-    if (!validGuestCounts || !room || adultCount + childCount > room.capacity) {
-      setCurrentStep(2);
-      setNotification({ show: true, title: "Check guest counts", message: "Enter valid whole-number guest counts within the room capacity.", type: "error" });
-      return;
-    }
-    if (availabilityLoading || !isAvailable) {
-      setNotification({ show: true, title: "Room unavailable", message: availabilityMessage || "This room is unavailable for the selected dates.", type: "error" });
-      return;
-    }
-    if (directTransferBooking) {
+    if (processing || !directTransferBooking) return;
+    if (directTransferBooking.paymentStatus === "PaymentReported" || directTransferBooking.paymentStatus === "Paid") {
       setShowTransferModal(true);
       return;
     }
-
     setProcessing(true);
     try {
-      let quote = pricingQuote;
-      if (!quote || new Date(quote.expiresAtUtc).getTime() <= Date.now() + 30_000) {
-        const refreshedQuote = await requestPricingQuote();
-        setPricingQuote(refreshedQuote);
-        if (quote && (
-          quote.currency !== refreshedQuote.currency ||
-          quote.totalAmount !== refreshedQuote.totalAmount
-        )) {
-          setNotification({
-            show: true,
-            title: "Price updated",
-            message: "The stay price changed while you were checking out. Review the new total, then confirm again.",
-            type: "info",
-          });
-          return;
-        }
-        quote = refreshedQuote;
-      }
-      const booking = await createBooking(quote);
-      api.rememberBookingLookup(booking.bookingCode, guestInfo.email, booking.guestAccessToken);
-      setDirectTransferBooking(booking);
+      const accessToken = directTransferBooking.guestAccessToken || api.getRememberedBookingAccess(directTransferBooking.bookingCode).guestAccessToken;
+      await api.reportTransfer(directTransferBooking.bookingCode, accessToken || "");
+      const booking = await api.lookupBooking(directTransferBooking.bookingCode, guestInfo.email, accessToken || "");
+      setDirectTransferBooking({ ...booking, guestAccessToken: accessToken });
       setShowTransferModal(true);
-      return;
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "We could not process your booking. Please try again.";
-      if (/pricing quote|after pricing|new quote/i.test(message)) setPricingQuote(null);
-      setNotification({ show: true, title: "Booking not completed", message, type: "error" });
+      const message = error instanceof Error ? error.message : "We could not report your transfer.";
+      setNotification({ show: true, title: "Contact the hotel to verify payment", message: `${message} Keep reference ${directTransferBooking.bookingCode} and do not send the transfer again.`, type: "error" });
     } finally {
       setProcessing(false);
     }
@@ -356,13 +344,13 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
             <span className="material-symbols-outlined text-4xl" aria-hidden="true">check_circle</span>
           </span>
           <p className="ui-eyebrow mt-4 text-emerald-400">Reservation Received</p>
-          <h2 id="booking-success-title" className="ui-card-title mt-1 italic text-white">Booking Successful!</h2>
+          <h2 id="booking-success-title" className="ui-card-title mt-1 italic text-white">{directTransferBooking?.status === BookingStatus.Cancelled ? "Contact the hotel" : "Payment update received"}</h2>
           <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold text-amber-300">
             <span className="size-2 rounded-full bg-amber-400 animate-pulse" aria-hidden="true" />
-            Pending Verification
+            {directTransferBooking?.paymentStatus === "Paid" ? "Payment verified" : "Pending Verification"}
           </div>
           <p className="mt-3 text-sm leading-6 text-gray-300">
-            Thank you, <span className="font-semibold text-white">{guestInfo.firstName}</span>! Your booking request has been submitted.
+            Thank you, <span className="font-semibold text-white">{guestInfo.firstName}</span>! {directTransferBooking?.status === BookingStatus.Cancelled ? "The room hold ended before your report. Staff must reconcile your payment and check availability; a room is not guaranteed." : directTransferBooking?.paymentStatus === "Paid" ? "Your payment is verified and your reservation is confirmed." : "Your payment has been reported, and the room is held while staff verify the bank credit."} Do not send the transfer again.
           </p>
         </div>
 
@@ -424,7 +412,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
           <p className="ui-eyebrow">Step {currentStep} of 3</p>
           <h1 className="ui-page-title mt-3 italic text-white">Complete your <span className="text-primary">booking.</span></h1>
           <p className="ui-copy mt-4 max-w-2xl">Your room and dates stay intact while you review guest details and payment.</p>
-          <CheckoutProgress currentStep={currentStep} onStay={returnToRoom} onGuest={() => currentStep === 3 && setCurrentStep(2)} />
+          <CheckoutProgress currentStep={currentStep} onStay={directTransferBooking ? viewTransferBooking : returnToRoom} onGuest={() => currentStep === 3 && !directTransferBooking && setCurrentStep(2)} />
         </header>
         <div className="grid gap-10 lg:grid-cols-12">
           <div className="space-y-8 lg:col-span-8">
@@ -453,8 +441,9 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                 <p className="ui-eyebrow">Step 3 of 3</p>
                 <h2 className="ui-card-title mt-2 italic text-white">Direct Bank Transfer</h2>
                 <p className="mt-3 text-sm leading-6 text-gray-400">
-                  Please transfer the total stay amount directly to our hotel bank account below. Once transferred, click the button to acknowledge payment. Your booking reference will be generated and ticket validation will be updated to your email upon reception verification.
+                  Your booking reference is {directTransferBooking?.bookingCode}. Only transfer while your unpaid room hold is active. After sending the transfer, click “I have made this transfer”. This reports your payment and keeps the room held while staff verify the bank credit; it does not mark the payment as verified.
                 </p>
+                <p role="status" className="mt-4 rounded border border-amber-400/30 p-3 text-sm text-amber-200">{directTransferBooking?.paymentStatus === "PaymentReported" || directTransferBooking?.paymentStatus === "Paid" ? "Your transfer is already reported or verified. Do not pay again." : holdExpired ? "This unpaid hold has expired. Do not initiate a new transfer. If you already paid, report it below and contact the hotel for reconciliation." : `Unpaid room hold ends at ${directTransferBooking?.paymentExpiresAtUtc ? new Date(directTransferBooking.paymentExpiresAtUtc).toLocaleString() : 'the deadline shown on your booking'}. Report your transfer before then.`}</p>
 
                 {/* Bank Account Details Card */}
                 <div className="mt-6 overflow-hidden rounded-lg border border-primary/30 bg-primary/5 p-4 sm:p-6">
@@ -526,7 +515,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   </div>
                 )}
 
-                <button type="button" onClick={goBack} className="mt-7 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-white"><span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span> Back to guest details</button>
+                <button type="button" onClick={viewTransferBooking} className="mt-7 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-white">Manage this reservation</button>
               </section>
             )}
           </div>
@@ -550,7 +539,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                         type="date"
                         min={todayInputValue()}
                         value={checkIn}
-                        disabled={processing}
+                        disabled={processing || Boolean(directTransferBooking)}
                         onChange={(event) => handleCheckInChange(event.target.value)}
                         className="ui-input py-1.5 px-2 text-xs"
                       />
@@ -562,7 +551,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                         type="date"
                         min={addDaysToInput(checkIn, 1)}
                         value={checkOut}
-                        disabled={processing}
+                        disabled={processing || Boolean(directTransferBooking)}
                         onChange={(event) => handleCheckOutChange(event.target.value)}
                         className="ui-input py-1.5 px-2 text-xs"
                       />
@@ -577,11 +566,11 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                 <button
                   type="button"
                   onClick={currentStep === 2 ? () => void continueToPayment() : handleBooking}
-                  disabled={processing || availabilityLoading || !isAvailable || !policies}
+                  disabled={processing || (!directTransferBooking && (availabilityLoading || !isAvailable || !policies))}
                   className="ui-button ui-button-primary w-full"
                 >
                   {(processing || availabilityLoading) && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}
-                  {availabilityLoading ? "Verifying" : processing ? "Processing" : currentStep === 2 ? "Review payment" : "I have made this transfer"}
+                  {processing ? "Processing" : currentStep === 2 ? "Reserve room and get bank details" : directTransferBooking?.paymentStatus === "PaymentReported" || directTransferBooking?.paymentStatus === "Paid" ? "View booking status" : "I have made this transfer"}
                   {!processing && !availabilityLoading && <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>}
                 </button>
                 {availabilityMessage && <p className="rounded border border-red-500/20 bg-red-500/5 p-3 text-center text-sm text-red-300" aria-live="polite">{availabilityMessage}</p>}

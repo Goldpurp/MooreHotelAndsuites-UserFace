@@ -62,6 +62,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
         </div>
         <div className="mt-6 grid grid-cols-2 gap-5 border-t border-white/10 pt-6 text-sm sm:grid-cols-4">
           <ModalField label="Room" value={room?.name || (booking.roomId ? "Room details unavailable" : "Room assignment pending")} detail={room?.category || booking.roomTypeName || booking.roomTypeCode || ""} />
+          {booking.paymentStatus === "PaymentReported" && <p role="status" className="text-sm text-amber-300">Payment reported, not yet verified. {isCancelled ? "Contact the hotel for reconciliation; a room is not guaranteed." : "Your room is held while staff verify the bank credit."}</p>}
           <ModalField
             label="Nights"
             value={String(
