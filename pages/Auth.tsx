@@ -155,14 +155,14 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
 
   const heading =
     mode === "register"
-      ? "Create your account"
+      ? "Create Your Account"
       : mode === "forgot"
-        ? "Reset your password"
+        ? "Reset Your Password"
         : mode === "verify"
-          ? "Verify your email"
+          ? "Verify Your Email"
       : mode === "two-factor"
-        ? "Confirm it’s you"
-        : "Welcome back";
+        ? "Confirm It’s You"
+        : "Welcome Back";
   const intro =
     mode === "register"
       ? "Save your details and keep track of your stays."
@@ -192,20 +192,20 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         : "Sign in";
 
   return (
-    <div className="grid min-h-screen bg-background-dark pt-24 lg:grid-cols-2 lg:pt-0">
+    <div className="grid min-h-[100dvh] bg-background-dark pt-24 lg:grid-cols-2 lg:pt-0">
       <NotificationModal isOpen={modal.show} onClose={() => setModal((current) => ({ ...current, show: false }))} title={modal.title} message={modal.message} type={modal.type} />
 
-      <div className="relative hidden min-h-screen overflow-hidden lg:block">
+      <div className="relative hidden min-h-[100dvh] overflow-hidden lg:block">
         <img src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-05-20_at_6.27.21_pm_dtspvl-large.webp", 1200)} alt="A serene Moore guest suite" className="absolute inset-0 h-full w-full object-cover opacity-60 image-luxury" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/30 to-background-dark" />
         <div className="absolute inset-0 flex items-end p-12 xl:p-16">
-          <div className="max-w-xl"><p className="ui-eyebrow">Guest account</p><h2 className="ui-section-title mt-4 italic text-white">Your stay, kept close.</h2><p className="ui-copy mt-5 text-gray-300">Review bookings, manage your profile, and keep important stay information in one place.</p></div>
+          <div className="max-w-xl"><p className="ui-eyebrow">Guest account</p><h2 className="ui-section-title mt-4 text-white">Your Stay, Kept Close.</h2><p className="ui-copy mt-5 text-gray-300">Review bookings, manage your profile, and keep important stay information in one place.</p></div>
         </div>
       </div>
 
-      <section className="flex items-center justify-center px-4 py-14 sm:px-8 lg:min-h-screen lg:px-12 lg:pb-16 lg:pt-32">
+      <section className="flex items-center justify-center px-4 py-14 sm:px-8 lg:min-h-[100dvh] lg:px-12 lg:pb-16 lg:pt-32">
         <div className="w-full max-w-md">
-          <div className="mb-8"><p className="ui-eyebrow">Secure guest access</p><h1 className="ui-page-title mt-3 italic text-white">{heading}</h1><p className="ui-copy mt-4">{intro}</p></div>
+          <div className="mb-8"><p className="ui-eyebrow">Secure guest access</p><h1 className="ui-page-title mt-3 text-white">{heading}</h1><p className="ui-copy mt-4">{intro}</p></div>
 
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             {mode === "register" && (

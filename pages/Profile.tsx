@@ -5,6 +5,7 @@ import { ApplicationUser, Booking, PrivacyRequest, PrivacyRequestType } from "..
 import NotificationModal from "../components/NotificationModal";
 import Dialog from "../components/ui/Dialog";
 import FormField from "../components/ui/FormField";
+import PasswordInput from "../components/ui/PasswordInput";
 import { cloudinaryImage } from "../utils/cloudinary";
 
 interface ProfileProps {
@@ -243,7 +244,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
   const lastName = displayName.split(/\s+/).at(-1) || "Guest";
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background-dark px-4 pb-24 pt-32 sm:px-6">
+    <div className="relative min-h-[100dvh] overflow-hidden bg-background-dark px-4 pb-24 pt-32 sm:px-6">
       {notification && <NotificationModal isOpen={notification.show} onClose={() => { const shouldLogout = notification.title === "Password updated" || logoutAfterNotice; setNotification(null); setLogoutAfterNotice(false); if (shouldLogout) onLogout(); }} title={notification.title} message={notification.message} type={notification.type} />}
 
       <Dialog
@@ -254,7 +255,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
         panelClassName="ui-card w-full max-w-xl p-6 shadow-2xl sm:p-8"
       >
         <div className="flex items-start justify-between gap-4">
-          <div><p className="ui-eyebrow">Guest details</p><h2 id="profile-edit-title" className="ui-card-title mt-2 italic text-white">Edit your profile</h2></div>
+          <div><p className="ui-eyebrow">Guest details</p><h2 id="profile-edit-title" className="ui-card-title mt-2 text-white">Edit Your Profile</h2></div>
           <button ref={profileCloseRef} type="button" onClick={closeProfileEditor} disabled={savingProfile || uploadingAvatar} className="ui-icon-button" aria-label="Close profile editor"><span className="material-symbols-outlined" aria-hidden="true">close</span></button>
         </div>
 
@@ -287,7 +288,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
       >
         {cancelModal.booking && (
           <>
-            <div className="flex items-start justify-between gap-4"><div><p className="ui-eyebrow text-red-400">Cancellation request</p><h2 id="cancel-title" className="ui-card-title mt-2 italic text-white">Cancel {cancelModal.booking.bookingCode}?</h2></div><button ref={cancelCloseRef} type="button" onClick={closeCancelModal} className="ui-icon-button" aria-label="Close cancellation dialog"><span className="material-symbols-outlined" aria-hidden="true">close</span></button></div>
+            <div className="flex items-start justify-between gap-4"><div><p className="ui-eyebrow text-red-400">Cancellation request</p><h2 id="cancel-title" className="ui-card-title mt-2 text-white">Cancel {cancelModal.booking.bookingCode}?</h2></div><button ref={cancelCloseRef} type="button" onClick={closeCancelModal} className="ui-icon-button" aria-label="Close cancellation dialog"><span className="material-symbols-outlined" aria-hidden="true">close</span></button></div>
             <p className="ui-copy mt-4 text-sm">Tell the hotel why you need to cancel. Cancel at least 24 hours before check-in for a full refund. Cancellations inside the final 24 hours and no-shows are non-refundable.</p>
             <label className="mt-6 block"><span className="ui-label">Reason for cancellation</span><textarea value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} maxLength={500} rows={4} className="ui-input min-h-32 resize-y" placeholder="Add a short reason…" /></label>
             <div className="mt-6 grid gap-3 sm:grid-cols-2"><button type="button" onClick={closeCancelModal} className="ui-button ui-button-secondary">Keep booking</button><button type="button" onClick={confirmCancellation} disabled={cancelling || !cancelReason.trim()} className="ui-button border-red-500/30 bg-red-600 text-white hover:bg-red-500">{cancelling ? "Cancelling" : "Confirm cancellation"}</button></div>
@@ -333,7 +334,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
                 return (
                   <article key={booking.id} className="ui-card p-5 sm:p-7">
                     <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-                      <div><span className="ui-label">Booking reference</span><h2 className="font-display text-2xl italic text-white">{booking.bookingCode}</h2><p className="mt-2 text-sm text-gray-500">Payment: {booking.paymentStatus}</p></div>
+                      <div><span className="ui-label">Booking reference</span><h2 className="font-body text-xl font-bold tracking-wider text-white">{booking.bookingCode}</h2><p className="mt-2 text-sm text-gray-500">Payment: {booking.paymentStatus}</p></div>
                       <dl className="grid grid-cols-2 gap-x-10 gap-y-4 text-sm sm:grid-cols-3"><BookingDatum label="Check-in" value={new Date(booking.checkIn).toLocaleDateString()} /><BookingDatum label="Check-out" value={new Date(booking.checkOut).toLocaleDateString()} /><BookingDatum label="Status" value={booking.status} highlight /></dl>
                       <div className="flex flex-wrap gap-3">
                         <Link to={`/booking-confirmation/${encodeURIComponent(booking.bookingCode)}`} state={{ booking }} className="ui-button ui-button-secondary">View details</Link>
@@ -344,14 +345,14 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
                     {booking.notificationMessage && <p className="mt-5 flex items-start gap-2 rounded border border-primary/20 bg-primary/5 p-3 text-sm text-gray-400"><span className="material-symbols-outlined text-primary" aria-hidden="true">info</span>{booking.notificationMessage}</p>}
                   </article>
                 );
-              }) : <div className="ui-card border-dashed py-20 text-center"><span className="material-symbols-outlined text-4xl text-primary/60" aria-hidden="true">luggage</span><h2 className="ui-card-title mt-4 italic text-white">No bookings yet</h2><p className="ui-copy mt-3">Your future stays will appear here.</p><Link to="/rooms" className="ui-button ui-button-primary mt-6">Explore rooms</Link></div>}
+              }) : <div className="ui-card border-dashed py-20 text-center"><span className="material-symbols-outlined text-4xl text-primary/60" aria-hidden="true">luggage</span><h2 className="ui-card-title mt-4 text-white">No Bookings Yet</h2><p className="ui-copy mt-3">Your future stays will appear here.</p><Link to="/rooms" className="ui-button ui-button-primary mt-6">Explore rooms</Link></div>}
             </div>
           )}
 
           {activeTab === "security" && (
             <div role="tabpanel" className="route-transition mx-auto max-w-2xl">
               <form onSubmit={handlePasswordUpdate} className="ui-card p-6 shadow-2xl sm:p-9">
-                <p className="ui-eyebrow">Account security</p><h2 className="ui-card-title mt-2 italic text-white">Change your password</h2><p className="ui-copy mt-3 text-sm">Choose a unique password you do not use on another service.</p>
+                <p className="ui-eyebrow">Account security</p><h2 className="ui-card-title mt-2 text-white">Change Your Password</h2><p className="ui-copy mt-3 text-sm">Choose a unique password you do not use on another service.</p>
                 <div className="mt-7 space-y-5"><SecurityField field="oldPassword" label="Current password" autoComplete="current-password" value={securityData.oldPassword} error={fieldErrors.oldPassword} onChange={(value) => setSecurityData({ ...securityData, oldPassword: value })} /><SecurityField field="newPassword" label="New password" autoComplete="new-password" value={securityData.newPassword} error={fieldErrors.newPassword} onChange={(value) => setSecurityData({ ...securityData, newPassword: value })} /><SecurityField field="confirmNewPassword" label="Confirm new password" autoComplete="new-password" value={securityData.confirmNewPassword} error={fieldErrors.confirmNewPassword} onChange={(value) => setSecurityData({ ...securityData, confirmNewPassword: value })} /></div>
                 <button type="submit" disabled={updating} className="ui-button ui-button-primary mt-7 w-full">{updating && <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>}{updating ? "Updating" : "Update password"}</button>
               </form>
@@ -362,20 +363,20 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
             <div role="tabpanel" className="route-transition grid gap-5 lg:grid-cols-2">
               <section className="ui-card p-6 sm:p-8">
                 <p className="ui-eyebrow">Your information</p>
-                <h2 className="ui-card-title mt-2 italic text-white">Download your data</h2>
+                <h2 className="ui-card-title mt-2 text-white">Download your data</h2>
                 <p className="ui-copy mt-3 text-sm">Download the personal and booking information linked to your account as a JSON file.</p>
                 <button type="button" onClick={() => void downloadPrivacyExport()} disabled={privacyBusy} className="ui-button ui-button-secondary mt-6"><span className="material-symbols-outlined" aria-hidden="true">download</span>{privacyBusy ? "Preparing" : "Download data"}</button>
               </section>
               <form onSubmit={submitPrivacyRequest} className="ui-card p-6 sm:p-8">
                 <p className="ui-eyebrow">Data rights</p>
-                <h2 className="ui-card-title mt-2 italic text-white">Submit a privacy request</h2>
+                <h2 className="ui-card-title mt-2 text-white">Submit A Privacy Request</h2>
                 <label className="mt-6 block"><span className="ui-label">Request type</span><select value={privacyType} onChange={(event) => setPrivacyType(event.target.value as PrivacyRequestType)} className="ui-input"><option value="Access">Access my data</option><option value="Rectification">Correct my data</option><option value="Erasure">Erase my data</option><option value="Restriction">Restrict processing</option><option value="Portability">Data portability</option><option value="Objection">Object to processing</option></select></label>
                 <label className="mt-5 block"><span className="ui-label">Details</span><textarea value={privacyDetails} onChange={(event) => setPrivacyDetails(event.target.value)} maxLength={2000} rows={4} className="ui-input min-h-28 resize-y" placeholder="Tell us what you need…" /></label>
                 <button type="submit" disabled={privacyBusy} className="ui-button ui-button-primary mt-6 w-full">{privacyBusy ? "Submitting" : "Submit request"}</button>
               </form>
               <section className="ui-card p-6 sm:p-8 lg:col-span-2">
                 <p className="ui-eyebrow">Request history</p>
-                <h2 className="ui-card-title mt-2 italic text-white">Privacy requests</h2>
+                <h2 className="ui-card-title mt-2 text-white">Privacy requests</h2>
                 <div className="mt-6 space-y-3">
                   {privacyRequests.length ? privacyRequests.map((request) => <article key={request.id} className="rounded border border-white/10 bg-black/20 p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-semibold text-white">{request.type}</p><p className="mt-1 text-xs text-gray-500">Submitted {new Date(request.requestedAtUtc).toLocaleDateString()} · Due {new Date(request.dueAtUtc).toLocaleDateString()}</p></div><span className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{request.status}</span></div>{request.details && <p className="mt-3 text-sm text-gray-400">{request.details}</p>}{request.resolutionNotes && <p className="mt-3 text-sm text-gray-400">Resolution: {request.resolutionNotes}</p>}</article>) : <p className="text-sm text-gray-500">You have not submitted a privacy request.</p>}
                 </div>
@@ -400,6 +401,6 @@ const ProfileAvatar = ({ user, size = "default" }: { user: ApplicationUser; size
   );
 };
 const BookingDatum = ({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) => <div><dt className="ui-label">{label}</dt><dd className={`font-semibold ${highlight ? "text-primary" : "text-white"}`}>{value}</dd></div>;
-const SecurityField = ({ field, label, autoComplete, value, error, onChange }: { field: string; label: string; autoComplete: string; value: string; error?: string; onChange: (value: string) => void }) => <FormField htmlFor={field} label={label} error={error}><input id={field} required type="password" autoComplete={autoComplete} value={value} onChange={(event) => onChange(event.target.value)} className={`ui-input ${error ? "border-red-500/50" : ""}`} aria-invalid={Boolean(error)} /></FormField>;
+const SecurityField = ({ field, label, autoComplete, value, error, onChange }: { field: string; label: string; autoComplete: string; value: string; error?: string; onChange: (value: string) => void }) => <FormField htmlFor={field} label={label} error={error}><PasswordInput id={field} required autoComplete={autoComplete} value={value} onChange={(event) => onChange(event.target.value)} inputClassName={error ? "border-red-500/50" : ""} aria-invalid={Boolean(error)} /></FormField>;
 
 export default Profile;

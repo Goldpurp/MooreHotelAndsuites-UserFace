@@ -95,7 +95,7 @@ const ManageBooking: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
       <form
         onSubmit={handleSubmit}
         className="ui-card w-full max-w-lg p-7 shadow-2xl sm:p-10"
@@ -103,7 +103,7 @@ const ManageBooking: React.FC = () => {
         <div className="text-center">
           <span className="mx-auto grid size-14 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined text-3xl" aria-hidden="true">travel_explore</span></span>
           <p className="ui-eyebrow mt-5">Secure lookup</p>
-          <h1 className="ui-card-title mt-2 italic text-white">Manage your booking</h1>
+          <h1 className="ui-card-title mt-2 text-white">Manage Your Booking</h1>
           <p className="ui-copy mt-3 text-sm">
             Use your reference and booking email to view the latest verified status.
           </p>

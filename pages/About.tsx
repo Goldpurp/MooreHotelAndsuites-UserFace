@@ -9,7 +9,7 @@ const standards = [
 ];
 
 const About: React.FC = () => (
-  <div className="min-h-screen bg-background-dark text-white">
+  <div className="min-h-[100dvh] bg-background-dark text-white">
     <header className="relative flex min-h-[42rem] items-center overflow-hidden px-4 pb-16 pt-32 text-center sm:px-6">
       <img
         src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3-large.webp", 1600)}
@@ -22,7 +22,7 @@ const About: React.FC = () => (
       <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/45 to-background-dark" />
       <div className="ui-container relative z-10 max-w-4xl">
         <p className="ui-eyebrow">Our story</p>
-        <h1 className="ui-display mt-5 italic">Hospitality with <span className="text-primary">heart and purpose.</span></h1>
+        <h1 className="ui-display mt-5 text-white">Hospitality with <span className="text-primary">Heart and Purpose</span></h1>
         <p className="mx-auto mt-6 max-w-2xl text-[clamp(1rem,2vw,1.18rem)] leading-8 text-gray-300">Moore Hotels &amp; Suites brings contemporary comfort and warm Nigerian service to the Sagamu–Ikenne corridor.</p>
       </div>
     </header>
@@ -31,9 +31,9 @@ const About: React.FC = () => (
       <div className="ui-container grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
         <div>
           <p className="ui-eyebrow">The Moore standard</p>
-          <h2 className="ui-section-title mt-4 italic">A calm base for every kind of stay.</h2>
+          <h2 className="ui-section-title mt-4 text-white">A Calm Base for Every Kind of Stay</h2>
           <p className="ui-copy mt-6">We created Moore for guests who value ease, professionalism, and a genuine welcome. Our location offers a practical retreat for business travel, family visits, events, and quiet weekends in Ogun State.</p>
-          <blockquote className="mt-8 border-l-2 border-primary/50 bg-white/[0.035] p-6 font-display text-xl italic leading-8 text-gray-200">“Luxury feels most meaningful when it is personal, comfortable, and quietly dependable.”</blockquote>
+          <blockquote className="mt-8 border-l-2 border-primary/50 bg-white/[0.035] p-6 font-display text-xl leading-8 text-gray-200">“Luxury feels most meaningful when it is personal, comfortable, and quietly dependable.”</blockquote>
         </div>
         <div className="group overflow-hidden rounded-lg border border-white/10 shadow-2xl">
           <img src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.08.26_pm_xl65yh-large.webp", 900)} alt="An elegant hotel reception" className="image-luxury aspect-[4/5] w-full object-cover lg:aspect-[4/5]" loading="lazy" decoding="async" />
@@ -43,13 +43,13 @@ const About: React.FC = () => (
 
     <section className="border-y border-primary/20 bg-primary py-16 text-black sm:py-20">
       <div className="ui-container">
-        <p className="text-[0.72rem] font-bold uppercase tracking-[0.18em] text-black/60">What guests can expect</p>
-        <h2 className="ui-section-title mt-3 italic">The experience, made simple.</h2>
+        <p className="ui-eyebrow !text-black/70">What guests can expect</p>
+        <h2 className="ui-section-title mt-3 text-black">The Experience, Made Simple</h2>
         <div className="mt-10 grid gap-px overflow-hidden rounded-lg bg-black/15 md:grid-cols-3">
           {standards.map((standard) => (
             <article key={standard.title} className="bg-primary p-6 sm:p-8">
               <span className="material-symbols-outlined text-3xl" aria-hidden="true">{standard.icon}</span>
-              <h3 className="font-display mt-5 text-2xl font-semibold">{standard.title}</h3>
+              <h3 className="font-display mt-5 text-2xl font-semibold text-black">{standard.title}</h3>
               <p className="mt-3 text-sm leading-7 text-black/70">{standard.text}</p>
             </article>
           ))}
@@ -64,7 +64,7 @@ const About: React.FC = () => (
         </div>
         <div>
           <p className="ui-eyebrow">Come as our guest</p>
-          <h2 className="ui-section-title mt-4 italic">Stay for the way it feels.</h2>
+          <h2 className="ui-section-title mt-4 text-white">Stay for the Way It Feels</h2>
           <p className="ui-copy mt-6">Choose your room, share your dates, and let our team take care of the details.</p>
           <Link to="/rooms" className="ui-button ui-button-primary mt-8">Explore rooms <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></Link>
         </div>

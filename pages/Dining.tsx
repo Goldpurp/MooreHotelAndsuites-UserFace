@@ -50,7 +50,7 @@ const hotelExperiences = [
 ];
 
 const Dining: React.FC = () => (
-  <div className="min-h-screen bg-background-dark">
+  <div className="min-h-[100dvh] bg-background-dark">
     <header className="relative flex min-h-[32rem] items-end overflow-hidden px-4 pb-16 pt-32 sm:min-h-[36rem] sm:px-6 sm:pb-20">
       <img src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl-large.webp", 1600)} srcSet={cloudinaryImageSrcSet("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl-large.webp", [640, 960, 1280, 1600])} sizes="100vw" alt="Covered lounge seating at Moore Hotels" className="absolute inset-0 h-full w-full object-cover opacity-50 image-luxury" fetchPriority="high" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/55 to-black/20" />
@@ -58,7 +58,7 @@ const Dining: React.FC = () => (
       <div className="ui-container-wide relative z-10 w-full">
         <div className="max-w-3xl">
           <p className="ui-eyebrow">The Moore experience</p>
-          <h1 className="ui-display mt-5 italic text-white">A good meal, <span className="text-primary">and more around it.</span></h1>
+          <h1 className="ui-display mt-5 text-white">A Good Meal, <span className="text-primary">and More Around It</span></h1>
           <p className="ui-copy mt-6 max-w-2xl text-gray-300">Simple dining, dependable hotel systems, and easy leisure spaces—presented honestly, without unnecessary ceremony.</p>
         </div>
       </div>
@@ -71,7 +71,7 @@ const Dining: React.FC = () => (
         </div>
         <div className="lg:col-span-5">
           <p className="ui-eyebrow">Food & refreshment</p>
-          <h2 id="dining-overview-title" className="ui-section-title mt-4 italic text-white">Familiar choices, thoughtfully served.</h2>
+          <h2 id="dining-overview-title" className="ui-section-title mt-4 text-white">Familiar Choices, Thoughtfully Served</h2>
           <p className="ui-copy mt-5">Our dining offer is intentionally focused: useful breakfast options, satisfying main meals, refreshments, and selected room-service requests for resident guests.</p>
           <div className="mt-7 space-y-4 border-t border-white/10 pt-6">
             {diningNotes.map((note) => (
@@ -89,7 +89,7 @@ const Dining: React.FC = () => (
     <section className="ui-section border-y border-white/5 bg-black/45" aria-labelledby="experience-power-title">
       <div className="ui-container-wide">
         <div className="grid gap-6 md:grid-cols-2 md:items-end">
-          <div><p className="ui-eyebrow">Behind every stay</p><h2 id="experience-power-title" className="ui-section-title mt-4 italic text-white">Comfort supported by real infrastructure.</h2></div>
+          <div><p className="ui-eyebrow">Behind every stay</p><h2 id="experience-power-title" className="ui-section-title mt-4 text-white">Comfort Supported by Real Infrastructure</h2></div>
           <p className="ui-copy max-w-xl md:justify-self-end">Reliable power is not a decorative extra. It supports lighting, connectivity, essential services, and the calm rhythm guests expect.</p>
         </div>
 
@@ -106,7 +106,7 @@ const Dining: React.FC = () => (
                 </div>
                 <div className="mt-auto pt-16">
                   <p className="ui-eyebrow">{feature.label}</p>
-                  <h3 className="font-display mt-3 text-[clamp(1.75rem,2.8vw,2.4rem)] italic leading-[1.1] text-white">{feature.title}</h3>
+                  <h3 className="font-display mt-3 text-[clamp(1.75rem,2.8vw,2.4rem)] leading-[1.1] text-white">{feature.title}</h3>
                   <p className="mt-5 max-w-xl text-sm leading-7 text-gray-400">{feature.text}</p>
                 </div>
               </div>
@@ -118,12 +118,12 @@ const Dining: React.FC = () => (
 
     <section className="ui-section" aria-labelledby="beyond-table-title">
       <div className="ui-container-wide">
-        <div className="text-center"><p className="ui-eyebrow">Beyond the table</p><h2 id="beyond-table-title" className="ui-section-title mt-4 italic text-white">More ways to use your time at Moore.</h2><p className="ui-copy mx-auto mt-5 max-w-2xl">The hotel experience continues through leisure, social, and restorative spaces.</p></div>
+        <div className="text-center"><p className="ui-eyebrow">Beyond the table</p><h2 id="beyond-table-title" className="ui-section-title mt-4 text-white">More Ways to Use Your Time at Moore</h2><p className="ui-copy mx-auto mt-5 max-w-2xl">The hotel experience continues through leisure, social, and restorative spaces.</p></div>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {hotelExperiences.map((experience) => (
             <article key={experience.title} className="group overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-2xl">
               <div className="overflow-hidden"><img src={cloudinaryImage(experience.image, 900)} alt={experience.alt} className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" decoding="async" /></div>
-              <div className="p-6 sm:p-7"><p className="ui-eyebrow">{experience.eyebrow}</p><h3 className="font-display mt-3 text-2xl italic text-white">{experience.title}</h3><p className="mt-4 text-sm leading-7 text-gray-500">{experience.text}</p></div>
+              <div className="p-6 sm:p-7"><p className="ui-eyebrow">{experience.eyebrow}</p><h3 className="font-display mt-3 text-2xl text-white">{experience.title}</h3><p className="mt-4 text-sm leading-7 text-gray-500">{experience.text}</p></div>
             </article>
           ))}
         </div>
