@@ -104,7 +104,7 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-[100dvh] flex flex-col">
       <Navbar user={user} onLogout={handleLogout} />
       
       <p className="sr-only" aria-live="polite">{routeTitle}</p>

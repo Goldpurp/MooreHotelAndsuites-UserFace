@@ -15,9 +15,15 @@ export default {
         },
       },
       fontFamily: {
-        display: ["Playfair Display", "serif"],
-        sans: ["Montserrat", "sans-serif"],
-        accent: ["Montserrat", "sans-serif"],
+        display: ["'Cormorant Garamond'", "Garamond", "Georgia", "serif"],
+        serif: ["'Cormorant Garamond'", "Garamond", "Georgia", "serif"],
+        sans: ["'Plus Jakarta Sans'", "Inter", "system-ui", "-apple-system", "sans-serif"],
+        ui: ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+        body: ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+        accent: ["'Plus Jakarta Sans'", "sans-serif"],
+      },
+      letterSpacing: {
+        badge: "0.12em",
       },
       maxWidth: {
         luxury: "1600px",

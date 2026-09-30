@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NotificationModal from "../components/NotificationModal";
+import PasswordInput from "../components/ui/PasswordInput";
 import { api } from "../services/api";
 import { appConfig } from "../config/environment";
 
@@ -23,9 +24,9 @@ function trustedSignInUrl(value: string | undefined): string {
 }
 
 function readResetParameters() {
-  const params = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(window.location.hash.slice(1));
   return {
-    email: params.get("email")?.trim().toLowerCase() ?? "",
+    userId: params.get("userId")?.trim() ?? "",
     token: params.get("token") ?? "",
   };
 }
@@ -52,7 +53,7 @@ const ResetPassword: React.FC = () => {
   }, []);
 
   const validate = () => {
-    if (!resetParameters.email || !resetParameters.token) {
+    if (!resetParameters.userId || !resetParameters.token) {
       return "This password-reset link is incomplete or expired. Request a new one.";
     }
     if (
@@ -79,7 +80,7 @@ const ResetPassword: React.FC = () => {
     setLoading(true);
     try {
       const response = await api.resetPassword({
-        email: resetParameters.email,
+        userId: resetParameters.userId,
         token: resetParameters.token,
         newPassword,
         confirmNewPassword,
@@ -115,7 +116,7 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center bg-background-dark px-4 py-32 text-white sm:px-6">
+    <div className="flex min-h-[100dvh] items-center bg-background-dark px-4 py-32 text-white sm:px-6">
       <NotificationModal
         isOpen={modal.show}
         onClose={closeModal}
@@ -128,38 +129,36 @@ const ResetPassword: React.FC = () => {
         <div className="mb-8 text-center">
           <span className="mx-auto grid size-14 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined text-3xl" aria-hidden="true">lock_reset</span></span>
           <p className="ui-eyebrow mt-5">Account security</p>
-          <h1 className="ui-card-title mt-2 italic">Choose a new password</h1>
+          <h1 className="ui-card-title mt-2">Choose A New Password</h1>
           <p className="ui-copy mt-3 text-sm">
-            Enter a strong password for {resetParameters.email || "your Moore account"}.
+            Enter a strong password for your Moore account.
           </p>
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <label className="block">
             <span className="ui-label">New password</span>
-            <input
+            <PasswordInput
+              id="newPassword"
               required
-              type="password"
               autoComplete="new-password"
               maxLength={128}
               disabled={loading || completed}
               value={newPassword}
               onChange={(event) => setNewPassword(event.target.value)}
-              className="ui-input"
             />
           </label>
 
           <label className="block">
             <span className="ui-label">Confirm new password</span>
-            <input
+            <PasswordInput
+              id="confirmNewPassword"
               required
-              type="password"
               autoComplete="new-password"
               maxLength={128}
               disabled={loading || completed}
               value={confirmNewPassword}
               onChange={(event) => setConfirmNewPassword(event.target.value)}
-              className="ui-input"
             />
           </label>
 

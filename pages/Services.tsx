@@ -91,7 +91,7 @@ const serviceHighlights = [
 ];
 
 const Services: React.FC = () => (
-  <div className="min-h-screen bg-background-dark">
+  <div className="min-h-[100dvh] bg-background-dark">
     <header className="relative flex min-h-[40rem] items-center overflow-hidden px-4 pb-24 pt-32 text-center sm:min-h-[44rem] sm:px-6">
       <img
         src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.10.55_pm_y33xug-large.webp", 1600)}
@@ -105,7 +105,7 @@ const Services: React.FC = () => (
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background-dark to-transparent" />
       <div className="ui-container relative z-10 max-w-4xl">
         <p className="ui-eyebrow">Four-star hospitality standards</p>
-        <h1 className="ui-display mt-5 italic text-white">Guest services, <span className="text-primary">thoughtfully delivered.</span></h1>
+        <h1 className="ui-display mt-5 text-white">Guest Services, <span className="text-primary">Thoughtfully Delivered</span></h1>
         <p className="ui-copy mx-auto mt-6 max-w-2xl text-gray-300">Professional support, useful comforts, and restorative spaces—brought together to make every part of your stay feel effortless.</p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <a href="#signature-services" className="ui-button ui-button-primary">Explore services <span className="material-symbols-outlined text-lg" aria-hidden="true">south</span></a>
@@ -128,7 +128,7 @@ const Services: React.FC = () => (
     <section id="signature-services" className="scroll-mt-24 py-20 sm:py-24 lg:py-32">
       <div className="ui-container-wide">
         <div className="mb-16 grid gap-6 border-b border-white/10 pb-10 md:grid-cols-2 md:items-end lg:mb-24">
-          <div><p className="ui-eyebrow">Signature services</p><h2 className="ui-section-title mt-4 italic text-white">Care that moves with your stay.</h2></div>
+          <div><p className="ui-eyebrow">Signature services</p><h2 className="ui-section-title mt-4 text-white">Care That Moves with Your Stay</h2></div>
           <p className="ui-copy max-w-xl md:justify-self-end">Each service is designed around the same standard: clear assistance, considered spaces, and fewer interruptions to your day.</p>
         </div>
 
@@ -148,7 +148,7 @@ const Services: React.FC = () => (
                   <span className="grid size-11 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined" aria-hidden="true">{service.icon}</span></span>
                   <p className="ui-eyebrow">{service.tag}</p>
                 </div>
-                <h3 className="font-display mt-5 text-[clamp(1.85rem,3vw,2.65rem)] italic leading-[1.1] text-white">{service.title}</h3>
+                <h3 className="font-display mt-5 text-[clamp(1.85rem,3vw,2.65rem)] leading-[1.1] text-white">{service.title}</h3>
                 <p className="ui-copy mt-5 max-w-xl">{service.description}</p>
                 <ul className="mt-7 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3" aria-label={`${service.title} includes`}>
                   {service.features.map((feature) => (
@@ -168,7 +168,7 @@ const Services: React.FC = () => (
 
     <section className="border-y border-white/5 bg-black/45 py-20 sm:py-24">
       <div className="ui-container-wide">
-        <div className="max-w-2xl"><p className="ui-eyebrow">Throughout your stay</p><h2 className="ui-section-title mt-4 italic text-white">The essentials are already considered.</h2><p className="ui-copy mt-5">Reliable everyday services support work, rest, arrivals, and everything in between.</p></div>
+        <div className="max-w-2xl"><p className="ui-eyebrow">Throughout your stay</p><h2 className="ui-section-title mt-4 text-white">The Essentials Are Already Considered</h2><p className="ui-copy mt-5">Reliable everyday services support work, rest, arrivals, and everything in between.</p></div>
         <div className="mt-10 grid gap-px overflow-hidden rounded-lg border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
           {stayEssentials.map((essential) => (
             <article key={essential.title} className="group bg-[#101010] p-6 transition-colors duration-300 hover:bg-[#151515] sm:p-7">
@@ -188,7 +188,7 @@ const Services: React.FC = () => (
         <div className="relative z-10 mx-auto max-w-3xl">
           <span className="mx-auto grid size-12 place-items-center rounded-full border border-primary/30 bg-primary/10 text-primary"><span className="material-symbols-outlined text-2xl" aria-hidden="true">support_agent</span></span>
           <p className="ui-eyebrow mt-6">Professional support, every moment</p>
-          <h2 className="ui-section-title mt-4 italic text-white">Tell us what would make your stay easier.</h2>
+          <h2 className="ui-section-title mt-4 text-white">Tell Us What Would Make Your Stay Easier</h2>
           <p className="ui-copy mx-auto mt-5 max-w-xl">Guest Relations can help with a specific request before arrival or while you are with us.</p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <a href="tel:+2348033774544" className="ui-button ui-button-primary"><span className="material-symbols-outlined text-lg" aria-hidden="true">call</span> Call guest relations</a>

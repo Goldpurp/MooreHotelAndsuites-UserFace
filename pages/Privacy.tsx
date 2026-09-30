@@ -2,14 +2,14 @@ import React from "react";
 
 const Privacy: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background-dark px-4 pb-20 pt-32 sm:px-6">
+    <div className="min-h-[100dvh] bg-background-dark px-4 pb-20 pt-32 sm:px-6">
       <div className="ui-container max-w-4xl">
         <header className="border-b border-white/10 pb-9">
           <p className="ui-eyebrow">
             Privacy Notice
           </p>
           <h1 className="ui-page-title mt-3 text-white">
-            Your Data, <span className="italic">Clearly Explained</span>
+            Your Data, Clearly Explained
           </h1>
           <p className="mt-4 text-sm text-gray-500">
             Last Updated: August 10, 2026
@@ -145,7 +145,7 @@ const PolicySection = ({
   children: React.ReactNode;
 }) => (
   <section>
-    <h2 className="ui-card-title mb-4 italic text-white">{title}</h2>
+    <h2 className="ui-card-title mb-4 text-white">{title}</h2>
     {children}
   </section>
 );

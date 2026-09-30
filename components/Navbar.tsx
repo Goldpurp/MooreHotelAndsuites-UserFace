@@ -90,7 +90,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
                 key={link.path}
                 to={link.path}
                 aria-current={isActive(link.path) ? "page" : undefined}
-                className={`relative flex min-h-11 items-center text-[0.72rem] font-semibold uppercase tracking-[0.13em] transition-colors ${
+                className={`relative flex min-h-11 items-center font-ui text-[0.72rem] font-bold uppercase tracking-[0.12em] transition-colors ${
                   isActive(link.path) ? "text-primary" : "text-gray-300 hover:text-white"
                 }`}
               >
@@ -102,7 +102,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
               <a
                 href="https://admin.moorehotelandsuites.com"
                 rel="noopener noreferrer"
-                className="flex min-h-11 items-center text-[0.72rem] font-semibold uppercase tracking-[0.13em] text-primary/80 transition-colors hover:text-primary"
+                className="flex min-h-11 items-center font-ui text-[0.72rem] font-bold uppercase tracking-[0.12em] text-primary/80 transition-colors hover:text-primary"
               >
                 Admin
               </a>
@@ -159,7 +159,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
                 key={link.path}
                 to={link.path}
                 tabIndex={mobileMenuOpen ? 0 : -1}
-                className={`font-display flex min-h-14 items-center border-b border-white/[0.07] text-[clamp(1.9rem,9vw,2.75rem)] italic transition-colors ${isActive(link.path) ? "text-primary" : "text-white hover:text-primary"}`}
+                className={`font-ui flex min-h-14 items-center border-b border-white/[0.07] text-lg font-bold uppercase tracking-[0.12em] transition-colors ${isActive(link.path) ? "text-primary" : "text-white hover:text-primary"}`}
                 style={{ transitionDelay: mobileMenuOpen ? `${80 + index * 45}ms` : "0ms" }}
               >
                 {link.name}
@@ -190,7 +190,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
         zIndex={320}
       >
         <p className="ui-eyebrow text-red-300">Account security</p>
-        <h2 id="guest-logout-title" className="ui-card-title mt-2 italic text-white">Sign out of your guest account?</h2>
+        <h2 id="guest-logout-title" className="ui-card-title mt-2 text-white">Sign out of your guest account?</h2>
         <p id="guest-logout-description" className="ui-copy mt-4 text-sm">You will need to enter your email and password again to view personal details and booking history.</p>
         <div className="mt-7 grid gap-3 sm:grid-cols-2">
           <button ref={logoutCancelRef} type="button" onClick={() => setLogoutConfirmOpen(false)} disabled={logoutLoading} className="ui-button ui-button-secondary">Stay signed in</button>

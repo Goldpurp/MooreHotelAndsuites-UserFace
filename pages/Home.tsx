@@ -160,7 +160,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background-dark">
+    <div className="min-h-[100dvh] bg-background-dark">
       <NotificationModal
         isOpen={modal.show}
         onClose={() => setModal((current) => ({ ...current, show: false }))}
@@ -189,7 +189,7 @@ const Home: React.FC = () => {
               Four-star hospitality in Sagamu
             </p>
             <h1 className="ui-display mt-6 text-white">
-              The standard of <span className="italic text-primary">luxury</span>
+              The Standard of <span className="text-primary">Luxury</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-[clamp(1rem,2vw,1.18rem)] leading-8 text-gray-200/85">
               Rest well, recharge fully, and experience thoughtful Nigerian hospitality along the Sagamu–Ikenne corridor.
@@ -259,7 +259,7 @@ const Home: React.FC = () => {
         <div className="ui-container">
           <div className="order-2 lg:order-1">
             <p className="ui-eyebrow">Nigerian professionalism</p>
-            <h2 className="ui-section-title mt-4 italic text-white">Refined hotel service at every touchpoint.</h2>
+            <h2 className="ui-section-title mt-4 text-white">Refined Hotel Service at Every Touchpoint</h2>
             <p className="ui-copy mt-6 max-w-xl">
               Moore Hotels &amp; Suites blends modern standards with genuine local warmth. From arrival to departure, every detail is designed to make your stay calm, efficient, and memorable.
             </p>
@@ -273,7 +273,7 @@ const Home: React.FC = () => {
           <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="ui-eyebrow">Stay your way</p>
-              <h2 className="ui-section-title mt-3 italic text-white">Featured rooms</h2>
+              <h2 className="ui-section-title mt-3 text-white">Featured Rooms</h2>
             </div>
             <Link to="/rooms" className="ui-button ui-button-secondary">View all rooms <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span></Link>
           </div>
@@ -284,13 +284,13 @@ const Home: React.FC = () => {
               : error ? (
                 <div className="ui-card col-span-full flex min-h-56 flex-col items-center justify-center p-7 text-center">
                   <span className="material-symbols-outlined text-3xl text-primary" aria-hidden="true">cloud_off</span>
-                  <h3 className="ui-card-title mt-4 italic text-white">Rooms are temporarily unavailable</h3>
+                  <h3 className="ui-card-title mt-4 text-white">Rooms Are Temporarily Unavailable</h3>
                   <p className="ui-copy mt-2 max-w-lg">The rest of the hotel website is available. Try the room list again in a moment.</p>
                   <button type="button" onClick={() => refetch()} className="ui-button ui-button-primary mt-5">Try again</button>
                 </div>
               ) : featuredRooms.length === 0 ? (
                 <div className="ui-card col-span-full min-h-48 p-7 text-center">
-                  <h3 className="ui-card-title italic text-white">New room availability is being prepared</h3>
+                  <h3 className="ui-card-title text-white">New Room Availability Is Being Prepared</h3>
                   <p className="ui-copy mx-auto mt-3 max-w-xl">Please contact Guest Relations for current room options while the online inventory is updated.</p>
                 </div>
               ) : featuredRooms.map((room, index) => (
@@ -311,7 +311,7 @@ const Home: React.FC = () => {
           <div className="mb-10 grid gap-5 md:grid-cols-2 md:items-end">
             <div>
               <p className="ui-eyebrow">Beyond your room</p>
-              <h2 className="ui-section-title mt-4 italic text-white">More of Moore to discover.</h2>
+              <h2 className="ui-section-title mt-4 text-white">More of Moore to Discover</h2>
             </div>
             <p className="ui-copy max-w-xl md:justify-self-end">Poolside pauses, shared games, and open-air seating give every stay more room to unfold.</p>
           </div>
@@ -328,7 +328,7 @@ const Home: React.FC = () => {
                 <div className="absolute inset-0 border border-white/0 transition-colors duration-500 group-hover:border-primary/35" aria-hidden="true" />
                 <div className={`absolute inset-x-0 bottom-0 p-6 sm:p-8 ${index === 0 ? "xl:p-10" : ""}`}>
                   <p className="ui-eyebrow">{item.eyebrow}</p>
-                  <h3 className={`font-display mt-3 italic leading-[1.12] text-white ${index === 0 ? "text-[clamp(2rem,3.3vw,3.25rem)]" : "text-[clamp(1.6rem,2.2vw,2.15rem)]"}`}>{item.title}</h3>
+                  <h3 className={`font-display mt-3 leading-[1.12] text-white ${index === 0 ? "text-[clamp(2rem,3.3vw,3.25rem)]" : "text-[clamp(1.6rem,2.2vw,2.15rem)]"}`}>{item.title}</h3>
                   <p className={`mt-4 max-w-lg text-sm leading-7 text-gray-300 ${index === 0 ? "" : "xl:hidden 2xl:block"}`}>{item.description}</p>
                   <span className="mt-6 inline-flex min-h-11 items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition-colors group-hover:text-primary">{item.action}<span className="material-symbols-outlined text-lg transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">arrow_forward</span></span>
                 </div>
@@ -342,7 +342,7 @@ const Home: React.FC = () => {
         <div className="ui-container-wide grid gap-12 lg:grid-cols-12 lg:items-start lg:gap-16">
           <div className="lg:sticky lg:top-32 lg:col-span-4">
             <p className="ui-eyebrow">Behind the comfort</p>
-            <h2 id="power-infrastructure-title" className="ui-section-title mt-4 italic text-white">Power that stays in the background.</h2>
+            <h2 id="power-infrastructure-title" className="ui-section-title mt-4 text-white">Power That Stays in the Background</h2>
             <p className="ui-copy mt-5">A layered power setup helps rooms, shared spaces, and essential hotel operations remain dependable through changes in public supply.</p>
             <div className="mt-8 flex items-start gap-3 border-t border-white/10 pt-6 text-sm leading-6 text-gray-400">
               <span className="material-symbols-outlined mt-0.5 text-primary" aria-hidden="true">monitor_heart</span>
@@ -363,7 +363,7 @@ const Home: React.FC = () => {
                   </div>
                   <div className="mt-auto pt-20">
                     <p className="ui-eyebrow">{system.eyebrow}</p>
-                    <h3 className="font-display mt-3 text-[clamp(1.75rem,2.4vw,2.4rem)] italic leading-[1.1] text-white">{system.title}</h3>
+                    <h3 className="font-display mt-3 text-[clamp(1.75rem,2.4vw,2.4rem)] leading-[1.1] text-white">{system.title}</h3>
                     <p className="mt-4 text-sm leading-7 text-gray-400">{system.description}</p>
                     <ul className="mt-6 space-y-3 border-t border-white/10 pt-5" aria-label={`${system.eyebrow} details`}>
                       {system.details.map((detail) => <li key={detail} className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.09em] text-gray-300"><span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />{detail}</li>)}
@@ -380,7 +380,7 @@ const Home: React.FC = () => {
         <div className="ui-container-wide">
           <div className="max-w-2xl">
             <p className="ui-eyebrow">Included in your stay</p>
-            <h2 id="stay-assurances-title" className="ui-section-title mt-4 italic text-white">The practical details are already considered.</h2>
+            <h2 id="stay-assurances-title" className="ui-section-title mt-4 text-white">The Practical Details Are Already Considered</h2>
           </div>
           <div className="mt-10 grid gap-px overflow-hidden rounded-lg border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
             {stayAssurances.map((item) => (
@@ -399,7 +399,7 @@ const Home: React.FC = () => {
           <div className="grid gap-6 border-b border-white/10 pb-9 md:grid-cols-2 md:items-end">
             <div>
               <p className="ui-eyebrow">Around the premises</p>
-              <h2 id="premises-spaces-title" className="ui-section-title mt-4 italic text-white">The spaces between your room matter.</h2>
+              <h2 id="premises-spaces-title" className="ui-section-title mt-4 text-white">The Spaces Between Your Room Matter</h2>
             </div>
             <p className="ui-copy max-w-xl md:justify-self-end">From the upstairs approach to the shared lounge, each part of the property helps the hotel feel considered and complete.</p>
           </div>
@@ -420,7 +420,7 @@ const Home: React.FC = () => {
                   </div>
                 </div>
                 <div className="p-6 sm:p-7">
-                  <h3 className="font-display text-[clamp(1.6rem,2.2vw,2rem)] italic leading-tight text-white">{space.title}</h3>
+                  <h3 className="font-display text-[clamp(1.6rem,2.2vw,2rem)] leading-tight text-white">{space.title}</h3>
                   <p className="mt-4 text-sm leading-7 text-gray-500">{space.description}</p>
                   <span className="mt-6 inline-flex min-h-11 items-center gap-2 text-xs font-bold uppercase tracking-[0.11em] text-white transition-colors group-hover:text-primary">{space.action}<span className="material-symbols-outlined text-lg transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">arrow_forward</span></span>
                 </div>
@@ -434,7 +434,7 @@ const Home: React.FC = () => {
         <div className="ui-container grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <p className="ui-eyebrow">The Moore experience</p>
-            <h2 className="ui-section-title mt-4 italic text-white">A calm retreat, made personal.</h2>
+            <h2 className="ui-section-title mt-4 text-white">A Calm Retreat, Made Personal</h2>
             <p className="ui-copy mt-5">See the atmosphere, spaces, and service that shape every stay.</p>
             <button type="button" onClick={toggleVideo} className="ui-button ui-button-secondary mt-8" aria-pressed={videoPlaying}>
               <span className="material-symbols-outlined" aria-hidden="true">{videoPlaying ? "pause" : "play_arrow"}</span>
@@ -461,7 +461,7 @@ const Home: React.FC = () => {
       <section className="border-y border-white/5 bg-black py-16 text-center sm:py-20">
         <blockquote className="ui-container max-w-4xl">
           <span className="material-symbols-outlined text-5xl text-primary/50" aria-hidden="true">format_quote</span>
-          <p className="font-display mt-4 text-[clamp(1.65rem,4vw,3.2rem)] italic leading-[1.3] text-white">Every guest experience is handled with professional precision and Nigerian warmth.</p>
+          <p className="font-display mt-4 text-[clamp(1.65rem,4vw,3.2rem)] leading-[1.3] text-white">Every guest experience is handled with professional precision and Nigerian warmth.</p>
           <footer className="ui-eyebrow mt-6">Alase Moore</footer>
         </blockquote>
       </section>
@@ -486,7 +486,7 @@ const Home: React.FC = () => {
 
           <div className="flex flex-col justify-center p-6 sm:p-9 lg:col-span-5 lg:p-12">
             <p className="ui-eyebrow">Location &amp; arrival</p>
-            <h2 className="ui-section-title mt-4 italic text-white">Well placed for an easy stay.</h2>
+            <h2 className="ui-section-title mt-4 text-white">Well Placed for an Easy Stay</h2>
             <p className="ui-copy mt-5">Find us on the Sagamu–Ikenne Road, beside the NYSC Camp—a practical base for business, events, family visits, and quiet weekends.</p>
 
             <address className="mt-7 flex items-start gap-3 border-y border-white/10 py-5 text-sm not-italic leading-7 text-gray-300">
@@ -512,7 +512,7 @@ const Home: React.FC = () => {
       <section className="ui-section text-center">
         <div className="ui-container max-w-3xl">
           <p className="ui-eyebrow">Guest relations</p>
-          <h2 className="ui-section-title mt-4 italic text-white">Plan your next stay.</h2>
+          <h2 className="ui-section-title mt-4 text-white">Plan Your Next Stay</h2>
           <p className="ui-copy mx-auto mt-5 max-w-2xl">Speak with our team about corporate rates, events, and tailored stays.</p>
           <a href="mailto:info@moorehotelandsuites.com?subject=Stay%20Enquiry" className="ui-button ui-button-primary mt-8">Email guest relations</a>
         </div>

@@ -56,7 +56,7 @@ const VerifyEmail: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background-dark p-6 pt-28">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-background-dark p-6 pt-28">
       <div className="w-full max-w-md">
         <div className="ui-card flex flex-col items-center p-8 text-center shadow-2xl sm:p-10">
 
@@ -70,7 +70,7 @@ const VerifyEmail: React.FC = () => {
 
           {status === "success" && (
             <div className="route-transition">
-              <h1 className="ui-card-title mb-2 italic text-primary">
+              <h1 className="ui-card-title mb-2 text-primary">
                 Email Verified
               </h1>
               <div className="mx-auto my-4 h-px w-12 bg-primary/50" />
@@ -82,7 +82,7 @@ const VerifyEmail: React.FC = () => {
 
           {status === "error" && (
             <div className="route-transition">
-              <h1 className="ui-card-title mb-2 italic text-red-400">
+              <h1 className="ui-card-title mb-2 text-red-400">
                 Verification Failed
               </h1>
               <p className="ui-copy mb-8 text-sm">

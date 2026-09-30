@@ -29,7 +29,7 @@ const FAQ: React.FC = () => {
           <p className="ui-eyebrow">
             Guest Information
           </p>
-          <h2 className="ui-section-title italic text-white">
+          <h2 className="ui-section-title text-white">
             Frequently Asked Questions
           </h2>
         </div>
@@ -47,7 +47,7 @@ const FAQ: React.FC = () => {
                 aria-expanded={openIndex === index}
                 aria-controls={`faq-answer-${index}`}
               >
-                <span className={`font-display text-[clamp(1.15rem,2vw,1.4rem)] italic transition-colors ${openIndex === index ? 'text-primary' : 'text-white group-hover:text-primary/80'}`}>
+                <span className={`text-[clamp(1.05rem,1.8vw,1.3rem)] font-semibold transition-colors ${openIndex === index ? 'text-primary' : 'text-white group-hover:text-primary/80'}`}>
                   {item.question}
                 </span>
                 <span className={`material-symbols-outlined text-primary transition-transform duration-500 ${openIndex === index ? 'rotate-180' : ''}`}>

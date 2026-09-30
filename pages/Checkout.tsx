@@ -325,7 +325,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const currentTotalAmount = pricingQuote ? pricingQuote.totalAmount : estimatedTotal;
 
   return (
-    <div className="min-h-screen bg-background-dark px-4 pb-24 pt-32 sm:px-6">
+    <div className="min-h-[100dvh] bg-background-dark px-4 pb-24 pt-32 sm:px-6">
       <NotificationModal isOpen={notification.show} onClose={() => setNotification((current) => ({ ...current, show: false }))} title={notification.title} message={notification.message} type={notification.type} />
       {processing && <AestheticLoader message="Securing your booking" subtext="Please keep this page open" />}
 
@@ -344,7 +344,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
             <span className="material-symbols-outlined text-4xl" aria-hidden="true">check_circle</span>
           </span>
           <p className="ui-eyebrow mt-4 text-emerald-400">Reservation Received</p>
-          <h2 id="booking-success-title" className="ui-card-title mt-1 italic text-white">{directTransferBooking?.status === BookingStatus.Cancelled ? "Contact the hotel" : "Payment update received"}</h2>
+          <h2 id="booking-success-title" className="ui-card-title mt-1 text-white">{directTransferBooking?.status === BookingStatus.Cancelled ? "Contact the hotel" : "Payment update received"}</h2>
           <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold text-amber-300">
             <span className="size-2 rounded-full bg-amber-400 animate-pulse" aria-hidden="true" />
             {directTransferBooking?.paymentStatus === "Paid" ? "Payment verified" : "Pending Verification"}
@@ -410,7 +410,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
       <div className="ui-container-wide">
         <header className="mb-10">
           <p className="ui-eyebrow">Step {currentStep} of 3</p>
-          <h1 className="ui-page-title mt-3 italic text-white">Complete your <span className="text-primary">booking.</span></h1>
+          <h1 className="ui-page-title mt-3 text-white">Complete Your <span className="text-primary">Booking</span></h1>
           <p className="ui-copy mt-4 max-w-2xl">Your room and dates stay intact while you review guest details and payment.</p>
           <CheckoutProgress currentStep={currentStep} onStay={directTransferBooking ? viewTransferBooking : returnToRoom} onGuest={() => currentStep === 3 && !directTransferBooking && setCurrentStep(2)} />
         </header>
@@ -418,7 +418,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
           <div className="space-y-8 lg:col-span-8">
             {currentStep === 2 ? (
               <section ref={formRef} className="ui-card scroll-mt-32 p-6 sm:p-8">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><p className="ui-eyebrow">Lead guest</p><h2 className="ui-card-title mt-2 italic text-white">Contact information</h2></div>{!user && <p className="text-sm text-gray-500">Booking as a guest</p>}</div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><p className="ui-eyebrow">Lead guest</p><h2 className="ui-card-title mt-2 text-white">Contact Information</h2></div>{!user && <p className="text-sm text-gray-500">Booking as a guest</p>}</div>
                 <p className="mt-3 text-sm leading-6 text-gray-500">We use these details for your reservation confirmation and important stay updates.</p>
                 <div className="mt-7 grid gap-5 md:grid-cols-2">
                   <FormField label="First name" error={fieldErrors.firstName}><input type="text" autoComplete="given-name" maxLength={80} disabled={processing} value={guestInfo.firstName} onChange={(event) => updateGuestField("firstName", event.target.value)} className={`ui-input ${fieldErrors.firstName ? "border-red-500/50" : ""}`} aria-invalid={Boolean(fieldErrors.firstName)} /></FormField>
@@ -439,7 +439,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
             ) : (
               <section id="payment-section" className="ui-card scroll-mt-32 p-6 sm:p-8">
                 <p className="ui-eyebrow">Step 3 of 3</p>
-                <h2 className="ui-card-title mt-2 italic text-white">Direct Bank Transfer</h2>
+                <h2 className="ui-card-title mt-2 text-white">Direct Bank Transfer</h2>
                 <p className="mt-3 text-sm leading-6 text-gray-400">
                   Your booking reference is {directTransferBooking?.bookingCode}. Only transfer while your unpaid room hold is active. After sending the transfer, click “I have made this transfer”. This reports your payment and keeps the room held while staff verify the bank credit; it does not mark the payment as verified.
                 </p>
@@ -484,7 +484,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                     </div>
                     <div className="flex items-center justify-between gap-3 bg-black/30 p-3.5 text-sm">
                       <span className="text-gray-400">Total Amount to Pay</span>
-                      <span className="font-display text-lg sm:text-xl font-bold text-white">
+                      <span className="text-lg sm:text-xl font-bold text-white">
                         ₦{currentTotalAmount.toLocaleString()}
                       </span>
                     </div>
@@ -522,7 +522,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
           <aside className="lg:col-span-4">
             <div className="ui-card sticky top-28 overflow-hidden shadow-2xl">
-              <div className="relative h-48 bg-gray-800"><img src={cloudinaryImage(room.images?.[0], 720)} className="image-luxury h-full w-full object-cover" alt={room.name} loading="lazy" decoding="async" /><div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-black/20 to-transparent p-6"><p className="ui-eyebrow">{room.category}</p><h2 className="ui-card-title mt-2 italic text-white">{room.name}</h2></div></div>
+              <div className="relative h-48 bg-gray-800"><img src={cloudinaryImage(room.images?.[0], 720)} className="image-luxury h-full w-full object-cover" alt={room.name} loading="lazy" decoding="async" /><div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-black/20 to-transparent p-6"><p className="ui-eyebrow">{room.category}</p><h2 className="ui-card-title mt-2 text-white">{room.name}</h2></div></div>
               <div className="space-y-6 p-6 sm:p-8">
                 
                 {/* Stay Dates with Direct Change Support */}
@@ -562,7 +562,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                 <dl className="space-y-4 text-sm">
                   <SummaryRow label="Room capacity" value={`Up to ${room.capacity} ${room.capacity === 1 ? "guest" : "guests"}`} />
                 </dl>
-                <div className="border-t border-white/10 pt-5"><span className="ui-label">Stay total</span><p className="font-display text-3xl font-semibold italic text-primary">{pricingQuote ? formatMoney(pricingQuote.totalAmount, pricingQuote.currency) : formatMoney(estimatedTotal)}</p><p className="mt-1 text-xs text-gray-500">{pricingQuote ? "Hotel-confirmed price" : `${nights} × ${formatMoney(room.pricePerNight)}`}</p></div>
+                <div className="border-t border-white/10 pt-5"><span className="ui-label">Stay total</span><p className="text-3xl font-semibold text-primary">{pricingQuote ? formatMoney(pricingQuote.totalAmount, pricingQuote.currency) : formatMoney(estimatedTotal)}</p><p className="mt-1 text-xs text-gray-500">{pricingQuote ? "Hotel-confirmed price" : `${nights} × ${formatMoney(room.pricePerNight)}`}</p></div>
                 <button
                   type="button"
                   onClick={currentStep === 2 ? () => void continueToPayment() : handleBooking}
