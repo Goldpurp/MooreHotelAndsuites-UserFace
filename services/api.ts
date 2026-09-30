@@ -329,7 +329,7 @@ class ApiService {
     });
 
   resetPassword = async (data: {
-    email: string;
+    userId: string;
     token: string;
     newPassword: string;
     confirmNewPassword: string;

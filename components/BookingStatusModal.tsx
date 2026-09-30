@@ -49,7 +49,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
           </span>
         </div>
         <p className="ui-eyebrow mt-5">Verified booking record</p>
-        <h2 id={titleId} className="ui-card-title mt-2 italic text-white">{statusLabel}</h2>
+        <h2 id={titleId} className="ui-card-title mt-2 text-white">{statusLabel}</h2>
         <p className="mt-3 text-sm text-gray-400">{booking.guestFirstName} {booking.guestLastName}</p>
       </div>
 
@@ -79,7 +79,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
         </div>
         <div className="mt-6 border-t border-white/10 pt-6 text-center">
           <p className="ui-label">Amount</p>
-          <p className="font-display text-3xl font-semibold text-primary sm:text-4xl">
+          <p className="font-body text-3xl font-semibold text-primary sm:text-4xl">
             ₦{booking.amount.toLocaleString()}
           </p>
           <p className="mt-2 text-sm text-gray-500">
@@ -125,7 +125,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
       </div>
 
       {isPending && (
-        <p className="mt-5 text-center text-sm italic text-gray-500">
+        <p className="mt-5 text-center text-sm text-gray-400">
           Your room is held temporarily while payment is verified.
         </p>
       )}

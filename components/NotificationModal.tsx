@@ -36,7 +36,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({ isOpen, onClose, 
         <div className={`mx-auto grid size-16 place-items-center rounded-full border ${color}`}>
           <span className="material-symbols-outlined text-[1.8rem]" aria-hidden="true">{icon}</span>
         </div>
-        <h2 id={titleId} className="ui-card-title mt-6 italic text-white">{title}</h2>
+        <h2 id={titleId} className="ui-card-title mt-6 text-white">{title}</h2>
         <p id={messageId} className="ui-copy mt-3 text-[0.95rem]">{message}</p>
         <button ref={buttonRef} onClick={onClose} className="ui-button ui-button-primary mt-7 w-full">Continue</button>
     </Dialog>

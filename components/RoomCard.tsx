@@ -45,9 +45,9 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, to, variant = "listing", eage
         <RoomImage room={room} className="image-luxury aspect-[16/10] w-full object-cover" />
         <div className="p-5">
           <p className="ui-eyebrow">{category}</p>
-          <h3 className="ui-card-title mt-2 italic text-white transition-colors group-hover:text-primary">{room.name}</h3>
-          <p className="mt-2 text-xs text-gray-500">Up to {room.capacity} {room.capacity === 1 ? "guest" : "guests"}{SHOW_ROOM_SIZES && room.size ? ` · ${room.size}` : ""}</p>
-          <p className="mt-3 text-sm text-gray-300">₦{room.pricePerNight.toLocaleString()} / night</p>
+          <h3 className="ui-card-title mt-2 text-white transition-colors group-hover:text-primary">{room.name}</h3>
+          <p className="mt-2 text-xs text-gray-400">Up to {room.capacity} {room.capacity === 1 ? "guest" : "guests"}{SHOW_ROOM_SIZES && room.size ? ` · ${room.size}` : ""}</p>
+          <p className="mt-3 text-sm font-medium text-gray-200">From ₦{room.pricePerNight.toLocaleString()} / night</p>
         </div>
       </Link>
     );
@@ -62,8 +62,8 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, to, variant = "listing", eage
             <div className="luxury-gradient absolute inset-0" />
             <div className="absolute inset-x-5 bottom-5">
               <p className="ui-eyebrow">{category}</p>
-              <h3 className="ui-card-title mt-2 italic text-white">{room.name}</h3>
-              <p className="mt-2 text-sm font-semibold text-gray-300">From ₦{room.pricePerNight.toLocaleString()} / night</p>
+              <h3 className="ui-card-title mt-2 text-white">{room.name}</h3>
+              <p className="mt-2 text-sm font-medium text-gray-200">From ₦{room.pricePerNight.toLocaleString()} / night</p>
             </div>
           </div>
         </article>
@@ -79,14 +79,14 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, to, variant = "listing", eage
           <div className="luxury-gradient absolute inset-0" />
           <div className="absolute inset-x-6 bottom-6">
             <p className="ui-eyebrow">{category}</p>
-            <h2 className="ui-card-title mt-2 italic text-white transition-colors group-hover:text-primary">{room.name}</h2>
+            <h2 className="ui-card-title mt-2 text-white transition-colors group-hover:text-primary">{room.name}</h2>
             <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-300"><span>{room.capacity} {room.capacity === 1 ? "guest" : "guests"}</span>{SHOW_ROOM_SIZES && room.size && <span>{room.size}</span>}</p>
           </div>
         </div>
         <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
           <div>
             <span className="ui-label mb-1">From</span>
-            <p className="text-xl font-semibold text-white">₦{room.pricePerNight.toLocaleString()} <span className="text-sm font-normal text-gray-500">/ night</span></p>
+            <p className="text-xl font-medium text-white">₦{room.pricePerNight.toLocaleString()} <span className="text-sm font-normal text-gray-400">/ night</span></p>
           </div>
           <span className="ui-icon-button" aria-hidden="true"><span className="material-symbols-outlined">arrow_forward</span></span>
         </div>

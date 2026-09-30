@@ -23,7 +23,7 @@ const AestheticLoader: React.FC<AestheticLoaderProps> = ({
         <img src="https://media.moorehotelandsuites.com/slazzer-preview-w1yad_jizukz-thumb.webp" alt="" className="h-full w-full object-contain" />
       </div>
     </div>
-    <h2 className="font-display text-2xl italic text-white sm:text-3xl">{message}</h2>
+    <h2 className="font-display text-2xl font-medium text-white sm:text-3xl">{message}</h2>
     <p className="ui-eyebrow mt-3 animate-pulse">{subtext}</p>
   </div>
 );

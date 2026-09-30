@@ -154,22 +154,22 @@ const Rooms: React.FC = () => {
 
   if (error && rooms.length === 0) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-background-dark p-6 text-center">
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-8 bg-background-dark p-6 text-center">
         <span className="grid size-16 place-items-center rounded-full border border-primary/30 bg-primary/10 text-primary"><span className="material-symbols-outlined text-3xl" aria-hidden="true">cloud_off</span></span>
-        <div><h1 className="ui-page-title italic text-white">Rooms are temporarily unavailable</h1><p className="ui-copy mx-auto mt-4 max-w-md">We could not reach the hotel inventory. Please try again in a moment.</p></div>
+        <div><h1 className="ui-page-title text-white">Rooms Are Temporarily Unavailable</h1><p className="ui-copy mx-auto mt-4 max-w-md">We could not reach the hotel inventory. Please try again in a moment.</p></div>
         <button onClick={() => refetch()} className="ui-button ui-button-primary">Try again</button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background-dark pb-24 pt-32">
+    <div className="min-h-[100dvh] bg-background-dark pb-24 pt-32">
       <div className="ui-container-wide">
         <header className="mb-9">
           <div className="flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="ui-eyebrow">Rooms &amp; suites</p>
-              <h1 className="ui-page-title mt-3 italic text-white">Find your room</h1>
+              <h1 className="ui-page-title mt-3 text-white">Find Your Room</h1>
               <p className="ui-copy mt-4 max-w-2xl">Search live room availability, match guest capacity, and compare the details that matter to your stay.</p>
             </div>
             <button type="button" onClick={() => setFiltersOpen(true)} className="ui-button ui-button-secondary self-start md:self-auto">
@@ -186,7 +186,7 @@ const Rooms: React.FC = () => {
                   type="button"
                   onClick={() => updateParam("category", category)}
                   aria-pressed={activeCategory === category}
-                  className={`min-h-11 whitespace-nowrap rounded px-4 text-xs font-semibold uppercase tracking-[0.1em] transition-colors ${activeCategory === category ? "bg-primary/12 text-primary" : "text-gray-500 hover:bg-white/5 hover:text-white"}`}
+                  className={`min-h-11 whitespace-nowrap rounded px-4 font-ui text-xs font-bold uppercase tracking-[0.12em] transition-colors ${activeCategory === category ? "bg-primary/12 text-primary" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
                 >
                   {category === "All" ? "All rooms" : formatLabel(category)}
                 </button>
@@ -232,7 +232,7 @@ const Rooms: React.FC = () => {
         ) : (
           <div className="py-16 text-center sm:py-24">
             <span className="mx-auto grid size-16 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined text-3xl" aria-hidden="true">event_busy</span></span>
-            <h2 className="ui-section-title mt-6 italic text-white">No exact match found</h2>
+            <h2 className="ui-section-title mt-6 text-white">No Exact Match Found</h2>
             <p className="ui-copy mx-auto mt-4 max-w-xl">Adjust your dates, guest count, price, or amenities to see more options.</p>
             {alternativeRooms.length > 0 && (
               <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -253,7 +253,7 @@ const Rooms: React.FC = () => {
         panelClassName="flex w-full max-w-lg flex-col border-l border-white/10 bg-background-dark p-6 shadow-2xl sm:p-8"
       >
         <div className="flex items-center justify-between border-b border-white/10 pb-5">
-          <div><p className="ui-eyebrow">Room search</p><h2 id="filters-title" className="ui-card-title mt-2 italic text-white">Refine results</h2></div>
+          <div><p className="ui-eyebrow">Room search</p><h2 id="filters-title" className="ui-card-title mt-2 text-white">Refine Results</h2></div>
           <button ref={closeButtonRef} type="button" onClick={() => setFiltersOpen(false)} className="ui-icon-button" aria-label="Close room filters"><span className="material-symbols-outlined" aria-hidden="true">close</span></button>
         </div>
 

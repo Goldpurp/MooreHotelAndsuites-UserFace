@@ -156,7 +156,7 @@ const BookingConfirmation: React.FC = () => {
 
   if (!booking) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
+      <div className="flex min-h-[100dvh] items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
         <form
           onSubmit={handleLookup}
           className="ui-card w-full max-w-md p-7 text-center shadow-2xl sm:p-9"
@@ -164,7 +164,7 @@ const BookingConfirmation: React.FC = () => {
           <span className="mx-auto grid size-14 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined text-3xl" aria-hidden="true">shield_lock</span></span>
           <div className="mt-6">
             <p className="ui-eyebrow">Secure lookup</p>
-            <h1 className="ui-card-title mt-2 italic text-white">Verify your booking</h1>
+            <h1 className="ui-card-title mt-2 text-white">Verify Your Booking</h1>
             <p className="mt-3 text-sm text-gray-400">
               Reference <span className="font-mono text-white">{code || "—"}</span>
             </p>
@@ -216,7 +216,7 @@ const BookingConfirmation: React.FC = () => {
       ? "border-red-500 bg-red-500/10 text-red-500"
       : "border-emerald-500 bg-emerald-500/10 text-emerald-500";
   return (
-    <div className="booking-print-page flex min-h-screen items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
+    <div className="booking-print-page flex min-h-[100dvh] items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
       <div className="booking-print-card ui-card w-full max-w-2xl p-6 shadow-2xl sm:p-10">
         <div className="flex flex-col items-center text-center">
           <div className={`grid size-14 place-items-center rounded-full border ${statusColor}`}>
@@ -225,7 +225,7 @@ const BookingConfirmation: React.FC = () => {
             </span>
           </div>
           <p className="ui-eyebrow mt-5">Verified booking record</p>
-          <h1 className="ui-card-title mt-2 italic text-white">{statusLabel}</h1>
+          <h1 className="ui-card-title mt-2 text-white">{statusLabel}</h1>
           <p className="mt-3 text-sm text-gray-400">{booking.guestFirstName} {booking.guestLastName}</p>
         </div>
 
@@ -275,7 +275,7 @@ const BookingConfirmation: React.FC = () => {
           </div>
           <div className="mt-6 border-t border-white/10 pt-6 text-center">
             <p className="ui-label">Amount</p>
-            <p className="font-display text-3xl font-semibold text-primary sm:text-4xl">
+            <p className="font-body text-3xl font-semibold text-primary sm:text-4xl">
               ₦{booking.amount.toLocaleString()}
             </p>
             <p className="mt-2 text-sm text-gray-500">
@@ -329,7 +329,7 @@ const BookingConfirmation: React.FC = () => {
         </div>
 
         {isPending && (
-          <p className="mt-5 text-center text-sm italic text-gray-500">
+          <p className="mt-5 text-center text-sm text-gray-400">
             Your room is held temporarily while payment is verified.
           </p>
         )}
