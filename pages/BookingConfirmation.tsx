@@ -1,3 +1,4 @@
+import { bookingRoomLabel } from "../utils/bookingRooms";
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { api } from "../services/api";
@@ -237,7 +238,7 @@ const BookingConfirmation: React.FC = () => {
             </p>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-5 border-t border-white/10 pt-6 text-sm sm:grid-cols-4">
-            <BookingField label="Room" value={room?.name || (booking.roomId ? "Room details unavailable" : "Room assignment pending")} detail={room?.category || booking.roomTypeName || booking.roomTypeCode || ""} />
+            <BookingField label="Room" value={bookingRoomLabel(booking, room)} detail={room?.category || booking.roomTypeName || booking.roomTypeCode || ""} />
             {booking.paymentStatus === PaymentStatus.PaymentReported && <p role="status" className="text-sm text-amber-300">{booking.status === BookingStatus.Cancelled ? "Payment reported after the room hold ended. Contact the hotel for reconciliation; a room is not guaranteed yet." : "Payment reported—not yet verified. Your room is held while staff check the bank credit."}</p>}
             {booking.paymentMethod === PaymentMethod.DirectTransfer && [PaymentStatus.Unpaid, PaymentStatus.AwaitingVerification].includes(booking.paymentStatus) && booking.status === BookingStatus.Pending && (
               <div className="space-y-3">

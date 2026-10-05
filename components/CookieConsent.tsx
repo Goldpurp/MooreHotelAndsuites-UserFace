@@ -14,9 +14,9 @@ const CookieConsent: React.FC = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!analyticsEnabled) return;
+
     const consent = getAnalyticsConsent();
-    setVisible(consent === null);
+    setVisible(analyticsEnabled && consent === null);
     if (consent === "accepted") loadAnalytics();
 
     const openSettings = () => setVisible(true);
@@ -24,7 +24,7 @@ const CookieConsent: React.FC = () => {
     return () => window.removeEventListener(COOKIE_SETTINGS_EVENT, openSettings);
   }, []);
 
-  if (!analyticsEnabled || !visible) return null;
+  if (!visible) return null;
 
   const choose = (choice: "accepted" | "declined") => {
     setAnalyticsConsent(choice);
@@ -44,14 +44,14 @@ const CookieConsent: React.FC = () => {
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="max-w-xl">
-          <h2 id="analytics-consent-title" className="text-sm font-bold text-white">Help us improve your experience</h2>
+          <h2 id="analytics-consent-title" className="text-sm font-bold text-white">{analyticsEnabled ? "Help us improve your experience" : "Cookie choices"}</h2>
           <p id="analytics-consent-description" className="mt-1 text-xs leading-5 text-gray-300">
-            With your permission, we use privacy-conscious Google Analytics to understand visits and improve the website. We do not use advertising cookies. Read our <Link to="/privacy" className="text-primary underline underline-offset-2">privacy notice</Link>.
+            {analyticsEnabled ? <>With your permission, we use privacy-conscious Google Analytics to understand visits and improve the website. We do not use advertising cookies. Read our <Link to="/privacy" className="text-primary underline underline-offset-2">privacy notice</Link>.</> : <>Optional analytics are disabled on this website. Only storage needed for sign-in, bookings and your preferences is used.</>}
           </p>
         </div>
         <div className="flex shrink-0 gap-2">
-          <button type="button" onClick={() => choose("declined")} className="ui-button ui-button-secondary min-h-11 px-4 py-2 text-xs">Decline</button>
-          <button type="button" onClick={() => choose("accepted")} className="ui-button ui-button-primary min-h-11 px-4 py-2 text-xs">Allow analytics</button>
+          {analyticsEnabled ? <><button type="button" onClick={() => choose("declined")} className="ui-button ui-button-secondary min-h-11 px-4 py-2 text-xs">Decline</button>
+          <button type="button" onClick={() => choose("accepted")} className="ui-button ui-button-primary min-h-11 px-4 py-2 text-xs">Allow analytics</button></> : <button type="button" onClick={() => setVisible(false)} className="ui-button ui-button-primary min-h-11 px-4 py-2 text-xs">Close</button>}
         </div>
       </div>
     </aside>

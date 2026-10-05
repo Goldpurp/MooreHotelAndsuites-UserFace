@@ -42,5 +42,5 @@ test("Render definition includes SPA routing and browser security policy", async
   assert.match(blueprint, /buildCommand: yarn install --frozen-lockfile && yarn build:production/);
   assert.match(blueprint, /name: Content-Security-Policy/);
   assert.match(blueprint, /name: Strict-Transport-Security/);
-  assert.match(blueprint, /type: rewrite[\s\S]*source: \/\*[\s\S]*destination: \/index\.html/);
+  assert.match(blueprint, /type: rewrite[\s\S]*source: \/\*[\s\S]*destination: \/404\.html/);
 });

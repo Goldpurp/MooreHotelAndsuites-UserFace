@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { Booking, Room } from "../types";
 import BookingStatusModal from "../components/BookingStatusModal";
 
 const ManageBooking: React.FC = () => {
+  const lookupButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const [bookingCode, setBookingCode] = useState("");
@@ -144,6 +145,7 @@ const ManageBooking: React.FC = () => {
         )}
 
         <button
+          ref={lookupButtonRef}
           type="submit"
           disabled={loading}
           className="ui-button ui-button-primary mt-6 w-full"
@@ -158,6 +160,7 @@ const ManageBooking: React.FC = () => {
         onClose={() => setStatusBooking(null)}
         booking={statusBooking}
         room={statusRoom}
+        returnFocusRef={lookupButtonRef}
       />
     </div>
   );

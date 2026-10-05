@@ -44,6 +44,13 @@ const RoomDetail: React.FC = () => {
   });
 
   useEffect(() => {
+    const seo = (window as typeof window & { MooreSeo?: { setRouteMeta: (path: string, meta: object) => void; clearRouteMeta: (path: string) => void } }).MooreSeo;
+    const path = "/rooms/" + id;
+    if (room) seo?.setRouteMeta(path, { title: room.name + " | Moore Hotels & Suites", description: "View " + room.name + ", guest capacity, amenities and availability at Moore Hotels & Suites in Sagamu." });
+    return () => seo?.clearRouteMeta(path);
+  }, [id, room]);
+
+  useEffect(() => {
     if (error) navigate("/rooms", { replace: true });
   }, [error, navigate]);
 

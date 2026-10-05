@@ -1,3 +1,4 @@
+import { bookingRoomLabel } from "../utils/bookingRooms";
 import React, { useId, useRef } from "react";
 import { Link } from "react-router-dom";
 import Dialog from "./ui/Dialog";
@@ -11,9 +12,10 @@ interface BookingStatusModalProps {
   onClose: () => void;
   booking: Booking | null;
   room?: Room | null;
+  returnFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
-const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose, booking, room }) => {
+const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose, booking, room, returnFocusRef }) => {
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -39,6 +41,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
       onClose={onClose}
       labelledBy={titleId}
       initialFocusRef={closeButtonRef}
+      returnFocusRef={returnFocusRef}
       zIndex={400}
       panelClassName="ui-card w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 shadow-[0_30px_100px_rgba(0,0,0,.72)] sm:p-10"
     >
@@ -61,7 +64,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
           </p>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-5 border-t border-white/10 pt-6 text-sm sm:grid-cols-4">
-          <ModalField label="Room" value={room?.name || (booking.roomId ? "Room details unavailable" : "Room assignment pending")} detail={room?.category || booking.roomTypeName || booking.roomTypeCode || ""} />
+          <ModalField label="Room" value={bookingRoomLabel(booking, room)} detail={room?.category || booking.roomTypeName || booking.roomTypeCode || ""} />
           {booking.paymentStatus === "PaymentReported" && <p role="status" className="text-sm text-amber-300">Payment reported, not yet verified. {isCancelled ? "Contact the hotel for reconciliation; a room is not guaranteed." : "Your room is held while staff verify the bank credit."}</p>}
           <ModalField
             label="Nights"

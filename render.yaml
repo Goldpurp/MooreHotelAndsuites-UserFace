@@ -59,7 +59,7 @@ services:
     routes:
       - type: rewrite
         source: /*
-        destination: /index.html
+        destination: /404.html
     envVars:
       # The first production deploy runs while the API launch gate is closed.
       # Change this to true and redeploy after public room access is enabled.

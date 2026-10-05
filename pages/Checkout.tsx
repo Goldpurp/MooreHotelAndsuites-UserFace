@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { parseGuestCounts } from "../utils/guestCounts";
+import { parseGuestCounts, initialGuestCounts } from "../utils/guestCounts";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import { ApplicationUser, Booking, BookingStatus, PaymentMethod, PricingQuote, PrivacyPolicy, Room } from "../types";
@@ -55,8 +55,8 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
     email: user?.email || "",
     phone: user?.phone || "",
   });
-  const [adultCountInput, setAdultCountInput] = useState("1");
-  const [childCountInput, setChildCountInput] = useState("0");
+  const [adultCountInput, setAdultCountInput] = useState(() => initialGuestCounts(searchParams).adults);
+  const [childCountInput, setChildCountInput] = useState(() => initialGuestCounts(searchParams).children);
   const { adultCount, childCount, validGuestCounts } = parseGuestCounts(adultCountInput, childCountInput);
   const [policies, setPolicies] = useState<PrivacyPolicy | null>(null);
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
@@ -73,13 +73,13 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
       newCheckOut = addDaysToInput(newCheckIn, 1);
       setCheckOut(newCheckOut);
     }
-    setSearchParams({ checkIn: newCheckIn, checkOut: newCheckOut }, { replace: true });
+    setSearchParams({ ...Object.fromEntries(searchParams), checkIn: newCheckIn, checkOut: newCheckOut, adultCount: adultCountInput, childCount: childCountInput }, { replace: true });
   };
 
   const handleCheckOutChange = (newCheckOut: string) => {
     if (directTransferBooking) return;
     setCheckOut(newCheckOut);
-    setSearchParams({ checkIn, checkOut: newCheckOut }, { replace: true });
+    setSearchParams({ ...Object.fromEntries(searchParams), checkIn, checkOut: newCheckOut, adultCount: adultCountInput, childCount: childCountInput }, { replace: true });
   };
 
   useEffect(() => {
@@ -381,8 +381,8 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
             <div>
               <p className="font-semibold text-white">Confirmation & Ticket Validation</p>
               <p className="mt-0.5 text-gray-400">
-                A confirmation email with your booking code has been dispatched to <strong className="text-gray-200">{guestInfo.email}</strong>.
-                Your ticket validation and payment receipt will be updated to your email once verified by hotel reception.
+                Booking updates are sent to <strong className="text-gray-200">{guestInfo.email}</strong>. Email delivery may take time; keep your booking reference and use View Booking Details for the current status.
+                A payment receipt is available only after hotel staff verify the bank credit.
               </p>
             </div>
           </div>
@@ -522,7 +522,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
           <aside className="lg:col-span-4">
             <div className="ui-card sticky top-28 overflow-hidden shadow-2xl">
-              <div className="relative h-48 bg-gray-800"><img src={cloudinaryImage(room.images?.[0], 720)} className="image-luxury h-full w-full object-cover" alt={room.name} loading="lazy" decoding="async" /><div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-black/20 to-transparent p-6"><p className="ui-eyebrow">{room.category}</p><h2 className="ui-card-title mt-2 text-white">{room.name}</h2></div></div>
+              <div className="relative h-48 bg-gray-800">{room.images?.find(Boolean) ? <img src={cloudinaryImage(room.images.find(Boolean), 720)} className="image-luxury h-full w-full object-cover" alt={room.name} loading="lazy" decoding="async" /> : <div className="flex h-full items-center justify-center text-gray-400" role="img" aria-label="Room photo not available"><span className="material-symbols-outlined" aria-hidden="true">hotel</span></div>}<div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-black/20 to-transparent p-6"><p className="ui-eyebrow">{room.category}</p><h2 className="ui-card-title mt-2 text-white">{room.name}</h2></div></div>
               <div className="space-y-6 p-6 sm:p-8">
                 
                 {/* Stay Dates with Direct Change Support */}
