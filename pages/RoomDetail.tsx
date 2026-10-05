@@ -110,14 +110,14 @@ const RoomDetail: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background-dark pb-20">
-      <header className="relative min-h-[38rem] overflow-hidden bg-black pt-24 sm:min-h-[44rem]">
+    <div className="min-h-dvh bg-background-dark pb-20">
+      <header className="relative min-h-152 overflow-hidden bg-black pt-24 sm:min-h-176">
         {images[activeImage] ? (
           <img src={cloudinaryImage(images[activeImage], 1600)} srcSet={cloudinaryImageSrcSet(images[activeImage], [640, 960, 1280, 1600]) || undefined} sizes="100vw" alt={`${room.name} — view ${activeImage + 1}`} className="absolute inset-0 h-full w-full object-cover image-luxury" fetchPriority="high" />
         ) : <div className="absolute inset-0 bg-surface-dark" />}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/10 to-background-dark" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/55 via-black/10 to-background-dark" />
 
-        <div className="ui-container-wide relative z-10 flex min-h-[38rem] flex-col justify-between pb-20 pt-4 sm:min-h-[44rem]">
+        <div className="ui-container-wide relative z-10 flex min-h-152 flex-col justify-between pb-20 pt-4 sm:min-h-176">
           <button type="button" onClick={() => navigate(buildRoomSearchUrl())} className="ui-button ui-button-secondary self-start bg-black/45 backdrop-blur-lg">
             <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span> Back to rooms
           </button>
@@ -126,7 +126,7 @@ const RoomDetail: React.FC = () => {
             {images.length > 1 && (
               <div className="flex max-w-full gap-2 overflow-x-auto rounded-lg border border-white/10 bg-black/45 p-2 backdrop-blur-lg scrollbar-hide" role="group" aria-label="Room gallery">
                 {images.map((image, index) => (
-                  <button key={`${image}-${index}`} type="button" onClick={() => setActiveImage(index)} aria-label={`Show room image ${index + 1}`} aria-pressed={activeImage === index} className={`h-14 w-20 flex-none overflow-hidden rounded border-2 transition-all ${activeImage === index ? "border-primary" : "border-transparent opacity-65 hover:opacity-100"}`}>
+                  <button key={`${image}-${index}`} type="button" onClick={() => setActiveImage(index)} aria-label={`Show room image ${index + 1}`} aria-pressed={activeImage === index} className={`h-14 w-20 flex-none overflow-hidden rounded-sm border-2 transition-all ${activeImage === index ? "border-primary" : "border-transparent opacity-65 hover:opacity-100"}`}>
                     <img src={cloudinaryImage(image, 240)} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
                   </button>
                 ))}
@@ -155,7 +155,7 @@ const RoomDetail: React.FC = () => {
               {room.amenities.map((amenity) => {
                 const key = amenity.toLowerCase().replace(/[\s-]+/g, "_");
                 return (
-                  <li key={amenity} className="flex min-h-16 items-center gap-4 rounded border border-white/10 bg-white/[0.025] px-5 py-4 text-sm font-medium text-gray-200">
+                  <li key={amenity} className="flex min-h-16 items-center gap-4 rounded-sm border border-white/10 bg-white/2.5 px-5 py-4 text-sm font-medium text-gray-200">
                     <span className="grid size-9 place-items-center rounded-full bg-primary/10 text-primary"><span className="material-symbols-outlined" aria-hidden="true">{amenityIcons[key] || "verified"}</span></span>
                     {amenity}
                   </li>
@@ -177,7 +177,7 @@ const RoomDetail: React.FC = () => {
             {availabilityLoading ? (
               <p className="flex items-center gap-2 text-sm text-gray-400"><span className="material-symbols-outlined animate-spin text-primary" aria-hidden="true">progress_activity</span> Checking availability…</p>
             ) : availabilityMessage ? (
-              <p className="rounded border border-red-500/20 bg-red-500/5 p-3 text-sm leading-6 text-red-300">{availabilityMessage}</p>
+              <p className="rounded-sm border border-red-500/20 bg-red-500/5 p-3 text-sm leading-6 text-red-300">{availabilityMessage}</p>
             ) : isAvailable ? (
               <p className="flex items-center gap-2 text-sm text-emerald-400"><span className="material-symbols-outlined" aria-hidden="true">check_circle</span> Available for your dates</p>
             ) : null}

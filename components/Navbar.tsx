@@ -56,17 +56,17 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
     <>
       <a
         href="#main-content"
-        className="fixed left-4 top-3 z-[120] -translate-y-20 rounded bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wider text-black transition-transform focus:translate-y-0"
+        className="fixed left-4 top-3 z-120 -translate-y-20 rounded-sm bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wider text-black transition-transform focus:translate-y-0"
       >
         Skip to content
       </a>
 
       <nav
         aria-label="Primary navigation"
-        className={`fixed inset-x-0 top-0 z-[70] border-b transition-all duration-500 ${
+        className={`fixed inset-x-0 top-0 z-70 border-b transition-all duration-500 ${
           isScrolled
             ? "border-white/10 bg-black/90 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl"
-            : "border-transparent bg-gradient-to-b from-black/65 to-transparent py-5"
+            : "border-transparent bg-linear-to-b from-black/65 to-transparent py-5"
         }`}
       >
         <div className="ui-container-wide flex items-center justify-between gap-5">
@@ -90,7 +90,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
                 key={link.path}
                 to={link.path}
                 aria-current={isActive(link.path) ? "page" : undefined}
-                className={`relative flex min-h-11 items-center font-ui text-[0.72rem] font-bold uppercase tracking-[0.12em] transition-colors ${
+                className={`relative flex min-h-11 items-center font-ui text-[0.72rem] font-bold uppercase tracking-badge transition-colors ${
                   isActive(link.path) ? "text-primary" : "text-gray-300 hover:text-white"
                 }`}
               >
@@ -102,7 +102,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
               <a
                 href="https://admin.moorehotelandsuites.com"
                 rel="noopener noreferrer"
-                className="flex min-h-11 items-center font-ui text-[0.72rem] font-bold uppercase tracking-[0.12em] text-primary/80 transition-colors hover:text-primary"
+                className="flex min-h-11 items-center font-ui text-[0.72rem] font-bold uppercase tracking-badge text-primary/80 transition-colors hover:text-primary"
               >
                 Admin
               </a>
@@ -159,7 +159,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
                 key={link.path}
                 to={link.path}
                 tabIndex={mobileMenuOpen ? 0 : -1}
-                className={`font-ui flex min-h-14 items-center border-b border-white/[0.07] text-lg font-bold uppercase tracking-[0.12em] transition-colors ${isActive(link.path) ? "text-primary" : "text-white hover:text-primary"}`}
+                className={`font-ui flex min-h-14 items-center border-b border-white/[0.07] text-lg font-bold uppercase tracking-badge transition-colors ${isActive(link.path) ? "text-primary" : "text-white hover:text-primary"}`}
                 style={{ transitionDelay: mobileMenuOpen ? `${80 + index * 45}ms` : "0ms" }}
               >
                 {link.name}

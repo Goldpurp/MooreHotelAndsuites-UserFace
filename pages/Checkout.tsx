@@ -325,7 +325,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
   const currentTotalAmount = pricingQuote ? pricingQuote.totalAmount : estimatedTotal;
 
   return (
-    <div className="min-h-[100dvh] bg-background-dark px-4 pb-24 pt-32 sm:px-6">
+    <div className="min-h-dvh bg-background-dark px-4 pb-24 pt-32 sm:px-6">
       <NotificationModal isOpen={notification.show} onClose={() => setNotification((current) => ({ ...current, show: false }))} title={notification.title} message={notification.message} type={notification.type} />
       {processing && <AestheticLoader message="Securing your booking" subtext="Please keep this page open" />}
 
@@ -354,7 +354,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
           </p>
         </div>
 
-        <div className="mt-6 rounded border border-white/10 bg-black/30 p-4">
+        <div className="mt-6 rounded-sm border border-white/10 bg-black/30 p-4">
           <div className="flex items-center justify-between">
             <span className="ui-label">Booking Reference</span>
             <button
@@ -375,7 +375,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
           </div>
         </div>
 
-        <div className="mt-5 rounded border border-primary/20 bg-primary/5 p-4 text-left text-xs leading-6 text-gray-300">
+        <div className="mt-5 rounded-sm border border-primary/20 bg-primary/5 p-4 text-left text-xs leading-6 text-gray-300">
           <div className="flex items-start gap-2.5">
             <span className="material-symbols-outlined shrink-0 text-primary" aria-hidden="true">mail</span>
             <div>
@@ -428,7 +428,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   <FormField label="Adults"><input type="number" inputMode="numeric" step={1} required min={1} max={Math.min(20, room.capacity)} disabled={processing} value={adultCountInput} onChange={(event) => setAdultCountInput(event.target.value)} className="ui-input" /></FormField>
                   <FormField label="Children"><input type="number" inputMode="numeric" step={1} required min={0} max={Math.min(20, room.capacity - 1)} disabled={processing} value={childCountInput} onChange={(event) => setChildCountInput(event.target.value)} className="ui-input" /></FormField>
                 </div>
-                <label className="mt-6 flex cursor-pointer items-start gap-3 rounded border border-white/10 bg-white/[0.025] p-4 text-sm text-gray-400">
+                <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-sm border border-white/10 bg-white/2.5 p-4 text-sm text-gray-400">
                   <input type="checkbox" checked={acceptedPolicies} onChange={(event) => setAcceptedPolicies(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-primary" />
                   <span>I agree to the <a href={policies?.privacyPolicyUrl || "/privacy"} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-white">Privacy Notice</a> and <a href={policies?.bookingTermsUrl || "/terms"} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-white">Booking Terms</a>.</span>
                 </label>
@@ -443,7 +443,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                 <p className="mt-3 text-sm leading-6 text-gray-400">
                   Your booking reference is {directTransferBooking?.bookingCode}. Only transfer while your unpaid room hold is active. After sending the transfer, click “I have made this transfer”. This reports your payment and keeps the room held while staff verify the bank credit; it does not mark the payment as verified.
                 </p>
-                <p role="status" className="mt-4 rounded border border-amber-400/30 p-3 text-sm text-amber-200">{directTransferBooking?.paymentStatus === "PaymentReported" || directTransferBooking?.paymentStatus === "Paid" ? "Your transfer is already reported or verified. Do not pay again." : holdExpired ? "This unpaid hold has expired. Do not initiate a new transfer. If you already paid, report it below and contact the hotel for reconciliation." : `Unpaid room hold ends at ${directTransferBooking?.paymentExpiresAtUtc ? new Date(directTransferBooking.paymentExpiresAtUtc).toLocaleString() : 'the deadline shown on your booking'}. Report your transfer before then.`}</p>
+                <p role="status" className="mt-4 rounded-sm border border-amber-400/30 p-3 text-sm text-amber-200">{directTransferBooking?.paymentStatus === "PaymentReported" || directTransferBooking?.paymentStatus === "Paid" ? "Your transfer is already reported or verified. Do not pay again." : holdExpired ? "This unpaid hold has expired. Do not initiate a new transfer. If you already paid, report it below and contact the hotel for reconciliation." : `Unpaid room hold ends at ${directTransferBooking?.paymentExpiresAtUtc ? new Date(directTransferBooking.paymentExpiresAtUtc).toLocaleString() : 'the deadline shown on your booking'}. Report your transfer before then.`}</p>
 
                 {/* Bank Account Details Card */}
                 <div className="mt-6 overflow-hidden rounded-lg border border-primary/30 bg-primary/5 p-4 sm:p-6">
@@ -457,7 +457,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                     </span>
                   </div>
 
-                  <dl className="mt-4 divide-y divide-white/10 overflow-hidden rounded border border-white/10 bg-black/40">
+                  <dl className="mt-4 divide-y divide-white/10 overflow-hidden rounded-sm border border-white/10 bg-black/40">
                     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 p-3.5">
                       <dt className="text-xs font-semibold uppercase tracking-wider text-gray-400">Bank Name</dt>
                       <dd className="font-semibold text-white text-base">{HOTEL_BANK_DETAILS.bankName}</dd>
@@ -491,14 +491,14 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   </dl>
                 </div>
 
-                <div className="mt-6 rounded border border-white/10 bg-black/20 p-4 text-sm">
+                <div className="mt-6 rounded-sm border border-white/10 bg-black/20 p-4 text-sm">
                   <p className="ui-label">Booking contact</p>
                   <p className="font-medium text-white">{guestInfo.firstName} {guestInfo.lastName}</p>
                   <p className="mt-1 break-all text-gray-500">{guestInfo.email}</p>
                 </div>
 
                 {pricingQuote && (
-                  <div className="mt-5 rounded border border-white/10 bg-black/20 p-4 text-sm">
+                  <div className="mt-5 rounded-sm border border-white/10 bg-black/20 p-4 text-sm">
                     <div className="flex items-start justify-between gap-4">
                       <div><p className="ui-label">Current hotel quote</p><p className="mt-1 text-gray-500">{pricingQuote.ratePlanName}</p></div>
                       <p className="font-semibold text-primary">{formatMoney(pricingQuote.totalAmount, pricingQuote.currency)}</p>
@@ -522,11 +522,11 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
 
           <aside className="lg:col-span-4">
             <div className="ui-card sticky top-28 overflow-hidden shadow-2xl">
-              <div className="relative h-48 bg-gray-800">{room.images?.find(Boolean) ? <img src={cloudinaryImage(room.images.find(Boolean), 720)} className="image-luxury h-full w-full object-cover" alt={room.name} loading="lazy" decoding="async" /> : <div className="flex h-full items-center justify-center text-gray-400" role="img" aria-label="Room photo not available"><span className="material-symbols-outlined" aria-hidden="true">hotel</span></div>}<div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-black/20 to-transparent p-6"><p className="ui-eyebrow">{room.category}</p><h2 className="ui-card-title mt-2 text-white">{room.name}</h2></div></div>
+              <div className="relative h-48 bg-gray-800">{room.images?.find(Boolean) ? <img src={cloudinaryImage(room.images.find(Boolean), 720)} className="image-luxury h-full w-full object-cover" alt={room.name} loading="lazy" decoding="async" /> : <div className="flex h-full items-center justify-center text-gray-400" role="img" aria-label="Room photo not available"><span className="material-symbols-outlined" aria-hidden="true">hotel</span></div>}<div className="absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black via-black/20 to-transparent p-6"><p className="ui-eyebrow">{room.category}</p><h2 className="ui-card-title mt-2 text-white">{room.name}</h2></div></div>
               <div className="space-y-6 p-6 sm:p-8">
                 
                 {/* Stay Dates with Direct Change Support */}
-                <div className="rounded border border-white/10 bg-black/25 p-4">
+                <div className="rounded-sm border border-white/10 bg-black/25 p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="ui-label">Stay dates</span>
                     <span className="text-xs font-semibold text-primary">{nights} {nights === 1 ? "night" : "nights"}</span>
@@ -573,7 +573,7 @@ const Checkout: React.FC<CheckoutProps> = ({ user }) => {
                   {processing ? "Processing" : currentStep === 2 ? "Reserve room and get bank details" : directTransferBooking?.paymentStatus === "PaymentReported" || directTransferBooking?.paymentStatus === "Paid" ? "View booking status" : "I have made this transfer"}
                   {!processing && !availabilityLoading && <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>}
                 </button>
-                {availabilityMessage && <p className="rounded border border-red-500/20 bg-red-500/5 p-3 text-center text-sm text-red-300" aria-live="polite">{availabilityMessage}</p>}
+                {availabilityMessage && <p className="rounded-sm border border-red-500/20 bg-red-500/5 p-3 text-center text-sm text-red-300" aria-live="polite">{availabilityMessage}</p>}
                 <p className="flex items-center justify-center gap-2 text-center text-xs text-gray-500"><span className="material-symbols-outlined text-base" aria-hidden="true">lock</span> Secure booking and transfer instructions</p>
               </div>
             </div>
@@ -602,7 +602,7 @@ const CheckoutProgress = ({ currentStep, onStay, onGuest }: { currentStep: Check
             <li key={step.number} className="relative">
               {index > 0 && <span className={`absolute left-0 right-1/2 top-4 h-px ${complete || active ? "bg-primary/70" : "bg-white/10"}`} aria-hidden="true" />}
               {index < steps.length - 1 && <span className={`absolute left-1/2 right-0 top-4 h-px ${complete ? "bg-primary/70" : "bg-white/10"}`} aria-hidden="true" />}
-              <button type="button" onClick={step.action} disabled={!enabled} aria-current={active ? "step" : undefined} className={`relative z-10 flex w-full flex-col items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] ${active ? "text-white" : complete ? "text-primary" : "text-gray-600"}`}>
+              <button type="button" onClick={step.action} disabled={!enabled} aria-current={active ? "step" : undefined} className={`relative z-10 flex w-full flex-col items-center gap-2 text-xs font-semibold uppercase tracking-widest ${active ? "text-white" : complete ? "text-primary" : "text-gray-600"}`}>
                 <span className={`grid size-8 place-items-center rounded-full border text-xs transition-colors ${active ? "border-primary bg-primary text-black" : complete ? "border-primary bg-background-dark text-primary" : "border-white/10 bg-background-dark text-gray-600"}`}>{complete ? <span className="material-symbols-outlined text-base" aria-hidden="true">check</span> : step.number}</span>
                 {step.label}
               </button>

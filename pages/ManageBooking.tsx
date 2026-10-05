@@ -96,7 +96,7 @@ const ManageBooking: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
+    <div className="flex min-h-dvh items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
       <form
         onSubmit={handleSubmit}
         className="ui-card w-full max-w-lg p-7 shadow-2xl sm:p-10"

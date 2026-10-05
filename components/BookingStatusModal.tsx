@@ -56,7 +56,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
         <p className="mt-3 text-sm text-gray-400">{booking.guestFirstName} {booking.guestLastName}</p>
       </div>
 
-      <div className="mt-7 rounded border border-white/10 bg-black/25 p-5 sm:p-6">
+      <div className="mt-7 rounded-sm border border-white/10 bg-black/25 p-5 sm:p-6">
         <div className="text-center">
           <p className="ui-label">Reference code</p>
           <p className="break-all font-mono text-xl font-bold tracking-[0.08em] text-white sm:text-2xl">
@@ -93,13 +93,13 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
       </div>
 
       {booking.notificationMessage && (
-        <p className="mt-5 rounded border border-primary/20 bg-primary/5 p-4 text-center text-sm leading-6 text-gray-300">
+        <p className="mt-5 rounded-sm border border-primary/20 bg-primary/5 p-4 text-center text-sm leading-6 text-gray-300">
           {booking.notificationMessage}
         </p>
       )}
 
       {booking.status === BookingStatus.Pending && booking.paymentExpiresAtUtc && (
-        <p className="mt-5 rounded border border-amber-400/30 bg-amber-400/10 p-4 text-center text-sm leading-6 text-amber-100">
+        <p className="mt-5 rounded-sm border border-amber-400/30 bg-amber-400/10 p-4 text-center text-sm leading-6 text-amber-100">
           Payment must be confirmed by{" "}
           <strong>{new Date(booking.paymentExpiresAtUtc).toLocaleString()}</strong>.
           {" "}If it is not confirmed within one hour, this booking is cancelled automatically so the room becomes available again.
@@ -107,7 +107,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
       )}
 
       {booking.paymentInstruction && (
-        <section className="mt-5 rounded border border-white/10 bg-black/20 p-5" aria-label="Payment instructions">
+        <section className="mt-5 rounded-sm border border-white/10 bg-black/20 p-5" aria-label="Payment instructions">
           <p className="ui-label">Direct transfer</p>
           <h3 className="text-base font-semibold text-white">Payment instructions</h3>
           <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-gray-300">{booking.paymentInstruction}</p>

@@ -37,7 +37,7 @@ const CookieConsent: React.FC = () => {
 
   return (
     <aside
-      className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-xl border border-white/15 bg-[#111]/95 p-4 text-left shadow-2xl backdrop-blur-xl sm:bottom-5 sm:p-5"
+      className="fixed inset-x-3 bottom-3 z-100 mx-auto max-w-3xl rounded-xl border border-white/15 bg-[#111]/95 p-4 text-left shadow-2xl backdrop-blur-xl sm:bottom-5 sm:p-5"
       role="dialog"
       aria-labelledby="analytics-consent-title"
       aria-describedby="analytics-consent-description"

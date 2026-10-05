@@ -9,8 +9,8 @@ const standards = [
 ];
 
 const About: React.FC = () => (
-  <div className="min-h-[100dvh] bg-background-dark text-white">
-    <header className="relative flex min-h-[42rem] items-center overflow-hidden px-4 pb-16 pt-32 text-center sm:px-6">
+  <div className="min-h-dvh bg-background-dark text-white">
+    <header className="relative flex min-h-168 items-center overflow-hidden px-4 pb-16 pt-32 text-center sm:px-6">
       <img
         src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3-large.webp", 1600)}
         srcSet={cloudinaryImageSrcSet("https://media.moorehotelandsuites.com/Screenshot_2026-05-20_at_6.26.14_pm_rnngx3-large.webp", [640, 960, 1280, 1600])}
@@ -19,7 +19,7 @@ const About: React.FC = () => (
         className="absolute inset-0 h-full w-full object-cover opacity-60 image-luxury"
         fetchPriority="high"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/45 to-background-dark" />
+      <div className="absolute inset-0 bg-linear-to-b from-black/80 via-black/45 to-background-dark" />
       <div className="ui-container relative z-10 max-w-4xl">
         <p className="ui-eyebrow">Our story</p>
         <h1 className="ui-display mt-5 text-white">Hospitality with <span className="text-primary">Heart and Purpose</span></h1>
@@ -36,14 +36,14 @@ const About: React.FC = () => (
           <blockquote className="mt-8 border-l-2 border-primary/50 bg-white/[0.035] p-6 font-display text-xl leading-8 text-gray-200">“Luxury feels most meaningful when it is personal, comfortable, and quietly dependable.”</blockquote>
         </div>
         <div className="group overflow-hidden rounded-lg border border-white/10 shadow-2xl">
-          <img src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.08.26_pm_xl65yh-large.webp", 900)} alt="An elegant hotel reception" className="image-luxury aspect-[4/5] w-full object-cover lg:aspect-[4/5]" loading="lazy" decoding="async" />
+          <img src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.08.26_pm_xl65yh-large.webp", 900)} alt="An elegant hotel reception" className="image-luxury aspect-4/5 w-full object-cover lg:aspect-4/5" loading="lazy" decoding="async" />
         </div>
       </div>
     </section>
 
     <section className="border-y border-primary/20 bg-primary py-16 text-black sm:py-20">
       <div className="ui-container">
-        <p className="ui-eyebrow !text-black/70">What guests can expect</p>
+        <p className="ui-eyebrow text-black/70!">What guests can expect</p>
         <h2 className="ui-section-title mt-3 text-black">The Experience, Made Simple</h2>
         <div className="mt-10 grid gap-px overflow-hidden rounded-lg bg-black/15 md:grid-cols-3">
           {standards.map((standard) => (
@@ -60,7 +60,7 @@ const About: React.FC = () => (
     <section className="ui-section">
       <div className="ui-container grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
         <div className="group overflow-hidden rounded-lg border border-white/10 shadow-2xl">
-          <img src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_8.43.08_pm_om7gem-large.webp", 900)} alt="A welcoming hotel arrival" className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" decoding="async" />
+          <img src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_8.43.08_pm_om7gem-large.webp", 900)} alt="A welcoming hotel arrival" className="image-luxury aspect-4/3 w-full object-cover" loading="lazy" decoding="async" />
         </div>
         <div>
           <p className="ui-eyebrow">Come as our guest</p>
