@@ -1,3 +1,4 @@
+import { routeHtmlPlugin } from "./scripts/route-html.mjs";
 import path from "path";
 import { defineConfig, loadEnv, type ProxyOptions } from "vite";
 import react from "@vitejs/plugin-react";
@@ -97,7 +98,7 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       proxy,
     },
-    plugins: [react()],
+    plugins: [react(), routeHtmlPlugin()],
     build: {
       target: "es2022",
       cssCodeSplit: true,

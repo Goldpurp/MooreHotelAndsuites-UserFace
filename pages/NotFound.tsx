@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const NotFound: React.FC = () => (
-  <div className="flex min-h-[100dvh] items-center justify-center bg-background-dark px-4 py-32 text-center sm:px-6">
+  <div className="flex min-h-dvh items-center justify-center bg-background-dark px-4 py-32 text-center sm:px-6">
     <div className="max-w-xl">
       <span className="mx-auto grid size-16 place-items-center rounded-full border border-primary/25 bg-primary/10 text-primary"><span className="material-symbols-outlined text-3xl" aria-hidden="true">explore_off</span></span>
       <p className="ui-eyebrow mt-6">Page not found</p>

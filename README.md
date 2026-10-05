@@ -74,3 +74,9 @@ reference and transfer instructions after validating a current pricing quote.
 
 For the Render Blueprint, security headers, release steps and mobile acceptance
 checklist, follow `FRONTEND_RENDER_DEPLOYMENT.md`.
+
+## Browser support
+
+The Tailwind CSS 4 styling build targets Safari 16.4+, Chrome 111+, and Firefox
+128+. Older browsers require a separate compatibility assessment. This minimum
+is a tooling requirement, not a claim that every supported device was tested.

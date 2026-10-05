@@ -12,7 +12,7 @@ const AestheticLoader: React.FC<AestheticLoaderProps> = ({
   isFullPage = true,
 }) => (
   <div
-    className={`${isFullPage ? "fixed inset-0 z-[500] min-h-dvh bg-background-dark" : "min-h-80 w-full"} flex flex-col items-center justify-center p-6 text-center`}
+    className={`${isFullPage ? "fixed inset-0 z-500 min-h-dvh bg-background-dark" : "min-h-80 w-full"} flex flex-col items-center justify-center p-6 text-center`}
     role="status"
     aria-live="polite"
   >

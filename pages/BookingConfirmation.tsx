@@ -1,3 +1,4 @@
+import { bookingRoomLabel } from "../utils/bookingRooms";
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { api } from "../services/api";
@@ -156,7 +157,7 @@ const BookingConfirmation: React.FC = () => {
 
   if (!booking) {
     return (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
+      <div className="flex min-h-dvh items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
         <form
           onSubmit={handleLookup}
           className="ui-card w-full max-w-md p-7 text-center shadow-2xl sm:p-9"
@@ -216,7 +217,7 @@ const BookingConfirmation: React.FC = () => {
       ? "border-red-500 bg-red-500/10 text-red-500"
       : "border-emerald-500 bg-emerald-500/10 text-emerald-500";
   return (
-    <div className="booking-print-page flex min-h-[100dvh] items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
+    <div className="booking-print-page flex min-h-dvh items-center justify-center bg-background-dark px-4 py-32 sm:px-6">
       <div className="booking-print-card ui-card w-full max-w-2xl p-6 shadow-2xl sm:p-10">
         <div className="flex flex-col items-center text-center">
           <div className={`grid size-14 place-items-center rounded-full border ${statusColor}`}>
@@ -229,7 +230,7 @@ const BookingConfirmation: React.FC = () => {
           <p className="mt-3 text-sm text-gray-400">{booking.guestFirstName} {booking.guestLastName}</p>
         </div>
 
-        <div className="mt-7 rounded border border-white/10 bg-black/25 p-5 sm:p-6">
+        <div className="mt-7 rounded-sm border border-white/10 bg-black/25 p-5 sm:p-6">
           <div className="text-center">
             <p className="ui-label">Reference code</p>
             <p className="break-all font-mono text-xl font-bold tracking-[0.08em] text-white sm:text-2xl">
@@ -237,7 +238,7 @@ const BookingConfirmation: React.FC = () => {
             </p>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-5 border-t border-white/10 pt-6 text-sm sm:grid-cols-4">
-            <BookingField label="Room" value={room?.name || (booking.roomId ? "Room details unavailable" : "Room assignment pending")} detail={room?.category || booking.roomTypeName || booking.roomTypeCode || ""} />
+            <BookingField label="Room" value={bookingRoomLabel(booking, room)} detail={room?.category || booking.roomTypeName || booking.roomTypeCode || ""} />
             {booking.paymentStatus === PaymentStatus.PaymentReported && <p role="status" className="text-sm text-amber-300">{booking.status === BookingStatus.Cancelled ? "Payment reported after the room hold ended. Contact the hotel for reconciliation; a room is not guaranteed yet." : "Payment reported—not yet verified. Your room is held while staff check the bank credit."}</p>}
             {booking.paymentMethod === PaymentMethod.DirectTransfer && [PaymentStatus.Unpaid, PaymentStatus.AwaitingVerification].includes(booking.paymentStatus) && booking.status === BookingStatus.Pending && (
               <div className="space-y-3">
@@ -286,13 +287,13 @@ const BookingConfirmation: React.FC = () => {
         </div>
 
         {booking.notificationMessage && (
-          <p className="mt-5 rounded border border-primary/20 bg-primary/5 p-4 text-center text-sm leading-6 text-gray-300">
+          <p className="mt-5 rounded-sm border border-primary/20 bg-primary/5 p-4 text-center text-sm leading-6 text-gray-300">
             {booking.notificationMessage}
           </p>
         )}
 
         {booking.status === BookingStatus.Pending && booking.paymentExpiresAtUtc && (
-          <p className="mt-5 rounded border border-amber-400/30 bg-amber-400/10 p-4 text-center text-sm leading-6 text-amber-100">
+          <p className="mt-5 rounded-sm border border-amber-400/30 bg-amber-400/10 p-4 text-center text-sm leading-6 text-amber-100">
             Payment must be confirmed by{' '}
             <strong>{new Date(booking.paymentExpiresAtUtc).toLocaleString()}</strong>.
             {' '}If it is not confirmed within one hour, this booking is cancelled automatically so the room becomes available again.
@@ -300,7 +301,7 @@ const BookingConfirmation: React.FC = () => {
         )}
 
         {booking.paymentInstruction && (
-          <section className="mt-5 rounded border border-white/10 bg-black/20 p-5" aria-labelledby="transfer-instructions-title">
+          <section className="mt-5 rounded-sm border border-white/10 bg-black/20 p-5" aria-labelledby="transfer-instructions-title">
             <p className="ui-label">Direct transfer</p>
             <h2 id="transfer-instructions-title" className="text-base font-semibold text-white">Payment instructions</h2>
             <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-gray-300">{booking.paymentInstruction}</p>

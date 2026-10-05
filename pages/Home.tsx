@@ -160,7 +160,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background-dark">
+    <div className="min-h-dvh bg-background-dark">
       <NotificationModal
         isOpen={modal.show}
         onClose={() => setModal((current) => ({ ...current, show: false }))}
@@ -169,7 +169,7 @@ const Home: React.FC = () => {
         type={modal.type}
       />
 
-      <header className="relative flex min-h-[46rem] items-center overflow-hidden px-4 pb-16 pt-32 text-center sm:px-6 lg:min-h-[50rem]">
+      <header className="relative flex min-h-184 items-center overflow-hidden px-4 pb-16 pt-32 text-center sm:px-6 lg:min-h-200">
         <div className="absolute inset-0">
           <img
             src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_8.42.08_pm_plc96z-large.webp", 1600)}
@@ -179,7 +179,7 @@ const Home: React.FC = () => {
             className="h-full w-full scale-[1.03] object-cover opacity-75 image-luxury"
             fetchPriority="high"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/35 to-background-dark" />
+          <div className="absolute inset-0 bg-linear-to-b from-black/85 via-black/35 to-background-dark" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,.38)_78%)]" />
         </div>
 
@@ -203,7 +203,7 @@ const Home: React.FC = () => {
                 <select
                   value={searchData.category}
                   onChange={(event) => setSearchData({ ...searchData, category: event.target.value })}
-                  className="min-h-10 w-full cursor-pointer appearance-none bg-transparent text-sm font-semibold text-white outline-none"
+                  className="min-h-10 w-full cursor-pointer appearance-none bg-transparent text-sm font-semibold text-white outline-hidden"
                 >
                   <option className="bg-black" value="All">All rooms</option>
                   {Object.values(RoomCategory).map((category) => <option key={category} className="bg-black" value={category}>{category}</option>)}
@@ -223,7 +223,7 @@ const Home: React.FC = () => {
                       checkOut: current.checkOut <= checkIn ? addDaysToInput(checkIn, 1) : current.checkOut,
                     }));
                   }}
-                  className="min-h-10 w-full bg-transparent text-sm font-semibold text-white outline-none"
+                  className="min-h-10 w-full bg-transparent text-sm font-semibold text-white outline-hidden"
                 />
               </label>
               <label className="border-b border-white/10 px-4 py-3 md:border-r xl:border-b-0">
@@ -233,7 +233,7 @@ const Home: React.FC = () => {
                   min={searchData.checkIn || todayInputValue()}
                   value={searchData.checkOut}
                   onChange={(event) => setSearchData({ ...searchData, checkOut: event.target.value })}
-                  className="min-h-10 w-full bg-transparent text-sm font-semibold text-white outline-none"
+                  className="min-h-10 w-full bg-transparent text-sm font-semibold text-white outline-hidden"
                 />
               </label>
               <label className="border-b border-white/10 px-4 py-3 xl:border-b-0 xl:border-r">
@@ -241,7 +241,7 @@ const Home: React.FC = () => {
                 <select
                   value={searchData.guests}
                   onChange={(event) => setSearchData({ ...searchData, guests: event.target.value })}
-                  className="min-h-10 w-full cursor-pointer appearance-none bg-transparent text-sm font-semibold text-white outline-none"
+                  className="min-h-10 w-full cursor-pointer appearance-none bg-transparent text-sm font-semibold text-white outline-hidden"
                 >
                   {[1, 2, 3, 4].map((count) => <option key={count} className="bg-black" value={count}>{count} {count === 1 ? "guest" : "guests"}</option>)}
                 </select>
@@ -280,7 +280,7 @@ const Home: React.FC = () => {
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {isLoading
-              ? [1, 2, 3, 4].map((item) => <div key={item} className="aspect-[4/5] animate-pulse rounded-lg bg-white/[0.04]" />)
+              ? [1, 2, 3, 4].map((item) => <div key={item} className="aspect-4/5 animate-pulse rounded-lg bg-white/4" />)
               : error ? (
                 <div className="ui-card col-span-full flex min-h-56 flex-col items-center justify-center p-7 text-center">
                   <span className="material-symbols-outlined text-3xl text-primary" aria-hidden="true">cloud_off</span>
@@ -321,16 +321,16 @@ const Home: React.FC = () => {
               <Link
                 key={item.title}
                 to={item.to}
-                className={`group relative min-h-[24rem] overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-2xl ${index === 0 ? "md:col-span-2 xl:col-span-7 xl:row-span-2 xl:min-h-[43rem]" : "xl:col-span-5 xl:min-h-[20rem]"}`}
+                className={`group relative min-h-96 overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-2xl ${index === 0 ? "md:col-span-2 xl:col-span-7 xl:row-span-2 xl:min-h-172" : "xl:col-span-5 xl:min-h-80"}`}
               >
                 <img src={cloudinaryImage(item.image, 1100)} srcSet={cloudinaryImageSrcSet(item.image, [480, 720, 1100])} sizes="(min-width: 1280px) 58vw, 100vw" alt={item.imageAlt} className="image-luxury absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/5" />
+                <div className="absolute inset-0 bg-linear-to-t from-black via-black/25 to-black/5" />
                 <div className="absolute inset-0 border border-white/0 transition-colors duration-500 group-hover:border-primary/35" aria-hidden="true" />
                 <div className={`absolute inset-x-0 bottom-0 p-6 sm:p-8 ${index === 0 ? "xl:p-10" : ""}`}>
                   <p className="ui-eyebrow">{item.eyebrow}</p>
                   <h3 className={`font-display mt-3 leading-[1.12] text-white ${index === 0 ? "text-[clamp(2rem,3.3vw,3.25rem)]" : "text-[clamp(1.6rem,2.2vw,2.15rem)]"}`}>{item.title}</h3>
                   <p className={`mt-4 max-w-lg text-sm leading-7 text-gray-300 ${index === 0 ? "" : "xl:hidden 2xl:block"}`}>{item.description}</p>
-                  <span className="mt-6 inline-flex min-h-11 items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition-colors group-hover:text-primary">{item.action}<span className="material-symbols-outlined text-lg transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">arrow_forward</span></span>
+                  <span className="mt-6 inline-flex min-h-11 items-center gap-2 text-xs font-bold uppercase tracking-badge text-white transition-colors group-hover:text-primary">{item.action}<span className="material-symbols-outlined text-lg transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">arrow_forward</span></span>
                 </div>
               </Link>
             ))}
@@ -352,11 +352,11 @@ const Home: React.FC = () => {
 
           <div className="grid gap-5 sm:grid-cols-2 lg:col-span-8">
             {powerSystems.map((system, index) => (
-              <article key={system.title} className="group relative min-h-[27rem] overflow-hidden rounded-lg border border-white/10 bg-[#111] p-6 shadow-2xl sm:p-8">
+              <article key={system.title} className="group relative min-h-108 overflow-hidden rounded-lg border border-white/10 bg-[#111] p-6 shadow-2xl sm:p-8">
                 <img src={cloudinaryImage(system.image, 900)} srcSet={cloudinaryImageSrcSet(system.image, [480, 720, 900])} sizes="(min-width: 1024px) 34vw, 100vw" alt="" className="image-luxury pointer-events-none absolute inset-0 h-full w-full object-cover opacity-65 transition duration-700 group-hover:scale-[1.03] group-hover:opacity-75" loading="lazy" decoding="async" aria-hidden="true" />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/20" aria-hidden="true" />
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black via-black/70 to-black/20" aria-hidden="true" />
                 <div className={`pointer-events-none absolute inset-0 opacity-80 ${index === 0 ? "bg-[radial-gradient(circle_at_80%_15%,rgba(201,74,17,0.22),transparent_38%)]" : "bg-[radial-gradient(circle_at_75%_10%,rgba(229,192,104,0.18),transparent_40%)]"}`} aria-hidden="true" />
-                <div className="pointer-events-none absolute -right-16 top-16 size-56 rounded-full border border-white/[0.06] transition-transform duration-700 group-hover:scale-110" aria-hidden="true" />
+                <div className="pointer-events-none absolute -right-16 top-16 size-56 rounded-full border border-white/6 transition-transform duration-700 group-hover:scale-110" aria-hidden="true" />
                 <div className="relative flex h-full flex-col">
                   <div className="flex items-start justify-between gap-4">
                     <span className="grid size-14 place-items-center rounded-full border border-primary/30 bg-primary/10 text-primary"><span className="material-symbols-outlined text-3xl" aria-hidden="true">{system.icon}</span></span>
@@ -406,15 +406,15 @@ const Home: React.FC = () => {
           <div className="mt-8 grid gap-5 md:grid-cols-3">
             {premisesSpaces.map((space) => (
               <Link key={space.title} to={space.to} data-image-slot={space.imageSlot} className="group overflow-hidden rounded-lg border border-white/10 bg-[#101010] shadow-2xl transition-colors duration-300 hover:border-primary/35">
-                <div className="relative aspect-[4/3] overflow-hidden bg-[radial-gradient(circle_at_75%_20%,rgba(201,74,17,.16),transparent_38%),linear-gradient(145deg,#171717,#0c0c0c)]">
+                <div className="relative aspect-4/3 overflow-hidden bg-[radial-gradient(circle_at_75%_20%,rgba(201,74,17,.16),transparent_38%),linear-gradient(145deg,#171717,#0c0c0c)]">
                   {space.image ? (
                     <img src={cloudinaryImage(space.image, 720)} srcSet={cloudinaryImageSrcSet(space.image, [360, 540, 720])} sizes="(min-width: 768px) 33vw, 100vw" alt={`${space.title} at Moore Hotels`} className="image-luxury absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]" loading="lazy" decoding="async" />
                   ) : (
                     <div className="absolute inset-0 grid place-items-center" aria-hidden="true">
-                      <span className="material-symbols-outlined text-[4.5rem] font-light text-white/[0.08] transition duration-500 group-hover:scale-110 group-hover:text-primary/20">{space.icon}</span>
+                      <span className="material-symbols-outlined text-[4.5rem] font-light text-white/8 transition duration-500 group-hover:scale-110 group-hover:text-primary/20">{space.icon}</span>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" aria-hidden="true" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/75 via-transparent to-transparent" aria-hidden="true" />
                   <div className="absolute inset-x-0 bottom-0 p-5">
                     <p className="ui-eyebrow">{space.eyebrow}</p>
                   </div>
@@ -468,7 +468,7 @@ const Home: React.FC = () => {
 
       <section className="ui-section">
         <div className="ui-container-wide grid overflow-hidden rounded-lg border border-white/10 bg-surface-dark/70 shadow-2xl lg:grid-cols-12">
-          <div className="group relative min-h-[24rem] overflow-hidden lg:col-span-7 lg:min-h-[34rem]">
+          <div className="group relative min-h-96 overflow-hidden lg:col-span-7 lg:min-h-136">
             <img
               src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_8.42.45_pm_bklvqu-large.webp", 1200)}
               srcSet={cloudinaryImageSrcSet("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_8.42.45_pm_bklvqu-large.webp", [480, 800, 1200])}
@@ -477,8 +477,8 @@ const Home: React.FC = () => {
               className="image-luxury absolute inset-0 h-full w-full object-cover"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-            <div className="absolute bottom-5 left-5 rounded border border-white/10 bg-black/70 px-4 py-3 text-sm text-white backdrop-blur-lg sm:bottom-7 sm:left-7">
+            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
+            <div className="absolute bottom-5 left-5 rounded-sm border border-white/10 bg-black/70 px-4 py-3 text-sm text-white backdrop-blur-lg sm:bottom-7 sm:left-7">
               <span className="material-symbols-outlined mr-2 text-primary" aria-hidden="true">location_on</span>
               Sagamu, Ogun State
             </div>

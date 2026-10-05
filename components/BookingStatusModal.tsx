@@ -1,3 +1,4 @@
+import { bookingRoomLabel } from "../utils/bookingRooms";
 import React, { useId, useRef } from "react";
 import { Link } from "react-router-dom";
 import Dialog from "./ui/Dialog";
@@ -11,9 +12,10 @@ interface BookingStatusModalProps {
   onClose: () => void;
   booking: Booking | null;
   room?: Room | null;
+  returnFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
-const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose, booking, room }) => {
+const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose, booking, room, returnFocusRef }) => {
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -39,6 +41,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
       onClose={onClose}
       labelledBy={titleId}
       initialFocusRef={closeButtonRef}
+      returnFocusRef={returnFocusRef}
       zIndex={400}
       panelClassName="ui-card w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 shadow-[0_30px_100px_rgba(0,0,0,.72)] sm:p-10"
     >
@@ -53,7 +56,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
         <p className="mt-3 text-sm text-gray-400">{booking.guestFirstName} {booking.guestLastName}</p>
       </div>
 
-      <div className="mt-7 rounded border border-white/10 bg-black/25 p-5 sm:p-6">
+      <div className="mt-7 rounded-sm border border-white/10 bg-black/25 p-5 sm:p-6">
         <div className="text-center">
           <p className="ui-label">Reference code</p>
           <p className="break-all font-mono text-xl font-bold tracking-[0.08em] text-white sm:text-2xl">
@@ -61,7 +64,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
           </p>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-5 border-t border-white/10 pt-6 text-sm sm:grid-cols-4">
-          <ModalField label="Room" value={room?.name || (booking.roomId ? "Room details unavailable" : "Room assignment pending")} detail={room?.category || booking.roomTypeName || booking.roomTypeCode || ""} />
+          <ModalField label="Room" value={bookingRoomLabel(booking, room)} detail={room?.category || booking.roomTypeName || booking.roomTypeCode || ""} />
           {booking.paymentStatus === "PaymentReported" && <p role="status" className="text-sm text-amber-300">Payment reported, not yet verified. {isCancelled ? "Contact the hotel for reconciliation; a room is not guaranteed." : "Your room is held while staff verify the bank credit."}</p>}
           <ModalField
             label="Nights"
@@ -90,13 +93,13 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
       </div>
 
       {booking.notificationMessage && (
-        <p className="mt-5 rounded border border-primary/20 bg-primary/5 p-4 text-center text-sm leading-6 text-gray-300">
+        <p className="mt-5 rounded-sm border border-primary/20 bg-primary/5 p-4 text-center text-sm leading-6 text-gray-300">
           {booking.notificationMessage}
         </p>
       )}
 
       {booking.status === BookingStatus.Pending && booking.paymentExpiresAtUtc && (
-        <p className="mt-5 rounded border border-amber-400/30 bg-amber-400/10 p-4 text-center text-sm leading-6 text-amber-100">
+        <p className="mt-5 rounded-sm border border-amber-400/30 bg-amber-400/10 p-4 text-center text-sm leading-6 text-amber-100">
           Payment must be confirmed by{" "}
           <strong>{new Date(booking.paymentExpiresAtUtc).toLocaleString()}</strong>.
           {" "}If it is not confirmed within one hour, this booking is cancelled automatically so the room becomes available again.
@@ -104,7 +107,7 @@ const BookingStatusModal: React.FC<BookingStatusModalProps> = ({ isOpen, onClose
       )}
 
       {booking.paymentInstruction && (
-        <section className="mt-5 rounded border border-white/10 bg-black/20 p-5" aria-label="Payment instructions">
+        <section className="mt-5 rounded-sm border border-white/10 bg-black/20 p-5" aria-label="Payment instructions">
           <p className="ui-label">Direct transfer</p>
           <h3 className="text-base font-semibold text-white">Payment instructions</h3>
           <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-gray-300">{booking.paymentInstruction}</p>

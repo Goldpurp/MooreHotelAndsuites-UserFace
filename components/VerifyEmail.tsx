@@ -56,11 +56,11 @@ const VerifyEmail: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-background-dark p-6 pt-28">
+    <div className="flex min-h-dvh items-center justify-center bg-background-dark p-6 pt-28">
       <div className="w-full max-w-md">
         <div className="ui-card flex flex-col items-center p-8 text-center shadow-2xl sm:p-10">
 
-          <div className="mb-8 size-16 overflow-hidden rounded border border-primary/30 bg-[#e4e6e8]">
+          <div className="mb-8 size-16 overflow-hidden rounded-sm border border-primary/30 bg-[#e4e6e8]">
             <img
               src="https://media.moorehotelandsuites.com/slazzer-preview-w1yad_jizukz-thumb.webp"
               alt="Moore Hotels"

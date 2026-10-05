@@ -116,7 +116,7 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-[100dvh] items-center bg-background-dark px-4 py-32 text-white sm:px-6">
+    <div className="flex min-h-dvh items-center bg-background-dark px-4 py-32 text-white sm:px-6">
       <NotificationModal
         isOpen={modal.show}
         onClose={closeModal}

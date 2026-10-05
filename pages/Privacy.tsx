@@ -2,7 +2,7 @@ import React from "react";
 
 const Privacy: React.FC = () => {
   return (
-    <div className="min-h-[100dvh] bg-background-dark px-4 pb-20 pt-32 sm:px-6">
+    <div className="min-h-dvh bg-background-dark px-4 pb-20 pt-32 sm:px-6">
       <div className="ui-container max-w-4xl">
         <header className="border-b border-white/10 pb-9">
           <p className="ui-eyebrow">

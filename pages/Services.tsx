@@ -91,8 +91,8 @@ const serviceHighlights = [
 ];
 
 const Services: React.FC = () => (
-  <div className="min-h-[100dvh] bg-background-dark">
-    <header className="relative flex min-h-[40rem] items-center overflow-hidden px-4 pb-24 pt-32 text-center sm:min-h-[44rem] sm:px-6">
+  <div className="min-h-dvh bg-background-dark">
+    <header className="relative flex min-h-160 items-center overflow-hidden px-4 pb-24 pt-32 text-center sm:min-h-176 sm:px-6">
       <img
         src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.10.55_pm_y33xug-large.webp", 1600)}
         srcSet={cloudinaryImageSrcSet("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.10.55_pm_y33xug-large.webp", [640, 960, 1280, 1600])}
@@ -101,8 +101,8 @@ const Services: React.FC = () => (
         className="absolute inset-0 h-full w-full object-cover opacity-50 image-luxury"
         fetchPriority="high"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/45 to-background-dark" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background-dark to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-b from-black/85 via-black/45 to-background-dark" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-background-dark to-transparent" />
       <div className="ui-container relative z-10 max-w-4xl">
         <p className="ui-eyebrow">Four-star hospitality standards</p>
         <h1 className="ui-display mt-5 text-white">Guest Services, <span className="text-primary">Thoughtfully Delivered</span></h1>
@@ -137,8 +137,8 @@ const Services: React.FC = () => (
             <article key={service.title} className="group grid items-center gap-10 lg:grid-cols-12 lg:gap-16 xl:gap-24">
               <div className={`relative lg:col-span-7 ${index % 2 ? "lg:order-2" : ""}`}>
                 <div className="relative overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-[0_30px_90px_rgba(0,0,0,.35)]">
-                  <img src={cloudinaryImage(service.image, 1100)} srcSet={cloudinaryImageSrcSet(service.image, [480, 720, 1100])} sizes="(min-width: 1024px) 58vw, 100vw" alt={service.imageAlt} className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" decoding="async" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                  <img src={cloudinaryImage(service.image, 1100)} srcSet={cloudinaryImageSrcSet(service.image, [480, 720, 1100])} sizes="(min-width: 1024px) 58vw, 100vw" alt={service.imageAlt} className="image-luxury aspect-4/3 w-full object-cover" loading="lazy" decoding="async" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/35 via-transparent to-transparent" />
                 </div>
                 <div className={`absolute -bottom-5 hidden h-px w-32 bg-primary/60 sm:block ${index % 2 ? "right-8" : "left-8"}`} aria-hidden="true" />
               </div>
@@ -184,7 +184,7 @@ const Services: React.FC = () => (
     <section className="px-4 py-20 sm:px-6 sm:py-24 lg:py-32">
       <div className="ui-container-wide relative overflow-hidden rounded-lg border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-10 sm:py-20">
         <img src="/Images/SanctuaryOverService.jpg" alt="Attentive service at Moore Hotels" className="absolute inset-0 h-full w-full object-cover opacity-30 image-luxury" loading="lazy" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-black/95" />
+        <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/75 to-black/95" />
         <div className="relative z-10 mx-auto max-w-3xl">
           <span className="mx-auto grid size-12 place-items-center rounded-full border border-primary/30 bg-primary/10 text-primary"><span className="material-symbols-outlined text-2xl" aria-hidden="true">support_agent</span></span>
           <p className="ui-eyebrow mt-6">Professional support, every moment</p>

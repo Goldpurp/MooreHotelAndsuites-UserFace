@@ -244,7 +244,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
   const lastName = displayName.split(/\s+/).at(-1) || "Guest";
 
   return (
-    <div className="relative min-h-[100dvh] overflow-hidden bg-background-dark px-4 pb-24 pt-32 sm:px-6">
+    <div className="relative min-h-dvh overflow-hidden bg-background-dark px-4 pb-24 pt-32 sm:px-6">
       {notification && <NotificationModal isOpen={notification.show} onClose={() => { const shouldLogout = notification.title === "Password updated" || logoutAfterNotice; setNotification(null); setLogoutAfterNotice(false); if (shouldLogout) onLogout(); }} title={notification.title} message={notification.message} type={notification.type} />}
 
       <Dialog
@@ -259,7 +259,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
           <button ref={profileCloseRef} type="button" onClick={closeProfileEditor} disabled={savingProfile || uploadingAvatar} className="ui-icon-button" aria-label="Close profile editor"><span className="material-symbols-outlined" aria-hidden="true">close</span></button>
         </div>
 
-        <div className="mt-6 flex flex-col gap-5 rounded border border-white/10 bg-black/20 p-4 sm:flex-row sm:items-center">
+        <div className="mt-6 flex flex-col gap-5 rounded-sm border border-white/10 bg-black/20 p-4 sm:flex-row sm:items-center">
           <ProfileAvatar user={user} size="large" />
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-white">Profile photo</p>
@@ -274,7 +274,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
           <FormField htmlFor="profile-full-name" label="Full name" error={profileErrors.fullName}><input id="profile-full-name" type="text" autoComplete="name" maxLength={160} disabled={savingProfile || uploadingAvatar} value={profileData.fullName} onChange={(event) => { setProfileData((current) => ({ ...current, fullName: event.target.value })); setProfileErrors((current) => ({ ...current, fullName: "" })); }} className="ui-input" aria-invalid={Boolean(profileErrors.fullName)} /></FormField>
           <FormField htmlFor="profile-email" label="Email address" error={profileErrors.email} hint="Changing your email requires verification and a fresh sign-in."><input id="profile-email" type="email" autoComplete="email" maxLength={254} disabled={savingProfile || uploadingAvatar} value={profileData.email} onChange={(event) => { setProfileData((current) => ({ ...current, email: event.target.value })); setProfileErrors((current) => ({ ...current, email: "" })); }} className="ui-input" aria-invalid={Boolean(profileErrors.email)} /></FormField>
           <FormField htmlFor="profile-phone" label="Phone number" error={profileErrors.phone}><input id="profile-phone" type="tel" autoComplete="tel" maxLength={30} disabled={savingProfile || uploadingAvatar} value={profileData.phone} onChange={(event) => { setProfileData((current) => ({ ...current, phone: event.target.value })); setProfileErrors((current) => ({ ...current, phone: "" })); }} className="ui-input" aria-invalid={Boolean(profileErrors.phone)} placeholder="+234 …" /></FormField>
-          {profileErrors.form && <p className="rounded border border-red-500/20 bg-red-500/5 p-3 text-sm text-red-300" role="alert">{profileErrors.form}</p>}
+          {profileErrors.form && <p className="rounded-sm border border-red-500/20 bg-red-500/5 p-3 text-sm text-red-300" role="alert">{profileErrors.form}</p>}
           <div className="grid gap-3 pt-2 sm:grid-cols-2"><button type="button" onClick={closeProfileEditor} disabled={savingProfile || uploadingAvatar} className="ui-button ui-button-secondary">Cancel</button><button type="submit" disabled={savingProfile || uploadingAvatar} className="ui-button ui-button-primary">{savingProfile ? "Saving changes" : "Save profile"}</button></div>
         </form>
       </Dialog>
@@ -296,12 +296,12 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
         )}
       </Dialog>
 
-      <div className="pointer-events-none absolute left-0 top-0 size-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[130px]" />
+      <div className="pointer-events-none absolute left-0 top-0 size-120 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[130px]" />
       <div className="ui-container relative z-10 max-w-6xl">
         <header className="mb-10 text-center"><p className="ui-eyebrow">Guest account</p><h1 className="ui-page-title mt-3 text-white">Welcome, {lastName}</h1><p className="ui-copy mx-auto mt-4 max-w-xl">View your details, follow each stay, and keep your account secure.</p></header>
 
-        <div className="mx-auto mb-10 flex w-fit max-w-full gap-1 overflow-x-auto rounded border border-white/10 bg-white/[0.025] p-1 scrollbar-hide" role="tablist" aria-label="Guest account sections">
-          {(["profile", "bookings", "privacy", "security"] as Tab[]).map((tab) => <button key={tab} type="button" role="tab" aria-selected={activeTab === tab} onClick={() => setActiveTab(tab)} className={`min-h-11 whitespace-nowrap rounded px-5 text-xs font-semibold uppercase tracking-[0.1em] transition-colors sm:px-7 ${activeTab === tab ? "bg-primary text-black" : "text-gray-500 hover:text-white"}`}>{tab}</button>)}
+        <div className="mx-auto mb-10 flex w-fit max-w-full gap-1 overflow-x-auto rounded-sm border border-white/10 bg-white/2.5 p-1 scrollbar-hide" role="tablist" aria-label="Guest account sections">
+          {(["profile", "bookings", "privacy", "security"] as Tab[]).map((tab) => <button key={tab} type="button" role="tab" aria-selected={activeTab === tab} onClick={() => setActiveTab(tab)} className={`min-h-11 whitespace-nowrap rounded-sm px-5 text-xs font-semibold uppercase tracking-widest transition-colors sm:px-7 ${activeTab === tab ? "bg-primary text-black" : "text-gray-500 hover:text-white"}`}>{tab}</button>)}
         </div>
 
         <div>
@@ -311,8 +311,8 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
                 <ProfileAvatar user={user} size="large" />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-3">
-                    <h2 className="ui-card-title break-words text-white">{displayName || "Guest"}</h2>
-                    <span className={`rounded-full border px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.1em] ${user.emailVerified ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-300" : "border-amber-400/25 bg-amber-400/10 text-amber-300"}`}>{user.emailVerified ? "Email verified" : "Verification required"}</span>
+                    <h2 className="ui-card-title wrap-break-word text-white">{displayName || "Guest"}</h2>
+                    <span className={`rounded-full border px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-widest ${user.emailVerified ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-300" : "border-amber-400/25 bg-amber-400/10 text-amber-300"}`}>{user.emailVerified ? "Email verified" : "Verification required"}</span>
                   </div>
                   <p className="mt-2 break-all text-sm text-gray-400">{user.email}</p>
                   <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-500">Keep these details current so confirmations and important stay updates reach you.</p>
@@ -342,7 +342,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
                         <button type="button" onClick={() => setCancelModal({ open: true, booking })} disabled={!canCancel} className="ui-button border-red-500/25 bg-red-500/5 text-red-300 hover:bg-red-500/10">Cancel</button>
                       </div>
                     </div>
-                    {booking.notificationMessage && <p className="mt-5 flex items-start gap-2 rounded border border-primary/20 bg-primary/5 p-3 text-sm text-gray-400"><span className="material-symbols-outlined text-primary" aria-hidden="true">info</span>{booking.notificationMessage}</p>}
+                    {booking.notificationMessage && <p className="mt-5 flex items-start gap-2 rounded-sm border border-primary/20 bg-primary/5 p-3 text-sm text-gray-400"><span className="material-symbols-outlined text-primary" aria-hidden="true">info</span>{booking.notificationMessage}</p>}
                   </article>
                 );
               }) : <div className="ui-card border-dashed py-20 text-center"><span className="material-symbols-outlined text-4xl text-primary/60" aria-hidden="true">luggage</span><h2 className="ui-card-title mt-4 text-white">No Bookings Yet</h2><p className="ui-copy mt-3">Your future stays will appear here.</p><Link to="/rooms" className="ui-button ui-button-primary mt-6">Explore rooms</Link></div>}
@@ -378,7 +378,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
                 <p className="ui-eyebrow">Request history</p>
                 <h2 className="ui-card-title mt-2 text-white">Privacy requests</h2>
                 <div className="mt-6 space-y-3">
-                  {privacyRequests.length ? privacyRequests.map((request) => <article key={request.id} className="rounded border border-white/10 bg-black/20 p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-semibold text-white">{request.type}</p><p className="mt-1 text-xs text-gray-500">Submitted {new Date(request.requestedAtUtc).toLocaleDateString()} · Due {new Date(request.dueAtUtc).toLocaleDateString()}</p></div><span className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{request.status}</span></div>{request.details && <p className="mt-3 text-sm text-gray-400">{request.details}</p>}{request.resolutionNotes && <p className="mt-3 text-sm text-gray-400">Resolution: {request.resolutionNotes}</p>}</article>) : <p className="text-sm text-gray-500">You have not submitted a privacy request.</p>}
+                  {privacyRequests.length ? privacyRequests.map((request) => <article key={request.id} className="rounded-sm border border-white/10 bg-black/20 p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-semibold text-white">{request.type}</p><p className="mt-1 text-xs text-gray-500">Submitted {new Date(request.requestedAtUtc).toLocaleDateString()} · Due {new Date(request.dueAtUtc).toLocaleDateString()}</p></div><span className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{request.status}</span></div>{request.details && <p className="mt-3 text-sm text-gray-400">{request.details}</p>}{request.resolutionNotes && <p className="mt-3 text-sm text-gray-400">Resolution: {request.resolutionNotes}</p>}</article>) : <p className="text-sm text-gray-500">You have not submitted a privacy request.</p>}
                 </div>
               </section>
             </div>
@@ -389,7 +389,7 @@ const Profile: React.FC<ProfileProps> = ({ user: initialUser, onLogout, onUserCh
   );
 };
 
-const ProfileCard = ({ icon, label, value }: { icon: string; label: string; value: string }) => <article className="ui-card flex min-h-40 items-start gap-4 p-6 sm:p-7"><span className="grid size-11 place-items-center rounded-full bg-primary/10 text-primary"><span className="material-symbols-outlined" aria-hidden="true">{icon}</span></span><div className="min-w-0"><p className="ui-label">{label}</p><p className="break-words text-lg font-semibold text-white sm:text-xl">{value}</p></div></article>;
+const ProfileCard = ({ icon, label, value }: { icon: string; label: string; value: string }) => <article className="ui-card flex min-h-40 items-start gap-4 p-6 sm:p-7"><span className="grid size-11 place-items-center rounded-full bg-primary/10 text-primary"><span className="material-symbols-outlined" aria-hidden="true">{icon}</span></span><div className="min-w-0"><p className="ui-label">{label}</p><p className="wrap-break-word text-lg font-semibold text-white sm:text-xl">{value}</p></div></article>;
 const ProfileAvatar = ({ user, size = "default" }: { user: ApplicationUser; size?: "default" | "large" }) => {
   const displayName = user.name?.trim() || [user.firstName, user.lastName].filter(Boolean).join(" ").trim() || "Guest";
   const initials = displayName.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();

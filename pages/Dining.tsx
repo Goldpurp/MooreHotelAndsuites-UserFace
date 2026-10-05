@@ -50,11 +50,11 @@ const hotelExperiences = [
 ];
 
 const Dining: React.FC = () => (
-  <div className="min-h-[100dvh] bg-background-dark">
-    <header className="relative flex min-h-[32rem] items-end overflow-hidden px-4 pb-16 pt-32 sm:min-h-[36rem] sm:px-6 sm:pb-20">
+  <div className="min-h-dvh bg-background-dark">
+    <header className="relative flex min-h-128 items-end overflow-hidden px-4 pb-16 pt-32 sm:min-h-144 sm:px-6 sm:pb-20">
       <img src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl-large.webp", 1600)} srcSet={cloudinaryImageSrcSet("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.09.12_pm_yyiwwl-large.webp", [640, 960, 1280, 1600])} sizes="100vw" alt="Covered lounge seating at Moore Hotels" className="absolute inset-0 h-full w-full object-cover opacity-50 image-luxury" fetchPriority="high" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/55 to-black/20" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background-dark to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-r from-black/90 via-black/55 to-black/20" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-background-dark to-transparent" />
       <div className="ui-container-wide relative z-10 w-full">
         <div className="max-w-3xl">
           <p className="ui-eyebrow">The Moore experience</p>
@@ -67,7 +67,7 @@ const Dining: React.FC = () => (
     <section className="ui-section" aria-labelledby="dining-overview-title">
       <div className="ui-container-wide grid items-center gap-10 lg:grid-cols-12 lg:gap-16">
         <div className="group overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-2xl lg:col-span-7">
-          <img src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.21.28_pm_cdmivl-large.webp", 1100)} alt="A Moore Hotels chef preparing food in the hotel kitchen" className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" decoding="async" />
+          <img src={cloudinaryImage("https://media.moorehotelandsuites.com/Screenshot_2026-08-02_at_7.21.28_pm_cdmivl-large.webp", 1100)} alt="A Moore Hotels chef preparing food in the hotel kitchen" className="image-luxury aspect-4/3 w-full object-cover" loading="lazy" decoding="async" />
         </div>
         <div className="lg:col-span-5">
           <p className="ui-eyebrow">Food & refreshment</p>
@@ -95,11 +95,11 @@ const Dining: React.FC = () => (
 
         <div className="mt-10 grid gap-5 lg:grid-cols-2">
           {powerFeatures.map((feature, index) => (
-            <article key={feature.title} className="group relative min-h-[23rem] overflow-hidden rounded-lg border border-white/10 bg-[#111] p-6 shadow-2xl sm:p-8">
+            <article key={feature.title} className="group relative min-h-92 overflow-hidden rounded-lg border border-white/10 bg-[#111] p-6 shadow-2xl sm:p-8">
               <img src={cloudinaryImage(feature.image, 900)} alt="" className="image-luxury pointer-events-none absolute inset-0 h-full w-full object-cover opacity-65 transition duration-700 group-hover:scale-[1.03] group-hover:opacity-75" loading="lazy" decoding="async" aria-hidden="true" />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/20" aria-hidden="true" />
+              <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black via-black/70 to-black/20" aria-hidden="true" />
               <div className={`pointer-events-none absolute inset-0 ${index === 0 ? "bg-[radial-gradient(circle_at_85%_10%,rgba(201,74,17,0.22),transparent_40%)]" : "bg-[radial-gradient(circle_at_80%_12%,rgba(229,192,104,0.18),transparent_42%)]"}`} aria-hidden="true" />
-              <div className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full border border-white/[0.06] transition-transform duration-700 group-hover:scale-110" aria-hidden="true" />
+              <div className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full border border-white/6 transition-transform duration-700 group-hover:scale-110" aria-hidden="true" />
               <div className="relative flex h-full flex-col">
                 <div className="flex items-start gap-4">
                   <span className="grid size-14 place-items-center rounded-full border border-primary/30 bg-primary/10 text-primary"><span className="material-symbols-outlined text-3xl" aria-hidden="true">{feature.icon}</span></span>
@@ -122,7 +122,7 @@ const Dining: React.FC = () => (
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {hotelExperiences.map((experience) => (
             <article key={experience.title} className="group overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-2xl">
-              <div className="overflow-hidden"><img src={cloudinaryImage(experience.image, 900)} alt={experience.alt} className="image-luxury aspect-[4/3] w-full object-cover" loading="lazy" decoding="async" /></div>
+              <div className="overflow-hidden"><img src={cloudinaryImage(experience.image, 900)} alt={experience.alt} className="image-luxury aspect-4/3 w-full object-cover" loading="lazy" decoding="async" /></div>
               <div className="p-6 sm:p-7"><p className="ui-eyebrow">{experience.eyebrow}</p><h3 className="font-display mt-3 text-2xl text-white">{experience.title}</h3><p className="mt-4 text-sm leading-7 text-gray-500">{experience.text}</p></div>
             </article>
           ))}

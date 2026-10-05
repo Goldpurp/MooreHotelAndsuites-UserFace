@@ -154,7 +154,7 @@ const Rooms: React.FC = () => {
 
   if (error && rooms.length === 0) {
     return (
-      <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-8 bg-background-dark p-6 text-center">
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-8 bg-background-dark p-6 text-center">
         <span className="grid size-16 place-items-center rounded-full border border-primary/30 bg-primary/10 text-primary"><span className="material-symbols-outlined text-3xl" aria-hidden="true">cloud_off</span></span>
         <div><h1 className="ui-page-title text-white">Rooms Are Temporarily Unavailable</h1><p className="ui-copy mx-auto mt-4 max-w-md">We could not reach the hotel inventory. Please try again in a moment.</p></div>
         <button onClick={() => refetch()} className="ui-button ui-button-primary">Try again</button>
@@ -163,7 +163,7 @@ const Rooms: React.FC = () => {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-background-dark pb-24 pt-32">
+    <div className="min-h-dvh bg-background-dark pb-24 pt-32">
       <div className="ui-container-wide">
         <header className="mb-9">
           <div className="flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
@@ -186,7 +186,7 @@ const Rooms: React.FC = () => {
                   type="button"
                   onClick={() => updateParam("category", category)}
                   aria-pressed={activeCategory === category}
-                  className={`min-h-11 whitespace-nowrap rounded px-4 font-ui text-xs font-bold uppercase tracking-[0.12em] transition-colors ${activeCategory === category ? "bg-primary/12 text-primary" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
+                  className={`min-h-11 whitespace-nowrap rounded-sm px-4 font-ui text-xs font-bold uppercase tracking-badge transition-colors ${activeCategory === category ? "bg-primary/12 text-primary" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
                 >
                   {category === "All" ? "All rooms" : formatLabel(category)}
                 </button>
@@ -208,7 +208,7 @@ const Rooms: React.FC = () => {
           </div>
 
           {(checkIn && checkOut) && (
-            <div className="mt-4 inline-flex max-w-full items-center gap-3 rounded border border-primary/20 bg-primary/5 px-4 py-2 text-sm text-gray-300">
+            <div className="mt-4 inline-flex max-w-full items-center gap-3 rounded-sm border border-primary/20 bg-primary/5 px-4 py-2 text-sm text-gray-300">
               <span className="material-symbols-outlined text-primary" aria-hidden="true">calendar_month</span>
               <span className="truncate">{checkIn} — {checkOut}</span>
               <button type="button" onClick={clearDates} className="ui-icon-button size-9 flex-none" aria-label="Clear selected dates"><span className="material-symbols-outlined text-lg" aria-hidden="true">close</span></button>
@@ -218,7 +218,7 @@ const Rooms: React.FC = () => {
 
         {isLoading ? (
           <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading rooms">
-            {[1, 2, 3, 4, 5, 6].map((item) => <div key={item} className="aspect-[4/5] animate-pulse rounded-lg border border-white/5 bg-white/[0.03]" />)}
+            {[1, 2, 3, 4, 5, 6].map((item) => <div key={item} className="aspect-4/5 animate-pulse rounded-lg border border-white/5 bg-white/3" />)}
           </div>
         ) : filteredRooms.length > 0 ? (
           <>
@@ -277,7 +277,7 @@ const Rooms: React.FC = () => {
               <div className="flex flex-wrap gap-2">
                 {knownAmenities.map((amenity) => {
                   const selected = selectedAmenities.includes(amenity);
-                  return <button key={amenity} type="button" onClick={() => toggleAmenity(amenity)} aria-pressed={selected} className={`min-h-10 rounded-full border px-4 text-xs font-medium transition-colors ${selected ? "border-primary bg-primary/10 text-primary" : "border-white/10 bg-white/[0.025] text-gray-400 hover:border-white/25 hover:text-white"}`}>{formatLabel(amenity)}</button>;
+                  return <button key={amenity} type="button" onClick={() => toggleAmenity(amenity)} aria-pressed={selected} className={`min-h-10 rounded-full border px-4 text-xs font-medium transition-colors ${selected ? "border-primary bg-primary/10 text-primary" : "border-white/10 bg-white/2.5 text-gray-400 hover:border-white/25 hover:text-white"}`}>{formatLabel(amenity)}</button>;
                 })}
               </div>
             </fieldset>

@@ -104,11 +104,11 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-[100dvh] flex flex-col">
+    <div className="min-h-dvh flex flex-col">
       <Navbar user={user} onLogout={handleLogout} />
       
       <p className="sr-only" aria-live="polite">{routeTitle}</p>
-      <main className="min-h-dvh flex-grow" id="main-content" tabIndex={-1}>
+      <main className="min-h-dvh grow" id="main-content" tabIndex={-1}>
         {/* If still checking auth, show loader. Otherwise, show routes */}
         {loading ? (
           <AestheticLoader 

@@ -20,6 +20,9 @@ export const getAnalyticsConsent = (): AnalyticsConsent => {
 
 export const setAnalyticsConsent = (choice: Exclude<AnalyticsConsent, null>) => {
   window.localStorage.setItem(CONSENT_KEY, choice);
+  if (choice === "declined" && window.gtag) {
+    window.gtag("consent", "update", { analytics_storage: "denied", ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied" });
+  }
 };
 
 export const loadAnalytics = () => {

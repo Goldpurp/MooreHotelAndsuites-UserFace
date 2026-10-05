@@ -38,11 +38,6 @@ export const PUBLIC_ROUTE_METADATA = Object.freeze({
     description:
       "Find answers about reservations, check-in, check-out, dining, transfers and payments, or contact the Moore Hotels & Suites guest relations team for assistance.",
   },
-  "/contact": {
-    title: "Contact Moore Hotels & Suites | Sagamu Guest Relations",
-    description:
-      "Contact Moore Hotels & Suites in Sagamu for room reservations, corporate stays, dining, directions or guest support. Send a secure enquiry to our hotel team.",
-  },
   "/privacy": {
     title: "Privacy Policy | Moore Hotels & Suites",
     description:

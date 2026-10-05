@@ -16,6 +16,7 @@ interface DialogProps {
   closeOnBackdrop?: boolean;
   closeOnEscape?: boolean;
   initialFocusRef?: React.RefObject<HTMLElement | null>;
+  returnFocusRef?: React.RefObject<HTMLElement | null>;
   zIndex?: number;
   role?: "dialog" | "alertdialog";
 }
@@ -69,6 +70,7 @@ const Dialog: React.FC<DialogProps> = ({
   closeOnBackdrop = true,
   closeOnEscape = true,
   initialFocusRef,
+  returnFocusRef,
   zIndex = 300,
   role = "dialog",
 }) => {
@@ -131,9 +133,10 @@ const Dialog: React.FC<DialogProps> = ({
       const stackIndex = dialogStack.lastIndexOf(instanceId);
       if (stackIndex >= 0) dialogStack.splice(stackIndex, 1);
       unlockPage();
-      if (previouslyFocused?.isConnected) previouslyFocused.focus({ preventScroll: true });
+      const target = returnFocusRef?.current ?? previouslyFocused;
+      if (target?.isConnected) target.focus({ preventScroll: true });
     };
-  }, [closeOnEscape, initialFocusRef, instanceId, isOpen]);
+  }, [closeOnEscape, initialFocusRef, returnFocusRef, instanceId, isOpen]);
 
   if (!isOpen || typeof document === "undefined") return null;
 

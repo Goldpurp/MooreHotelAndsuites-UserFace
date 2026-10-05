@@ -86,19 +86,24 @@
     var isPrivate = privateRoutes.some(function (route) {
       return path === route || path.indexOf(route + "/") === 0;
     });
-    var isIndexable = indexableRoutes.indexOf(path) !== -1 || path.indexOf("/rooms/") === 0;
+    var isIndexable = indexableRoutes.indexOf(path) !== -1 || (path.indexOf("/rooms/") === 0 && Boolean(dynamicRouteMeta[path]));
     var canonicalUrl = siteUrl + (path === "/" ? "/" : path);
 
     document.title = meta.title;
     upsertMeta('meta[name="description"]', { name: "description" }, meta.description);
     upsertMeta('meta[name="robots"]', { name: "robots" }, isPrivate || !isIndexable ? "noindex, nofollow" : "index, follow, max-image-preview:large");
-    upsertCanonical(canonicalUrl);
+    if (isPrivate || !isIndexable) {
+      var oldCanonical = document.head.querySelector('link[rel="canonical"]');
+      if (oldCanonical) oldCanonical.remove();
+      var oldUrl = document.head.querySelector('meta[property="og:url"]');
+      if (oldUrl) oldUrl.remove();
+    } else upsertCanonical(canonicalUrl);
     upsertMeta('meta[property="og:site_name"]', { property: "og:site_name" }, siteName);
     upsertMeta('meta[property="og:type"]', { property: "og:type" }, meta.type || (path.indexOf("/rooms/") === 0 ? "product" : "website"));
     upsertMeta('meta[property="og:locale"]', { property: "og:locale" }, "en_NG");
     upsertMeta('meta[property="og:title"]', { property: "og:title" }, meta.title);
     upsertMeta('meta[property="og:description"]', { property: "og:description" }, meta.description);
-    upsertMeta('meta[property="og:url"]', { property: "og:url" }, canonicalUrl);
+    if (!isPrivate && isIndexable) upsertMeta('meta[property="og:url"]', { property: "og:url" }, canonicalUrl);
     upsertMeta('meta[property="og:image"]', { property: "og:image" }, meta.image || socialImage);
     upsertMeta('meta[property="og:image:alt"]', { property: "og:image:alt" }, meta.imageAlt || socialImageAlt);
     upsertMeta('meta[name="twitter:card"]', { name: "twitter:card" }, "summary_large_image");

@@ -42,7 +42,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, to, variant = "listing", eage
   if (variant === "compact") {
     return (
       <Link to={to} className="group ui-card overflow-hidden text-left transition-transform duration-300 hover:-translate-y-1">
-        <RoomImage room={room} className="image-luxury aspect-[16/10] w-full object-cover" />
+        <RoomImage room={room} className="image-luxury aspect-16/10 w-full object-cover" />
         <div className="p-5">
           <p className="ui-eyebrow">{category}</p>
           <h3 className="ui-card-title mt-2 text-white transition-colors group-hover:text-primary">{room.name}</h3>
@@ -57,7 +57,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, to, variant = "listing", eage
     return (
       <Link to={to} className="group">
         <article className="ui-card overflow-hidden transition-transform duration-300 hover:-translate-y-1">
-          <div className="relative aspect-[4/5] overflow-hidden">
+          <div className="relative aspect-4/5 overflow-hidden">
             <RoomImage room={room} eager={eager} className="image-luxury h-full w-full object-cover" />
             <div className="luxury-gradient absolute inset-0" />
             <div className="absolute inset-x-5 bottom-5">
@@ -74,7 +74,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, to, variant = "listing", eage
   return (
     <Link to={to} className="group">
       <article>
-        <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-2xl">
+        <div className="relative aspect-4/5 overflow-hidden rounded-lg border border-white/10 bg-surface-dark shadow-2xl">
           <RoomImage room={room} eager={eager} className="image-luxury h-full w-full object-cover" />
           <div className="luxury-gradient absolute inset-0" />
           <div className="absolute inset-x-6 bottom-6">

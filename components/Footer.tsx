@@ -13,7 +13,7 @@ const Footer: React.FC = () => (
             </span>
             <span>
               <span className="block text-sm font-bold tracking-[0.24em] text-white">MOORE</span>
-              <span className="mt-1 block font-ui text-[0.65rem] font-bold uppercase tracking-[0.12em] text-gray-400">Hotels &amp; Suites</span>
+              <span className="mt-1 block font-ui text-[0.65rem] font-bold uppercase tracking-badge text-gray-400">Hotels &amp; Suites</span>
             </span>
           </Link>
           <p className="mt-6 max-w-sm text-sm leading-7 text-gray-400">

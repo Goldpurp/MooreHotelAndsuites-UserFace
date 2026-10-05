@@ -5,7 +5,7 @@ import ts from "typescript";
 
 const source = await readFile(new URL("../utils/guestCounts.ts", import.meta.url), "utf8");
 const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext } }).outputText;
-const { parseGuestCounts } = await import("data:text/javascript;base64," + Buffer.from(js).toString("base64"));
+const { parseGuestCounts, initialGuestCounts } = await import("data:text/javascript;base64," + Buffer.from(js).toString("base64"));
 
 test("count fields keep raw editable text and request a mobile numeric keyboard", async () => {
   const form = await readFile(new URL("../pages/Checkout.tsx", import.meta.url), "utf8");
@@ -27,4 +27,13 @@ test("counts reject fractions, negatives, missing values and values outside the 
     assert.equal(parseGuestCounts(adults, children).validGuestCounts, false);
   }
   assert.equal(parseGuestCounts("20", "0").validGuestCounts, true);
+});
+
+test("checkout preserves selected search occupancy and does not coerce invalid counts", () => {
+  assert.deepEqual(initialGuestCounts(new URLSearchParams("guests=2")), {adults:"2",children:"0"});
+  assert.deepEqual(initialGuestCounts(new URLSearchParams("guests=4&adultCount=2&childCount=2")), {adults:"2",children:"2"});
+  for (const value of ["", "0", "1.5", "21", "no"]) {
+    const counts=initialGuestCounts(new URLSearchParams("guests="+value));
+    assert.equal(parseGuestCounts(counts.adults, counts.children).validGuestCounts, false);
+  }
 });

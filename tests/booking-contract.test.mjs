@@ -7,7 +7,7 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 test("booking room labels prefer the physical room name, with honest missing-room fallbacks", async () => {
   for (const path of ["pages/BookingConfirmation.tsx", "components/BookingStatusModal.tsx"]) {
     const source = await read(path);
-    assert.match(source, /label="Room" value=\{room\?\.name \|\| \(booking\.roomId \? "Room details unavailable" : "Room assignment pending"\)\}/);
+    assert.match(source, /label="Room" value=\{bookingRoomLabel\(booking, room\)\}/);
     assert.doesNotMatch(source, /booking\.roomTypeName \|\| room\?\.name/);
   }
 });

@@ -6,3 +6,7 @@ export function parseGuestCounts(adults: string, children: string) {
     && Number.isInteger(childCount) && childCount >= 0 && childCount <= 20;
   return { adultCount, childCount, validGuestCounts };
 }
+
+export function initialGuestCounts(params: URLSearchParams) {
+  return { adults: params.get("adultCount") ?? params.get("guests") ?? "1", children: params.get("childCount") ?? "0" };
+}

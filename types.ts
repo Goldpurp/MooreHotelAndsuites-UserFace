@@ -122,10 +122,19 @@ export interface PricingQuote {
   lines: PricingQuoteLine[];
 }
 
+export interface ReservationRoom {
+  id: string;
+  sequence: number;
+  roomTypeName: string;
+  assignedRoomName?: string | null;
+  assignmentStatus?: "Assigned" | "Pending" | "Released" | "Completed";
+}
+
 export interface Booking {
   id: string;
   bookingCode: string;
-  roomId: string;
+  roomId?: string | null;
+  rooms?: ReservationRoom[];
   guestId?: string;
   guestFirstName: string;
   guestLastName: string;
