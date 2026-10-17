@@ -12,7 +12,9 @@ test("hotel search data links the verified Google entity and matching Sagamu add
   ]);
 
   assert.match(seo, /alternateName: "Moore Hotels and Suites"/);
-  assert.ok(seo.includes(googleHotelEntity));
+  const sameAsMatch = seo.match(/sameAs:\s*\[\s*"([^"]+)"/);
+  assert.ok(sameAsMatch);
+  assert.equal(sameAsMatch[1], googleHotelEntity);
   assert.match(seo, /streetAddress: "After Stadium, Harmony Estate, Along Ikenne Road"/);
   assert.match(seo, /addressLocality: "Sagamu"/);
   assert.match(seo, /addressRegion: "Ogun State"/);
@@ -20,7 +22,14 @@ test("hotel search data links the verified Google entity and matching Sagamu add
   assert.doesNotMatch(seo, /postalCode: "121101"/);
 
   assert.match(html, /<script type="application\/ld\+json" id="moore-hotel-structured-data">/);
-  assert.ok(html.includes(googleHotelEntity));
+  const jsonLdMatch = html.match(
+    /<script type="application\/ld\+json" id="moore-hotel-structured-data">([\s\S]*?)<\/script>/,
+  );
+  assert.ok(jsonLdMatch);
+  const hotel = JSON.parse(jsonLdMatch[1])["@graph"].find(
+    (entry) => entry["@type"] === "Hotel",
+  );
+  assert.equal(hotel.sameAs[0], googleHotelEntity);
   assert.match(html, /"streetAddress": "After Stadium, Harmony Estate, Along Ikenne Road"/);
   assert.match(html, /"addressLocality": "Sagamu"/);
   assert.match(html, /"addressRegion": "Ogun State"/);
