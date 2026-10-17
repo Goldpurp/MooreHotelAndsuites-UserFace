@@ -117,8 +117,8 @@ const Privacy: React.FC = () => {
               >
                 info@moorehotelandsuites.com
               </a>
-              , call +234 803 377 4544, or write to Moore Hotels &amp; Suites, Harmony
-              Estate, Along Sagamu–Ikenne Road, Beside NYSC Camp, Sagamu, Ogun State,
+              , call +234 803 377 4544, or write to Moore Hotels &amp; Suites, After Stadium,
+              Harmony Estate, Along Ikenne Road, Sagamu 121103, Ogun State,
               Nigeria.
             </p>
           </PolicySection>

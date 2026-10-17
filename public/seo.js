@@ -132,6 +132,7 @@
           "@type": "Hotel",
           "@id": siteUrl + "/#hotel",
           name: siteName,
+          alternateName: "Moore Hotels and Suites",
           url: siteUrl + "/",
           description: defaultMeta.description,
           image: socialImage,
@@ -141,16 +142,18 @@
           priceRange: "₦₦",
           address: {
             "@type": "PostalAddress",
-            streetAddress: "Harmony Estate, Sagamu–Ikenne Road, beside NYSC Camp",
+            streetAddress: "After Stadium, Harmony Estate, Along Ikenne Road",
             addressLocality: "Sagamu",
             addressRegion: "Ogun State",
-            postalCode: "121101",
+            postalCode: "121103",
             addressCountry: "NG"
           },
-          hasMap: "https://maps.google.com/?q=Harmony+Estate+Sagamu+Ikenne+Road+Ogun+State+Nigeria",
+          hasMap: "https://www.google.com/maps/search/?api=1&query=Moore%20Hotels%20and%20Suites%2C%20After%20Stadium%2C%20Harmony%20Estate%2C%20Sagamu%2C%20Ogun%20State%2C%20Nigeria",
           checkinTime: "14:00",
           checkoutTime: "12:00",
-          sameAs: []
+          sameAs: [
+            "https://www.google.com.ng/travel/hotels/Ikenne/entity/ChkIypeh7a3txq8BGg0vZy8xMXJfZHJ0MjVzEAE/overview"
+          ]
         }
       ]
     });

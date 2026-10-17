@@ -487,11 +487,11 @@ const Home: React.FC = () => {
           <div className="flex flex-col justify-center p-6 sm:p-9 lg:col-span-5 lg:p-12">
             <p className="ui-eyebrow">Location &amp; arrival</p>
             <h2 className="ui-section-title mt-4 text-white">Well Placed for an Easy Stay</h2>
-            <p className="ui-copy mt-5">Find us on the Sagamu–Ikenne Road, beside the NYSC Camp—a practical base for business, events, family visits, and quiet weekends.</p>
+            <p className="ui-copy mt-5">Find us after the stadium in Harmony Estate, along Ikenne Road in Sagamu—a practical base for business, events, family visits, and quiet weekends.</p>
 
             <address className="mt-7 flex items-start gap-3 border-y border-white/10 py-5 text-sm not-italic leading-7 text-gray-300">
               <span className="material-symbols-outlined mt-1 text-primary" aria-hidden="true">pin_drop</span>
-              <span>Harmony Estate, Sagamu–Ikenne Road, beside NYSC Camp, Sagamu, Ogun State</span>
+              <span>After Stadium, Harmony Estate, Along Ikenne Road, Sagamu 121103, Ogun State</span>
             </address>
 
             <dl className="mt-6 grid grid-cols-2 gap-5 text-sm">
@@ -500,7 +500,7 @@ const Home: React.FC = () => {
             </dl>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
-              <a href="https://maps.google.com/?q=Harmony+Estate+Sagamu+Ikenne+Road+Ogun+State+Nigeria" target="_blank" rel="noopener noreferrer" className="ui-button ui-button-primary">Get directions <span className="material-symbols-outlined text-lg" aria-hidden="true">near_me</span></a>
+              <a href="https://www.google.com/maps/search/?api=1&amp;query=Moore%20Hotels%20and%20Suites%2C%20After%20Stadium%2C%20Harmony%20Estate%2C%20Sagamu%2C%20Ogun%20State%2C%20Nigeria" target="_blank" rel="noopener noreferrer" className="ui-button ui-button-primary">Get directions <span className="material-symbols-outlined text-lg" aria-hidden="true">near_me</span></a>
               <a href="tel:+2348033774544" className="ui-button ui-button-secondary">Call the hotel <span className="material-symbols-outlined text-lg" aria-hidden="true">call</span></a>
             </div>
           </div>
