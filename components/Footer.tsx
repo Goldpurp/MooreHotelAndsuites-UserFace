@@ -44,9 +44,9 @@ const Footer: React.FC = () => (
         <div>
           <h2 className="ui-label mb-5">Guest relations</h2>
           <address className="space-y-4 text-sm not-italic leading-6 text-gray-400">
-            <a href="https://maps.google.com/?q=Harmony+Estate+Sagamu+Ikenne+Road+Ogun+State+Nigeria" target="_blank" rel="noopener noreferrer" className="flex gap-3 transition-colors hover:text-white">
+            <a href="https://www.google.com/maps/search/?api=1&amp;query=Moore%20Hotels%20and%20Suites%2C%20After%20Stadium%2C%20Harmony%20Estate%2C%20Sagamu%2C%20Ogun%20State%2C%20Nigeria" target="_blank" rel="noopener noreferrer" className="flex gap-3 transition-colors hover:text-white">
               <span className="material-symbols-outlined mt-0.5 text-primary" aria-hidden="true">location_on</span>
-              <span>Harmony Estate, Sagamu–Ikenne Road, beside NYSC Camp, Sagamu, Ogun State</span>
+              <span>After Stadium, Harmony Estate, Along Ikenne Road, Sagamu 121103, Ogun State</span>
             </a>
             <a href="tel:+2348033774544" className="flex min-h-8 items-center gap-3 transition-colors hover:text-white">
               <span className="material-symbols-outlined text-primary" aria-hidden="true">phone</span>
